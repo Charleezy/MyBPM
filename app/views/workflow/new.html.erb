@@ -1,0 +1,17 @@
+<% content_for :javascripts do %>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      var bpmn = new net.BpmnJS($('#canvas')[0], []);
+      bpmn.plot($('#bpmn')[0].value);
+    });
+  </script>
+<% end %>
+
+<%# This will get removed just keeping for testing %>
+Raw order.bpmn:<br/> 
+<textarea id="bpmn" style="width:1050px;height:500px;margin:60px;">
+  <%= render 'test_bpmn' %>
+</textarea>
+<br/>
+Dynamic model:
+<div id="canvas"/> <br/>
