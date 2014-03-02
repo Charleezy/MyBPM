@@ -48,3 +48,7 @@ end
 
 # Added by Wenzhong
 gem 'bootstrap-sass', '~> 3.1.1'
+
+group :development do
+	gem 'rails_layout'
+end
