@@ -1,0 +1,18 @@
+<h1>Simulation</h1>
+
+<%= button_to "Create Mock Data", { :controller => "simulation", :action => "create", :workflow => "1", :data=> "mydata" } , :method=>:get  %>
+<%= button_to "Delete Mock Data", new_simulation_path, :id => "delete", :method => :delete %>
+
+<table>
+  <tr>
+    <th>Workflow ID</th>
+    <th>Mock Data</th>
+  </tr>
+ 
+<% @mockdata.each do |data| %>
+  <tr>
+    <td><%= data.workflowid %></td>
+    <td><%= data.data %></td>
+  </tr>
+<% end %>
+</table>

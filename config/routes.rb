@@ -1,4 +1,5 @@
 Mybpm::Application.routes.draw do
+  get "simulation/index"
   devise_for :users
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
@@ -7,6 +8,7 @@ Mybpm::Application.routes.draw do
   root :to => "home#index"
 
   resources :workflow
+  resources :simulation
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
