@@ -45,3 +45,6 @@ end
 
 # Use debugger
 # gem 'debugger', group: [:development, :test]
+
+# For validating xml
+gem 'libxml-ruby'
