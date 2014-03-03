@@ -1,4 +1,4 @@
-class XpdlObject 
+class XpdlObject < ActiveRecord::Base
 
   # Instance variables
   # :file holds the raw XML XPDL file, :xsd holds the schema
