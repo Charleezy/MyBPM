@@ -1,20 +1,8 @@
 <% if user_signed_in? %>
-	<nav class="navbar navbar-inverse navbar-left" role="navigation">
-	      <div class="container-fluid">
-	    <!-- Brand and toggle get grouped for better mobile display -->
-	    <div class="navbar-header">
-	      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-	        <span class="sr-only">Toggle navigation</span>
-	        <span class="icon-bar"></span>
-	        <span class="icon-bar"></span>
-	        <span class="icon-bar"></span>
-	      </button>
-	    </div>
-
-	    <!-- Collect the nav links, forms, and other content for toggling -->
-	    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-	      <ul class="nav nav-pills nav-stacked">
-			  <li class="active"><%= link_to 'Dashboard', root_path %></li>
+	<nav class="navbar-default navbar-static-side" role="navigation">
+	      <div class="sidebar-collapse">
+	      <ul class="nav" id="side-menu">
+			  <li class="sidebar-search"><%= link_to 'Dashboard', root_path %></li>
 			  <li><%= link_to 'Create New Workflow', root_path %></li>
 			  <li><%= link_to 'View Inventory', root_path %></li>
 		  </ul>
