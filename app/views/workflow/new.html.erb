@@ -1,15 +1,15 @@
-<%= form_for :bpmn do |f| %>
-  <%= f.file_field :bpmn %>
-<% end %>
+<%#= form_for :bpmn do |f| %>
+  <%#= f.file_field :bpmn %>
+<%# end %>
 
 <% content_for :javascripts do %>
   <script type="text/javascript">
-    $(document).ready(function(){
-    $('#MyButton').click(function(){
+  $(document).ready(function(){
+	$('#MyButton').click(function(){
       var bpmn = new net.BpmnJS($('#canvas')[0], []);
-      bpmn.plot(document.getElementById('bpmn').innerHTML);
-    ));
-    });
+	  bpmn.plot($('#bpmn')[0].value);
+	});
+  });
   </script>
 <% end %>
 
