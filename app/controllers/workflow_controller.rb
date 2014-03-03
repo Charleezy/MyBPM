@@ -3,6 +3,10 @@ class WorkflowController < ApplicationController
       @workflows = current_user.workflows
     end
 
+    def show
+      @workflow = Workflow.find(params[:id])
+    end
+
     def new
       @workflow = Workflow.new
     end

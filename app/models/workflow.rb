@@ -19,12 +19,12 @@ private
 
   def file_name
     # Calculate and return the expected file name.
-    prefix = Rails.configuration.my_app.cache_file_prefix
-    "#{prefix}/#{user_id}/#{id}"
+    prefix = Rails.root
+    "#{prefix}/db/workflows/#{user_id}/#{id}"
   end
 
   def get_file
-    xpdl = File.read( file_name )
+    @xpdl = File.read( file_name )
   end
 
 end
