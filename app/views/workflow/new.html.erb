@@ -1,11 +1,16 @@
 <% content_for :javascripts do %>
   <script type="text/javascript">
     $(document).ready(function(){
+	$('#MyButton').click(function(){
       var bpmn = new net.BpmnJS($('#canvas')[0], []);
       bpmn.plot($('#bpmn')[0].value);
+	  });
     });
   </script>
 <% end %>
+
+<input type="button" value="Import" id="MyButton" >
+
 
 <%# This will get removed just keeping for testing %>
 Raw order.bpmn:<br/> 
@@ -15,3 +20,7 @@ Raw order.bpmn:<br/>
 <br/>
 Dynamic model:
 <div id="canvas"/> <br/>
+
+
+
+
