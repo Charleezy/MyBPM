@@ -100,6 +100,8 @@ net.BpmnJS.prototype = {
       }
       this.paintEdge(docRoot, bpmnElement, path, startX, startY);
     }
+    //Allows elements to be draggable
+    this.moveElement();
   },
   
   resolveNamespaces : function(docRoot){
@@ -126,9 +128,27 @@ net.BpmnJS.prototype = {
     return name;
   },
   
+  moveElement : function(){
+     var  start = function () {
+            this.odx = 0;
+            this.ody = 0;
+          },
+          move = function (dx, dy) {
+            this.translate(dx - this.odx, dy - this.ody);
+            this.odx = dx;
+            this.ody = dy;
+            //console.log('Testing1: dx:' + dx + " dy: "+ dy+' ox:' + this.odx + " oy: "+ this.ody);
+          },
+          up = function () {
+          };
+    
+    this.paper.forEach(function(el){
+        el.drag(move, start, up)    
+    });
+  },
+  
   paintShape : function(docRoot, bpmnElement, x, y, width, height){
     var element = docRoot.selectNodeSet("//*[@id="+bpmnElement+"]").item(0);
-         
     switch(element.localName){
       case "startEvent":
          this.paintStartEvent(x,y,width, height, element, element.localName, bpmnElement);
@@ -235,8 +255,9 @@ net.BpmnJS.prototype = {
     this.paper.text(x+width/2,y+height/2,name);
 
     // add interactivity
-    shape.hover(function(){shape.transform('S1.2')},function(){shape.transform('S1')})
-    shape.click(function(){alert(name)});
+    //shape.hover(function(){shape.transform('S1.2')},function(){shape.transform('S1')})
+    //shape.click(function(){alert(name)});
+ 
 
     // apply css
     var css = this.getCss(bpmnElement, elementType)

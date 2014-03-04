@@ -45,3 +45,13 @@ end
 
 # Use debugger
 # gem 'debugger', group: [:development, :test]
+
+# Added by Wenzhong
+gem 'bootstrap-sass', '~> 3.1.1'
+
+group :development do
+	gem 'rails_layout'
+end
+
+# For validating xml
+gem 'libxml-ruby'
