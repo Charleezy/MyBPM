@@ -7,14 +7,13 @@ class SimulationController < ApplicationController
 	@mockdata = MockData.new
   end
   
-  def create (workflow, data)
+  def create (workflowid, mockdata)
 	@data = MockData.new(mockdata: data)
 	@data.save
 	
-	redirect_to simulation_index_path
   end
   
-  def destroy
+  def destroy (workflowid)
 	@data = MockData.find(params[:id])
 	@data.destroy
 	
