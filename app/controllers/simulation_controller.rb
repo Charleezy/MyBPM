@@ -7,7 +7,7 @@ class SimulationController < ApplicationController
 	@mockdata = MockData.new
   end
   
-  def create (workflowid, mockdata)
+  def create
 	@data = MockData.new(mockdata: data)
 	@data.save
 	
@@ -19,4 +19,9 @@ class SimulationController < ApplicationController
 	
 	redirect_to simulation_index_path
   end
+  
+  def simulation_params
+	params.require(:MockData).permit(:workflow_id, :mockdata)
+  end
+  
 end
