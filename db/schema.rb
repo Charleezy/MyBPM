@@ -20,7 +20,6 @@ ActiveRecord::Schema.define(version: 20140303193101) do
     t.datetime "updated_at"
   end
 
-
   create_table "users", force: true do |t|
     t.string   "email",                  default: "", null: false
     t.string   "encrypted_password",     default: "", null: false
@@ -41,7 +40,7 @@ ActiveRecord::Schema.define(version: 20140303193101) do
 
   create_table "workflows", force: true do |t|
     t.integer  "user_id"
-    t.string   "name"
+    t.string   "name",               null: false
     t.datetime "creation_date"
     t.datetime "last_modified_date"
     t.datetime "created_at"
@@ -49,5 +48,10 @@ ActiveRecord::Schema.define(version: 20140303193101) do
   end
 
   add_index "workflows", ["user_id"], name: "index_workflows_on_user_id"
+
+  create_table "xpdl_objects", force: true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
 end

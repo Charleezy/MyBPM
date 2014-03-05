@@ -1,4 +1,5 @@
 class SimulationController < ApplicationController
+
   def index
 	@mockdata = MockData.all
   end
@@ -7,21 +8,38 @@ class SimulationController < ApplicationController
 	@mockdata = MockData.new
   end
   
-  def create
-	@data = MockData.new(mockdata: data)
-	@data.save
-	
+  def show
+	@mockdata = MockData.find(params[:id])
   end
   
-  def destroy (workflowid)
+  def create
+	@data = MockData.create(simulation_params)
+	respond_to do |format| 
+		format.html
+		format.json { render :json => @data.id}
+	end
+  end
+  
+  def update
+	@data = MockData.find(params[:id])
+	@data.update(params[:mockdata].permit(:workflow_id, :mockdata))
+	respond_to do |format| 
+		format.html
+		format.json { render :json => @data.id}
+	end
+  end
+  
+  def destroy
 	@data = MockData.find(params[:id])
 	@data.destroy
-	
-	redirect_to simulation_index_path
+	respond_to do |format| 
+		format.html
+		format.json { render :json => @data.id}
+	end
   end
   
   def simulation_params
-	params.require(:MockData).permit(:workflow_id, :mockdata)
+	params.require(:mockdata).permit(:workflow_id, :mockdata)
   end
   
 end

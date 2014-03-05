@@ -47,4 +47,4 @@ end
 # gem 'debugger', group: [:development, :test]
 
 # For validating xml
-gem 'libxml-ruby'
+#gem 'libxml-ruby'

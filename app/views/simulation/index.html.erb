@@ -1,21 +1,12 @@
 <script>
 	$( document ).ready(function() {
 		$("#create").click(function() {
-			var workflow = { "workflowid" : "id" };
-			var mockdata = { "stage1" : "value1", "stage2" : "value2" };
-			
-			var data = {};
-			data[0] = workflow;
-			data[1] = mockdata;
-			
-			alert(data[1].stage1);
-			
 			$.ajax({
-				url: "simulation", 
+				url: "simulation.json", 
 				type: "POST",
-				data: data,
-				success: function() {
-					alert("Success");
+				data: {mockdata : { "workflow_id" : 1, "mockdata" : "data" }},
+				success: function(sim_id) {
+					alert("Simulation " + sim_id + " has been created.");
 				},
 				error: function() {
 					alert("Error");
@@ -23,18 +14,32 @@
 			});
 		});
 		
-		$("#delete").click(function() {
+		$(".delete").click(function() {
 			
-			workflowid = { "id" : 1 }
-			
-			alert(workflowid.id);
+			var sim_id= $(this).parent('td').parent('tr').find('.sim_id').data('id');
 			
 			$.ajax({
-				url: "simulation/destroy", 
+				url: "simulation/" + sim_id, 
 				type: "DELETE",
-				data: workflowid,
-				success: function() {
-					alert("Success");
+				success: function(sim_id) {
+					alert("Simulation " + sim_id + " has been deleted.");
+				},
+				error: function() {
+					alert("Error");
+				}
+			});
+		});
+		
+		$(".update").click(function() {
+			
+			var sim_id= $(this).parent('td').parent('tr').find('.sim_id').data('id');
+			
+			$.ajax({
+				url: "simulation/" + sim_id, 
+				type: "PUT",
+				data: {mockdata : { "workflow_id" : 2, "mockdata" : "updated_data" }},
+				success: function(sim_id) {
+					alert("Simulation " + sim_id + " has been updated.");
 				},
 				error: function() {
 					alert("Error");
@@ -48,18 +53,30 @@
 <h1>Simulation</h1>
 
 <button id="create">Create Mock Data</button>
-<button id="delete">Delete Mock Data</button>
 
 <table>
-  <tr>
-    <th>Workflow ID</th>
-    <th>Mock Data</th>
-  </tr>
- 
-<% @mockdata.each do |data| %>
-  <tr>
-    <td><%= data.workflowid %></td>
-    <td><%= data.data %></td>
-  </tr>
-<% end %>
+	<thead>
+	  <tr>
+		<th>Simulation ID</th>
+		<th>Workflow ID</th>
+		<th>Mock Data</th>
+		<th></th>
+		<th></th>
+	  </tr>
+	</thead>
+	<tbody>
+		<% @mockdata.each do |data| %>
+		  <tr>
+			<td class="sim_id" data-id=<%= data.id %>><%= data.id %></td>
+			<td><%= data.workflow_id %></td>
+			<td><%= data.mockdata %></td>
+			<td>
+				<button class="delete">Delete</button>
+			</td>
+			<td>
+				<button class="update">Update</button>
+			</td>
+		  </tr>
+		<% end %>
+	</tbody>
 </table>
