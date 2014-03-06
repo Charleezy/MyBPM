@@ -1,5 +1,7 @@
 class SimulationController < ApplicationController
-
+	
+  layout "application"
+	
   def index
 	@mockdata = MockData.all
   end
