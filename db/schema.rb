@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140303193101) do
+ActiveRecord::Schema.define(version: 20140304211307) do
 
   create_table "mock_data", force: true do |t|
     t.integer  "workflow_id"
@@ -40,9 +40,7 @@ ActiveRecord::Schema.define(version: 20140303193101) do
 
   create_table "workflows", force: true do |t|
     t.integer  "user_id"
-    t.string   "name",               null: false
-    t.datetime "creation_date"
-    t.datetime "last_modified_date"
+    t.string   "name",       null: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
