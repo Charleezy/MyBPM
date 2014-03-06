@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140303161758) do
+ActiveRecord::Schema.define(version: 20140304211307) do
 
   create_table "users", force: true do |t|
     t.string   "email",                  default: "", null: false
@@ -34,12 +34,15 @@ ActiveRecord::Schema.define(version: 20140303161758) do
   create_table "workflows", force: true do |t|
     t.integer  "user_id"
     t.string   "name"
-    t.datetime "creation_date"
-    t.datetime "last_modified_date"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   add_index "workflows", ["user_id"], name: "index_workflows_on_user_id"
+
+  create_table "xpdl_objects", force: true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
 end

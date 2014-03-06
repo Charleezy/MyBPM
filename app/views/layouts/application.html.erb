@@ -10,15 +10,14 @@
   </head>
   <body>
     <div id="wrapper">
-    <header>
-      <%= render 'layouts/navigation' %>
-    </header>
-    <main role="main">
-        <%= render 'layouts/side_navbar' %>
-        <%= render 'layouts/messages' %>
-        <%= yield %>
+      <header>
+        <%= render 'layouts/navigation' %>
+      </header>
+      <%= render 'layouts/side_navbar' %>
+      <div role="main" class="container">
+          <%= render 'layouts/messages' %>
+          <%= yield %>
       </div>
-    </main>
     </div>
   </body>
 </html>
