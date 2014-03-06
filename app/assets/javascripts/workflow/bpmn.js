@@ -26,8 +26,8 @@
 
 
 // Namespace
-var net = net || {}
-net = {}
+var net = net || {};
+net = {};
         
 // Constructor
 net.BpmnJS = function(canvas, highlighted){
@@ -40,18 +40,19 @@ net.BpmnJS = function(canvas, highlighted){
 
   // BPMNDI namespace name
   this.bpmndi = "unknown";
-}  
+};
 
 // Shared functions
 net.BpmnJS.prototype = {
 
   plot: function(bpmn){                     
-
     //initialize the W3C DOM Parser
     var parser = new DOMImplementation();
     var domDoc = parser.loadXML(bpmn);
-    var docRoot = domDoc.getDocumentElement();
-    
+    var docRoot = domDoc.getDocumentElement();    
+    //op 1. Give all shapes drawn ability to draw themselves
+    //op 2. Maintain object as you update it
+    //op 3. Just keep updating an xpdl in a hidden dom
     // resolve namespaces
     this.resolveNamespaces(docRoot);
     
@@ -184,7 +185,7 @@ net.BpmnJS.prototype = {
       $(path.node).attr("stroke-dasharray","5,5");
     }
     path.attr({'arrow-end':'block-wide-long'});
-    var css = this.getCss(bpmnElement, "edge")
+    var css = this.getCss(bpmnElement, "edge");
     $(path.node).attr("class",css);
     this.paper.text(x+15,y+10,name);
   },
@@ -213,7 +214,7 @@ net.BpmnJS.prototype = {
   },
   paintStartEvent : function(x, y, width, height,element, elementType, bpmnElement){
     var shape = this.paper.circle(x+width/2, y+height/2, width/2);
-    var css = this.getCss(bpmnElement, elementType)
+    var css = this.getCss(bpmnElement, elementType);
     $(shape.node).attr("class",css);
   }, 
   paintBoundaryEvent : function(x, y, width, height,element){
@@ -222,7 +223,7 @@ net.BpmnJS.prototype = {
   }, 
   paintEndEvent : function(x, y, width, height,element, elementType, bpmnElement){
     var shape = this.paper.circle(x+width/2, y+height/2, width/2);
-    var css = this.getCss(bpmnElement, elementType)
+    var css = this.getCss(bpmnElement, elementType);
     $(shape.node).attr("class",css);
   }, 
   paintTask : function(x, y, width, height, element, elementType, bpmnElement){
@@ -235,11 +236,11 @@ net.BpmnJS.prototype = {
     this.paper.text(x+width/2,y+height/2,name);
 
     // add interactivity
-    shape.hover(function(){shape.transform('S1.2')},function(){shape.transform('S1')})
-    shape.click(function(){alert(name)});
+    shape.hover(function(){shape.transform('S1.2');},function(){shape.transform('S1');});
+    shape.click(function(){alert(name);});
 
     // apply css
-    var css = this.getCss(bpmnElement, elementType)
+    var css = this.getCss(bpmnElement, elementType);
     $(shape.node).attr("class",css);
   },
   paintReceiveTask : function(x, y, width, height, element, elementType, bpmnElement){
@@ -286,4 +287,4 @@ net.BpmnJS.prototype = {
     }
     return cssClass;
   }
-}      
+};      
