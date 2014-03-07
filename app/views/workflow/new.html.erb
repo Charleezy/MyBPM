@@ -1,28 +1,70 @@
 <%#= form_for :bpmn do |f| %>
   <%#= f.file_field :bpmn %>
 <%# end %>
-
 <% content_for :javascripts do %>
+  <script type='text/javascript' src='https://dl.dropboxusercontent.com/s/wj6m9oblkx5jdun/xml2json.min.js?dl=1&token_hash=AAEMZFpYIua2Oe67lm_CB4ZhqMs-KCTYPLqT85PdxcNmLw'></script>
   <script type="text/javascript">
-  $(document).ready(function(){
-	$('#MyButton').click(function(){
+    $(document).ready(function(){
+      var client = new XMLHttpRequest();
+
+      // GET JSON FILE
+      client.open('GET', 'https://dl.dropboxusercontent.com/s/fzg12z1l599309c/json.json?dl=1&token_hash=AAE889w1e1ZYhlj_US-cSxT-s5keJrw-_c9Qfz9obW2kqQ',false);
+      client.send();
+      var jsonText = client.responseText;
+      
+      // GET XPDL FILE
+      client.open('GET', 'https://dl.dropboxusercontent.com/s/j1w6mr83r8ug0om/simpleWorkflow.xpdl?dl=1&token_hash=AAH7PHIpUBmIim-BUM6uC7WC8lAqG-36HYOqxJHkbm2WzA',false);
+      client.send();
+      var XPDLText = client.responseText;
+
+      // GET BPMN FILE
+      client.open('GET', 'https://dl.dropboxusercontent.com/s/8gmm8lss2j88i1b/testFile.bpmn?dl=1&token_hash=AAGfdvQIrgIaaLbx4cpJLbFEF9izHR-iuzOhMy5esvnV1w',false);
+      client.send();
+      var bpmnText = client.responseText;
+
+      // CONVERT JSON TO XPDL (NOT WORKING)
+      var x2js = new X2JS();
+      var newXPDLText = x2js.json2xml_str(jsonText);
+      console.log(newXPDLText);
+
+      // CREATE THE JAVASCRIPT OBJECT BASED ON THE JSON FILE
+      var jsonObject = JSON.parse(jsonText);
+
+      // FILL THE HTML ELEMENTS WITH TEXT
+      $('#json').html(jsonText);
+      $('#XPDL').html(XPDLText);
+      $('#bpmn').html(bpmnText);
+      $('#newXPDL').html(newXPDLText);
+
+    $('#MyButton').click(function(){
       var bpmn = new net.BpmnJS($('#canvas')[0], []);
-	  bpmn.plot($('#bpmn')[0].value);
-	});
-  });
+      bpmn.plot(jsonObject);
+    });
+    });
   </script>
 <% end %>
 
 
 
 
+
 <input type="button" value="Import" id="MyButton" >
 
-
 <%# This will get removed just keeping for testing %>
-<textarea style="display: hidden;" id="bpmn" style="width:1050px;height:500px;margin:60px;">
-  <%= render 'test_bpmn' %>
-</textarea>
-<br/>
+XPDL
+<textarea id="XPDL" style="width:1050px;height:200px;margin:60px;"></textarea>
+json
+<textarea id="json" style="width:1050px;height:200px;margin:60px;"></textarea>
+bpmn
+<textarea id="bpmn" style="width:1050px;height:200px;margin:60px;"></textarea>
+newXPDL
+<textarea id="newXPDL" style="width:1050px;height:200px;margin:60px;"></textarea>
+</br>
 Dynamic model:
-<div id="canvas"/> <br/>
+<div id="canvas"/>
+
+  <script type="text/javascript">
+    var drawing = new net.BpmnJS($('#canvas')[0], []);
+    drawing.plot($('#bpmn')[0].value);
+  </script>
+<br/>

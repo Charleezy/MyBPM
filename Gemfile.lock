@@ -26,16 +26,10 @@ GEM
       thread_safe (~> 0.1)
       tzinfo (~> 0.3.37)
     arel (4.0.2)
-<<<<<<< HEAD
     atomic (1.1.14)
     bcrypt (3.1.6)
     bcrypt (3.1.6-x86-mingw32)
     bcrypt-ruby (3.1.5)
-=======
-    atomic (1.1.15)
-    bcrypt (3.1.7-x64-mingw32)
-    bcrypt-ruby (3.1.5-x64-mingw32)
->>>>>>> c5f24fec0f01e4451281b0c19818443b94bfa02f
       bcrypt (>= 3.1.3)
     bcrypt-ruby (3.1.5-x86-mingw32)
       bcrypt (>= 3.1.3)
@@ -111,15 +105,11 @@ GEM
       actionpack (>= 3.0)
       activesupport (>= 3.0)
       sprockets (~> 2.8)
-<<<<<<< HEAD
     sqlite3 (1.3.8)
     sqlite3 (1.3.8-x86-mingw32)
     therubyracer (0.12.1)
       libv8 (~> 3.16.14.0)
       ref
-=======
-    sqlite3 (1.3.9-x64-mingw32)
->>>>>>> c5f24fec0f01e4451281b0c19818443b94bfa02f
     thor (0.18.1)
     thread_safe (0.2.0)
       atomic (>= 1.1.7, < 2)
@@ -137,12 +127,8 @@ GEM
       rack (>= 1.0)
 
 PLATFORMS
-<<<<<<< HEAD
   ruby
   x86-mingw32
-=======
-  x64-mingw32
->>>>>>> c5f24fec0f01e4451281b0c19818443b94bfa02f
 
 DEPENDENCIES
   bootstrap-sass (~> 3.1.1)

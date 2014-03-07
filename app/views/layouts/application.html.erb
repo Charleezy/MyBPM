@@ -6,6 +6,7 @@
     <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Mybpm" %>">
     <%= stylesheet_link_tag "bootstrap", "sb-admin", media: "all", "data-turbolinks-track" => true %>
     <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
+    <%= yield :javascripts %>
     <%= csrf_meta_tags %>
   </head>
   <body>

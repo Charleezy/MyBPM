@@ -57,6 +57,7 @@ net.BpmnJS.prototype = {
     this.resolveNamespaces(docRoot);
     
     // paint shapes loop
+
     var shapes = docRoot.getElementsByTagName(this.bpmndi+":BPMNShape");
 
     for(var i=0; i< shapes.length; i++){
