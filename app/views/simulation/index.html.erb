@@ -1,0 +1,86 @@
+<script>
+	$( document ).ready(function() {
+		$("#create").click(function() {
+			
+			var json = "{[{'stage_num' : 'stage1', 'stage_data' : [{ 'name1' : 'fieldname1', 'value1' : fieldvalue1 },{ 'name2' : 'fieldname2', 'value2' : fieldvalue2 } ]},{'stage_num' : 'stage2', 'stage_data' : [{ 'name3' : 'fieldname3', 'value3' : 'fieldvalue3' },{ 'name4' : 'fieldname4', 'value4' : 'fieldvalue4' }]}]}";
+		
+			$.ajax({
+				url: "simulation.json", 
+				type: "POST",
+				data: {mockdata : { "workflow_id" : 1, "mockdata" : json }},
+				success: function(sim_id) {
+					alert("Simulation " + sim_id + " has been created.");
+				},
+				error: function() {
+					alert("Error");
+				}
+			});
+		});
+		
+		$(".delete").click(function() {
+			
+			var sim_id= $(this).parent('td').parent('tr').find('.sim_id').data('id');
+			
+			$.ajax({
+				url: "simulation/" + sim_id, 
+				type: "DELETE",
+				success: function(sim_id) {
+					alert("Simulation " + sim_id + " has been deleted.");
+				},
+				error: function() {
+					alert("Error");
+				}
+			});
+		});
+		
+		$(".update").click(function() {
+			
+			var sim_id= $(this).parent('td').parent('tr').find('.sim_id').data('id');
+			
+			$.ajax({
+				url: "simulation/" + sim_id, 
+				type: "PUT",
+				data: {mockdata : { "workflow_id" : 2, "mockdata" : "updated_data" }},
+				success: function(sim_id) {
+					alert("Simulation " + sim_id + " has been updated.");
+				},
+				error: function() {
+					alert("Error");
+				}
+			});
+		});
+	});
+</script>
+
+
+			<h1>Simulation</h1>
+
+			<button type="button" class="btn btn-info" id="create">Create Mock Data</button>
+
+			<table class="table">
+				<thead>
+					  <tr>
+						<th>Simulation ID</th>
+						<th>Workflow ID</th>
+						<th>Mock Data</th>
+						<th></th>
+						<th></th>
+					  </tr>
+				</thead>
+				<tbody>
+					<% @mockdata.each do |data| %>
+						  <tr>
+							<td class="sim_id" data-id=<%= data.id %>><%= data.id %></td>
+							<td><%= data.workflow_id %></td>
+							<td><%= data.mockdata %></td>
+							<td>
+								<button class="delete">Delete</button>
+							</td>
+							<td>
+								<button class="update">Update</button>
+							</td>
+						  </tr>
+					<% end %>
+				</tbody>
+			</table>
+		

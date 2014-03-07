@@ -1,0 +1,23 @@
+<% content_for :javascripts do %>
+  <script type="text/javascript">
+    $(document).ready(function(){
+        var bpmn = new net.BpmnJS($('#canvas')[0], []);
+        bpmn.plot($('#bpmn')[0].value);
+    });
+  </script>
+<% end %>
+
+<input type="button" value="Import" id="MyButton" >
+
+
+<%# This will get removed just keeping for testing %>
+<textarea style="display: none;" id="bpmn" style="width:1050px;height:500px;margin:60px;">
+  <%= @workflow.xpdl %>
+</textarea>
+<br/>
+Dynamic model:
+<div id="canvas"/> <br/>
+
+
+
+

@@ -1,0 +1,40 @@
+
+<h1>Your Workflows</h1>
+<a id="create-work" href="<% new_workflow_path %>" class="pull-right">Create a workflow</a>
+
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Workflow ID</th>
+      <th></th>
+    <tr>
+  </thead>
+  <tbody>
+    <% if(@workflows.count == 0) %>
+      <tr>
+        <td colspan="3">You have no workflows</td>
+      </tr>
+    <% else %>
+      <% @workflows.each do |workflow| %>
+        <tr>
+          <td><%= workflow.name %></td>
+          <td><%= workflow.id %></td>
+          <td><a href="<%= workflow_path(workflow.id) %>">View</td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>
+
+<script type="text/javascript">
+
+  $('#create-work').click(function(){
+    $.ajax({
+      type: "POST",
+      url: "/workflow",
+      data: { workflow: { name: "TestDocument2", xpdl: "Test" }}
+    })
+  });
+
+</script>
