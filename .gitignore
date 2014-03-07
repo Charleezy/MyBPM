@@ -19,3 +19,14 @@
 /tmp
 
 *.lock
+
+# Files
+ .idea/.name
+ .idea/MyBPM.iml
+ .idea/encoding
+ .idea/misc.xml
+ .idea/modules.xml
+ .idea/scopes/scope_settings.xml
+ .idea/vcs.xml
+ .idea/workspace.xml
+ .project
