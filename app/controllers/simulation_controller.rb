@@ -25,19 +25,13 @@ class SimulationController < ApplicationController
   def update
 	@data = MockData.find(params[:id])
 	@data.update(params[:mockdata].permit(:workflow_id, :mockdata))
-	respond_to do |format| 
-		format.html
-		format.json { render :json => @data.id}
-	end
+	
   end
   
   def destroy
 	@data = MockData.find(params[:id])
 	@data.destroy
-	respond_to do |format| 
-		format.html
-		format.json { render :json => @data.id}
-	end
+	
   end
   
   def simulation_params

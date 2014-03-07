@@ -37,8 +37,11 @@ class WorkflowController < ApplicationController
       @workflow.destroy
       redirect_to :index, :notice => 'Workflow was deleted.'
     end
-
-
+	
+	def import
+	
+	end
+	
   private 
 
     def workflow_params

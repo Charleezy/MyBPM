@@ -1,28 +1,28 @@
-<%#= form_for :bpmn do |f| %>
-  <%#= f.file_field :bpmn %>
-<%# end %>
+<h1>Import a Workflow</h1>
 
-<% content_for :javascripts do %>
-  <script type="text/javascript">
-  $(document).ready(function(){
-	$('#MyButton').click(function(){
-      var bpmn = new net.BpmnJS($('#canvas')[0], []);
-	  bpmn.plot($('#bpmn')[0].value);
-	});
-  });
-  </script>
-<% end %>
+<div id="file_input">
+	<p>Select a workflow file to import.</p>
+	<div class="well">
+		<%= form_for :workflow, :url => {:action => "import"} do |f| %>
+			<p>
+				<%= f.file_field :workflow %>
+			</p>
+			<br />
+			<%= f.submit %>
+		<% end %>
+	</div>
+</div>
 
-
-
-
-<input type="button" value="Import" id="MyButton" >
-
-
-<%# This will get removed just keeping for testing %>
-<textarea style="display: hidden;" id="bpmn" style="width:1050px;height:500px;margin:60px;">
-  <%= render 'test_bpmn' %>
-</textarea>
-<br/>
+<br/><br/>
 Dynamic model:
 <div id="canvas"/> <br/>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#MyButton').click(function(){
+			var bpmn = new net.BpmnJS($('#canvas')[0], []);
+			bpmn.plot($('#bpmn')[0].value);
+		});
+	});
+</script>
+
