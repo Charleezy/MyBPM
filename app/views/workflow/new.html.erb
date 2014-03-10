@@ -1,28 +1,66 @@
-<h1>Import a Workflow</h1>
-
-<div id="file_input">
-	<p>Select a workflow file to import.</p>
-	<div class="well">
-		<%= form_for :workflow, :url => {:action => "import"} do |f| %>
-			<p>
-				<%= f.file_field :workflow %>
-			</p>
-			<br />
-			<%= f.submit %>
-		<% end %>
-	</div>
-</div>
-
-<br/><br/>
-Dynamic model:
-<div id="canvas"/> <br/>
-
+<%#= form_for :bpmn do |f| %>
+  <%#= f.file_field :bpmn %>
+<%# end %>
+<%= javascript_include_tag 'ext_lib/xml2json.min.js' %>
+<%= javascript_include_tag 'ext_lib/raphael.js' %>
+<%= javascript_include_tag 'workflow/bpmn.js' %>
 <script type="text/javascript">
-	$(document).ready(function(){
-		$('#MyButton').click(function(){
-			var bpmn = new net.BpmnJS($('#canvas')[0], []);
-			bpmn.plot($('#bpmn')[0].value);
-		});
-	});
+  $(document).ready(function(){
+    var client = new XMLHttpRequest();
+
+    // GET JSON FILE
+    client.open('GET', 'https://dl.dropboxusercontent.com/s/yyimks43gemdazq/jsonFile.json?dl=1&token_hash=AAEwKPu9isScXrMb-m9dVvUkYjxLiZTsM2DcEiIvPbXFnQ',false);
+    client.send();
+    var jsonText = client.responseText;
+    
+    // GET XPDL FILE
+    client.open('GET', 'https://dl.dropboxusercontent.com/s/j1w6mr83r8ug0om/simpleWorkflow.xpdl?dl=1&token_hash=AAH7PHIpUBmIim-BUM6uC7WC8lAqG-36HYOqxJHkbm2WzA',false);
+    client.send();
+    var XPDLText = client.responseText;
+
+    // GET BPMN FILE
+    client.open('GET', 'https://dl.dropboxusercontent.com/s/8gmm8lss2j88i1b/testFile.bpmn?dl=1&token_hash=AAGfdvQIrgIaaLbx4cpJLbFEF9izHR-iuzOhMy5esvnV1w',false);
+    client.send();
+    var bpmnText = client.responseText;
+
+    // CONVERT JSON TO XPDL (NOT WORKING)
+    var x2js = new X2JS();
+    var newXPDLText = x2js.json2xml_str(jsonText);
+    
+    // CREATE THE JAVASCRIPT OBJECT BASED ON THE JSON FILE
+    var jsonObject = JSON.parse(jsonText);
+    console.log(jsonObject);
+
+    // FILL THE HTML ELEMENTS WITH TEXT
+    $('#json').html(jsonText);
+    $('#XPDL').html(XPDLText);
+    $('#bpmn').html(bpmnText);
+    $('#newXPDL').html(newXPDLText);
+
+    var alreadyLoaded = false;
+
+  $('#MyButton').click(function(){
+    $('#canvas').height(500);
+    $('#canvas').width(2000);
+    if(!alreadyLoaded){
+        var bpmn = new net.BpmnJS($('#canvas')[0], []);
+        bpmn.plot(jsonObject);
+        alreadyLoaded = true;
+    }
+  });
+  });
 </script>
 
+
+<input type="button" value="Import" id="MyButton"></input>
+Dynamic model:
+<div id="canvas"></div>
+<%# This will get removed just keeping for testing %>
+XPDL
+<textarea id="XPDL" style="width:1050px;height:200px;margin:60px;"></textarea>
+json
+<textarea id="json" style="width:1050px;height:200px;margin:60px;"></textarea>
+bpmn
+<textarea id="bpmn" style="width:1050px;height:200px;margin:60px;"></textarea>
+newXPDL
+<textarea id="newXPDL" style="width:1050px;height:200px;margin:60px;"></textarea>

@@ -24,7 +24,6 @@
 // I modified some of this to make it work better, feel free to keep doing the same.
 
 
-
 // Namespace
 var net = net || {};
 net = {};
@@ -45,90 +44,54 @@ net.BpmnJS = function(canvas, highlighted){
 // Shared functions
 net.BpmnJS.prototype = {
 
-  plot: function(bpmn){                     
-    //initialize the W3C DOM Parser
-    var parser = new DOMImplementation();
-    var domDoc = parser.loadXML(bpmn);
-    var docRoot = domDoc.getDocumentElement();    
-    //op 1. Give all shapes drawn ability to draw themselves
-    //op 2. Maintain object as you update it
-    //op 3. Just keep updating an xpdl in a hidden dom
-    // resolve namespaces
-    this.resolveNamespaces(docRoot);
+  plot: function(jsonObject){
     
-    // paint shapes loop
-    var shapes = docRoot.getElementsByTagName(this.bpmndi+":BPMNShape");
-
-    for(var i=0; i< shapes.length; i++){
-      var shape = shapes.item(i);
-      var bpmnElement = shape.getAttributes().getNamedItem('bpmnElement').getNodeValue();
-      var bounds = shape.getFirstChild();
-      var atts = bounds.getAttributes();
-      var x = atts.getNamedItem('x').getNodeValue();
-      var y = atts.getNamedItem('y').getNodeValue();
-      x = parseInt(x.substring(0,x.indexOf(".")+3));
-      y = parseInt(y.substring(0,y.indexOf(".")+3));
-      var height = parseInt(atts.getNamedItem('height').getNodeValue());
-      var width = parseInt(atts.getNamedItem('width').getNodeValue());
+    // PAINT
+    for(var i=0; i<jsonObject.Package.WorkflowProcesses.WorkflowProcess.length; i++){
       
-      this.paintShape(docRoot,bpmnElement,x,y,width,height);
-    }
-    
-    // paint edges loop
-    var edges = docRoot.selectNodeSet("//"+this.bpmndi+":BPMNEdge");
-    
-    for(var i=0; i< edges.length; i++){
-      var path = "";
-      var edge = edges.item(i);
-      var bpmnElement = edge.getAttributes().getNamedItem('bpmnElement').getNodeValue();
-        var childs = edge.getChildNodes();
+      // TRANSITIONS
+      if(jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
+        var transitions = jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition;
+        for(var j=0; j<transitions.length; j++){
+          console.log('painting transition ' + j);
+          var transition = transitions[j];
+          var coordinatesArray = transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.Coordinates;
+          var xOrigin = parseInt(coordinatesArray[0].XCoordinate);
+          var yOrigin = parseInt(coordinatesArray[0].YCoordinate);
           
-      for(var t = 0;t < childs.length; t++){
-        var startX, startY;
-        var atts1 = childs.item(t).getAttributes();
-        var x1 = atts1.getNamedItem('x').getNodeValue();
-        var y1 = atts1.getNamedItem('y').getNodeValue();
-        x1 = parseInt(x1.substring(0,x1.indexOf(".")+3));
-        y1 = parseInt(y1.substring(0,y1.indexOf(".")+3));
-        if(path===""){
-          path = "M" + x1 + " " + y1;
-          startX = x1;
-          startY = y1;
-        }
-        else{
-          path += "L" + x1 + " " + y1;
+          var xCoordinates = [];
+          var yCoordinates = [];
+          for(var k=1; k<coordinatesArray.length; k++){
+            xCoordinates[k] = parseInt(coordinatesArray[k].XCoordinate);
+            yCoordinates[k] = parseInt(coordinatesArray[k].YCoordinate);
+          }
+          
+          var borderColor = transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.BorderColor;
+          this.paintTransition(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor);
         }
       }
-      this.paintEdge(docRoot, bpmnElement, path, startX, startY);
+
+      // ACTIVITIES
+      if(jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Activities')){
+        var activities = jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].Activities.Activity;
+        for(var j=0; j<activities.length; j++){
+          var activity = activities[j];
+          var xCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate);
+          var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
+          var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
+          var width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
+          var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
+          var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
+          var name = activity.Name;
+          this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
+        }
+      }
     }
+
     //Allows elements to be draggable
     this.moveElement();
   },
-  
-  resolveNamespaces : function(docRoot){
-    // namespace resolution is not possible using xmljs, so we do it the on our own
-    var xmlns = 'xmlns:';
-    var bpmnurl = '"http://www.omg.org/spec/BPMN/20100524/DI"';
-    var definitions = docRoot.getElementsByTagName("definitions").item(0).toString();
-    var pattern = definitions.split(" ");
-    for(var s in pattern){ 
-      var thepattern = pattern[s];  
-      if(thepattern.match("^"+xmlns)==xmlns)
-        if(thepattern.match(bpmnurl+"$")==bpmnurl){
-          this.bpmndi = thepattern.substring(xmlns.length,thepattern.indexOf("="));
-          break;
-        }
-      }
-  },
-  getElementName : function(element){
-    var att = element.getAttributes().getNamedItem('name');
-    var name = "";
-    if (att){
-      name = att.getNodeValue();
-    }
-    return name;
-  },
-  
+
   moveElement : function(){
      var  start = function () {
             this.odx = 0;
@@ -147,53 +110,78 @@ net.BpmnJS.prototype = {
         el.drag(move, start, up)    
     });
   },
-  
-  paintShape : function(docRoot, bpmnElement, x, y, width, height){
-    var element = docRoot.selectNodeSet("//*[@id="+bpmnElement+"]").item(0);
-    switch(element.localName){
-      case "startEvent":
-         this.paintStartEvent(x,y,width, height, element, element.localName, bpmnElement);
-         break;
-      case "endEvent":
-         this.paintEndEvent(x,y,width, height, element, element.localName, bpmnElement);
-         break;
-      case "participant":
-         this.paintParticipant(x,y,width, height, element);
-         break;
-      case "lane":
-         this.paintLane(x,y,width, height, element);
-         break;
-      case "serviceTask":
-      case "scriptTask":
-      case "userTask":
-      case "task":
-         this.paintTask(x,y,width, height, element, element.localName, bpmnElement);
-         break;
-      case "sendTask":
-         this.paintSendTask(x,y,width, height, element, element.localName, bpmnElement);
-         break;
-      case "receiveTask":
-         this.paintReceiveTask(x,y,width, height, element, element.localName, bpmnElement);
-         break;
-      case "exclusiveGateway":
-         this.paintExclusiveGateway(x,y,width, height, element);
-         break;
-      case "boundaryEvent":
-         this.paintBoundaryEvent(x,y,width, height, element);
-         break;
-      case "subProcess":
-         this.paintSubProcess(x,y,width, height, element);
-         break;
-      case "textAnnotation":
-         this.paintTextAnnotation(x,y,width, height, element);
-         break;
-      case "dataStoreReference":
-         this.paintDataStoreReference(x,y,width, height, element);
-         break;
-      default: 
-         this.paintDefault(x,y,width, height, element);
-         break;
+
+  paintTransition : function(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor){
+    var stringPath = "M"+xOrigin+","+yOrigin;
+
+    for(var i in xCoordinates){
+      stringPath += "L"+xCoordinates[i]+","+yCoordinates[i];
     }
+
+    console.log('string = ' + stringPath);
+
+    var shape = this.paper.path(stringPath);
+
+    $(shape.node).attr('border', borderColor);
+  },
+  
+  paintActivity : function(activity, x, y, height, width, borderColor, fillColor, name){
+    for(var activityProperty in activity)
+    {
+      console.log(activityProperty);
+      switch(activityProperty){
+        
+        case 'Event':
+          this.paintEvent(x,y,width, height, name, fillColor, borderColor);
+          break;
+
+        case 'Implementation':
+
+          if(activity.Implementation.hasOwnProperty('Task'))
+            this.paintImplementation(x,y,width,height, name, fillColor, borderColor);
+          
+          break;
+
+        case 'Route':
+            this.paintRoute(x,y,width,height, name, fillColor, borderColor);
+          break;
+      }
+    }
+  },
+
+  paintEvent : function(x, y, width, height, name, fillColor, borderColor){
+    var shape = this.paper.circle(x+width/2, y+height/2, width/2);
+    var cssClass = "";
+    console.log(fillColor);
+    $(shape.node).attr("fill",fillColor); 
+    $(shape.node).attr("border",borderColor); 
+  },
+
+  paintImplementation : function(x, y, width, height, name, fillColor, borderColor){
+    // paint shape
+    var shape = this.paper.rect(x, y, width, height, 5);
+
+    // add text
+    this.paper.text(x+width/2,y+height/2,name);
+
+    // add interactivity
+    //shape.hover(function(){shape.transform('S1.2')},function(){shape.transform('S1')})
+    //shape.click(function(){alert(name)});
+
+    // apply cssClass
+    var cssClass = "";
+    $(shape.node).attr("class",cssClass);
+    $(shape.node).attr("fill",fillColor); 
+    $(shape.node).attr("border",borderColor); 
+  },
+
+  paintRoute : function(x, y, width, height, name, fillColor, borderColor){
+    var shape = this.paper.rect(x, y, width, height, 1);
+    shape.transform('r45');
+    this.paper.text(x+width/2,y+height/2,name);
+
+    $(shape.node).attr("fill", fillColor);
+    $(shape.node).attr("border",borderColor);
   },
  
   paintEdge : function(docRoot, bpmnElement, path, x, y){
@@ -205,7 +193,7 @@ net.BpmnJS.prototype = {
       $(path.node).attr("stroke-dasharray","5,5");
     }
     path.attr({'arrow-end':'block-wide-long'});
-    var css = this.getCss(bpmnElement, "edge");
+    var css = "";
     $(path.node).attr("class",css);
     this.paper.text(x+15,y+10,name);
   },
@@ -232,37 +220,12 @@ net.BpmnJS.prototype = {
     this.paper.text(x+width/2,y-10,name);
     $(shape.node).attr("class","exclusiveGateway");
   },
-  paintStartEvent : function(x, y, width, height,element, elementType, bpmnElement){
-    var shape = this.paper.circle(x+width/2, y+height/2, width/2);
-    var css = this.getCss(bpmnElement, elementType);
-    $(shape.node).attr("class",css);
-  }, 
+
   paintBoundaryEvent : function(x, y, width, height,element){
     var shape = this.paper.circle(x+width/2, y+height/2, width/2);
     $(shape.node).attr("class","boundaryEvent");
   }, 
-  paintEndEvent : function(x, y, width, height,element, elementType, bpmnElement){
-    var shape = this.paper.circle(x+width/2, y+height/2, width/2);
-    var css = this.getCss(bpmnElement, elementType);
-    $(shape.node).attr("class",css);
-  }, 
-  paintTask : function(x, y, width, height, element, elementType, bpmnElement){
-    // paint shape
-    var shape = this.paper.rect(x, y, width, height, 5);
-    var name = this.getElementName(element);
-    // add text
-    var re = new RegExp(' ', 'g');
-    name = name.replace(re,'\n');
-    this.paper.text(x+width/2,y+height/2,name);
 
-    // add interactivity
-    //shape.hover(function(){shape.transform('S1.2')},function(){shape.transform('S1')})
-    //shape.click(function(){alert(name)});
-
-    // apply css
-    var css = this.getCss(bpmnElement, elementType);
-    $(shape.node).attr("class",css);
-  },
   paintReceiveTask : function(x, y, width, height, element, elementType, bpmnElement){
     // draw task shape
     this.paintTask(x, y, width, height, element, elementType, bpmnElement);

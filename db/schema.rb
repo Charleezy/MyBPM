@@ -20,6 +20,8 @@ ActiveRecord::Schema.define(version: 20140304211307) do
     t.datetime "updated_at"
   end
 
+  add_index "mock_data", ["workflow_id"], name: "index_mock_data_on_workflow_id"
+
   create_table "users", force: true do |t|
     t.string   "email",                  default: "", null: false
     t.string   "encrypted_password",     default: "", null: false
