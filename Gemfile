@@ -55,3 +55,5 @@ end
 
 # For validating xml
 #gem 'libxml-ruby', '1.1.3'
+
+gem 'crack'

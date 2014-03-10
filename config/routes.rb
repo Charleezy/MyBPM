@@ -11,6 +11,7 @@ Mybpm::Application.routes.draw do
   resources :simulation
   
   post '/workflow/import', :controller => 'workflow', :action => 'import'
+  post '/workflow/xpdltojson', :controller => 'workflow', :action => 'xpdltojson'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

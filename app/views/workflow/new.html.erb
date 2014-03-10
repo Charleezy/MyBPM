@@ -39,20 +39,47 @@
 
     var alreadyLoaded = false;
 
-  $('#MyButton').click(function(){
-    $('#canvas').height(500);
-    $('#canvas').width(2000);
-    if(!alreadyLoaded){
-        var bpmn = new net.BpmnJS($('#canvas')[0], []);
-        bpmn.plot(jsonObject);
-        alreadyLoaded = true;
-    }
+ 
+  
+  $("#convert").click(function() {
+			
+		$.ajax({
+			beforeSend: function(req) {
+				req.setRequestHeader("Accept", "application/json");
+			},
+			url: "/workflow/xpdltojson", 
+			type: "POST",
+			success: function(data) {
+				$('#canvas').height(500);
+				$('#canvas').width(2000);
+				if(!alreadyLoaded){
+					var bpmn = new net.BpmnJS($('#canvas')[0], []);
+					bpmn.plot(jsonObject);
+					alreadyLoaded = true;
+				}
+			}
+		});
+  
   });
+  
   });
 </script>
 
+<div id="file_input">
+	<p>Select a workflow file to import.</p>
+	<div class="well">
+		<%= form_for :workflow, :url => {:action => "import"} do |f| %>
+			<p>
+				<%= f.file_field :workflow %>
+			</p>
+			<br />
+			<%= f.submit %>
+		<% end %>
+	</div>
+</div>
 
-<input type="button" value="Import" id="MyButton"></input>
+<button type="button" class="btn btn-info" id="convert">Convert to JSON</button>
+
 Dynamic model:
 <div id="canvas"></div>
 <%# This will get removed just keeping for testing %>
