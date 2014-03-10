@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  workflow_id: 
+  step_trace: MyText
+  mock_data_id: 
+
+two:
+  workflow_id: 
+  step_trace: MyText
+  mock_data_id: 
