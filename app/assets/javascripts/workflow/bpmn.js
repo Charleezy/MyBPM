@@ -24,7 +24,6 @@
 // I modified some of this to make it work better, feel free to keep doing the same.
 
 
-var test = 'hi';
 // Namespace
 var net = net || {};
 net = {};
@@ -50,6 +49,28 @@ net.BpmnJS.prototype = {
     // PAINT
     for(var i=0; i<jsonObject.Package.WorkflowProcesses.WorkflowProcess.length; i++){
       
+      // TRANSITIONS
+      if(jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
+        var transitions = jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition;
+        for(var j=0; j<transitions.length; j++){
+          console.log('painting transition ' + j);
+          var transition = transitions[j];
+          var coordinatesArray = transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.Coordinates;
+          var xOrigin = parseInt(coordinatesArray[0].XCoordinate);
+          var yOrigin = parseInt(coordinatesArray[0].YCoordinate);
+          
+          var xCoordinates = [];
+          var yCoordinates = [];
+          for(var k=1; k<coordinatesArray.length; k++){
+            xCoordinates[k] = parseInt(coordinatesArray[k].XCoordinate);
+            yCoordinates[k] = parseInt(coordinatesArray[k].YCoordinate);
+          }
+          
+          var borderColor = transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.BorderColor;
+          this.paintTransition(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor);
+        }
+      }
+
       // ACTIVITIES
       if(jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Activities')){
         var activities = jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].Activities.Activity;
@@ -59,41 +80,18 @@ net.BpmnJS.prototype = {
           var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
           var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
           var width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
-          var borderColor = activity.NodeGraphicsInfos.BorderColor;
-          var fillColor = activity.NodeGraphicsInfos.FillColor;
-          this.paintShape(xCoordinate, yCoordinate, height, width, borderColor,fillColor, activity);
+          var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
+          var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
+          var name = activity.Name;
+          this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
         }
       }
-
-      // if(jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
-      //   var transitions = jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition;
-      //   for(var j=0; j<transitions.length; j++){
-      //     var transition = transitions[j];
-      //     var startXCoordinate = parseInt(transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.Coordinates[0].XCoordinate);
-      //     var startYCoordinate = parseInt(transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.Coordinates[0].YCoordinate);
-      //     for(var k in transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.Coordinates){
-      //       var XCoordinates[k] = parseInt(transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.Coordinates[k].XCoordinate);
-      //       var YCoordinates[k] = parseInt(transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.Coordinates[k].YCoordinate);
-      //     }
-      //     var borderColor = transition.NodeGraphicsInfos.BorderColor;
-      //     this.paintShape(xCoordinate, yCoordinate, height, width, borderColor,fillColor, transition);
-      //   }
-      // }
     }
 
-      //this.paintEdge(docRoot, bpmnElement, path, startX, startY);
     //Allows elements to be draggable
-    //this.moveElement();
+    this.moveElement();
   },
 
-  paintActivity : function(x, y, height, width, borderColor, fillColor, activity){
-
-  },
-
-  paintTransition : function(){
-
-  },
-  
   moveElement : function(){
      var  start = function () {
             this.odx = 0;
@@ -112,57 +110,78 @@ net.BpmnJS.prototype = {
         el.drag(move, start, up)    
     });
   },
+
+  paintTransition : function(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor){
+    var stringPath = "M"+xOrigin+","+yOrigin;
+
+    for(var i in xCoordinates){
+      stringPath += "L"+xCoordinates[i]+","+yCoordinates[i];
+    }
+
+    console.log('string = ' + stringPath);
+
+    var shape = this.paper.path(stringPath);
+
+    $(shape.node).attr('border', borderColor);
+  },
   
-  paintShape : function(x, y, height, width, borderColor, fillColor, activity){
-    // GET THE NAME OF THE EVENT
-    for(var eventName in activity.Event){
-        switch(eventName){
-        case "StartEvent":
-          console.log("StartEvent");
-           this.paintStartEvent(x,y,width, height);
-           break;
-        // case "EndEvent":
-        //    this.paintEndEvent(x,y,width, height, element, element.localName, bpmnElement);
-        //    break;
-        // case "Participant":
-        //    this.paintParticipant(x,y,width, height, element);
-        //    break;
-        // case "Lane":
-        //    this.paintLane(x,y,width, height, element);
-        //    break;
-        // case "ServiceTask":
-        // case "ScriptTask":
-        // case "UserTask":
-        // case "Task":
-        //    this.paintTask(x,y,width, height, element, element.localName, bpmnElement);
-        //    break;
-        // case "SendTask":
-        //    this.paintSendTask(x,y,width, height, element, element.localName, bpmnElement);
-        //    break;
-        // case "ReceiveTask":
-        //    this.paintReceiveTask(x,y,width, height, element, element.localName, bpmnElement);
-        //    break;
-        // case "ExclusiveGateway":
-        //    this.paintExclusiveGateway(x,y,width, height, element);
-        //    break;
-        // case "BoundaryEvent":
-        //    this.paintBoundaryEvent(x,y,width, height, element);
-        //    break;
-        // case "SubProcess":
-        //    this.paintSubProcess(x,y,width, height, element);
-        //    break;
-        // case "TextAnnotation":
-        //    this.paintTextAnnotation(x,y,width, height, element);
-        //    break;
-        // case "DataStoreReference":
-        //    this.paintDataStoreReference(x,y,width, height, element);
-        //    break;
-        default: 
-           // this.paintDefault(x,y,width, height, element);
-           break;
+  paintActivity : function(activity, x, y, height, width, borderColor, fillColor, name){
+    for(var activityProperty in activity)
+    {
+      console.log(activityProperty);
+      switch(activityProperty){
+        
+        case 'Event':
+          this.paintEvent(x,y,width, height, name, fillColor, borderColor);
+          break;
+
+        case 'Implementation':
+
+          if(activity.Implementation.hasOwnProperty('Task'))
+            this.paintImplementation(x,y,width,height, name, fillColor, borderColor);
+          
+          break;
+
+        case 'Route':
+            this.paintRoute(x,y,width,height, name, fillColor, borderColor);
+          break;
       }
     }
-  
+  },
+
+  paintEvent : function(x, y, width, height, name, fillColor, borderColor){
+    var shape = this.paper.circle(x+width/2, y+height/2, width/2);
+    var cssClass = "";
+    console.log(fillColor);
+    $(shape.node).attr("fill",fillColor); 
+    $(shape.node).attr("border",borderColor); 
+  },
+
+  paintImplementation : function(x, y, width, height, name, fillColor, borderColor){
+    // paint shape
+    var shape = this.paper.rect(x, y, width, height, 5);
+
+    // add text
+    this.paper.text(x+width/2,y+height/2,name);
+
+    // add interactivity
+    //shape.hover(function(){shape.transform('S1.2')},function(){shape.transform('S1')})
+    //shape.click(function(){alert(name)});
+
+    // apply cssClass
+    var cssClass = "";
+    $(shape.node).attr("class",cssClass);
+    $(shape.node).attr("fill",fillColor); 
+    $(shape.node).attr("border",borderColor); 
+  },
+
+  paintRoute : function(x, y, width, height, name, fillColor, borderColor){
+    var shape = this.paper.rect(x, y, width, height, 1);
+    shape.transform('r45');
+    this.paper.text(x+width/2,y+height/2,name);
+
+    $(shape.node).attr("fill", fillColor);
+    $(shape.node).attr("border",borderColor);
   },
  
   paintEdge : function(docRoot, bpmnElement, path, x, y){
@@ -201,39 +220,12 @@ net.BpmnJS.prototype = {
     this.paper.text(x+width/2,y-10,name);
     $(shape.node).attr("class","exclusiveGateway");
   },
-  paintStartEvent : function(x, y, width, height){
-    console.log(width + ' ' + height);
-    console.log(x);
-    var shape = this.paper.circle(x+width/2, y+height/2, width/2);
-    var css = "";
-    $(shape.node).attr("class",css);
-  }, 
+
   paintBoundaryEvent : function(x, y, width, height,element){
     var shape = this.paper.circle(x+width/2, y+height/2, width/2);
     $(shape.node).attr("class","boundaryEvent");
   }, 
-  paintEndEvent : function(x, y, width, height,element, elementType, bpmnElement){
-    var shape = this.paper.circle(x+width/2, y+height/2, width/2);
-    var css = "";
-    $(shape.node).attr("class",css);
-  }, 
-  paintTask : function(x, y, width, height, element, elementType, bpmnElement){
-    // paint shape
-    var shape = this.paper.rect(x, y, width, height, 5);
-    var name = this.getElementName(element);
-    // add text
-    var re = new RegExp(' ', 'g');
-    name = name.replace(re,'\n');
-    this.paper.text(x+width/2,y+height/2,name);
 
-    // add interactivity
-    //shape.hover(function(){shape.transform('S1.2')},function(){shape.transform('S1')})
-    //shape.click(function(){alert(name)});
-
-    // apply css
-    var css = "";
-    $(shape.node).attr("class",css);
-  },
   paintReceiveTask : function(x, y, width, height, element, elementType, bpmnElement){
     // draw task shape
     this.paintTask(x, y, width, height, element, elementType, bpmnElement);
