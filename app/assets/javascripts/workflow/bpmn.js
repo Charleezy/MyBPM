@@ -158,7 +158,7 @@ net.BpmnJS.prototype = {
     var shape = this.paper.rect(x, y, width, height, 5);
 
     // add text
-    this.paper.text(x+width/2,y+height/2,name);
+    var text = this.paper.text(x+width/2,y+height/2,name);
 
     // add interactivity
     //shape.hover(function(){shape.transform('S1.2')},function(){shape.transform('S1')})
@@ -170,6 +170,7 @@ net.BpmnJS.prototype = {
     $(shape.node).attr("fill",fillColor); 
     $(shape.node).attr("border",borderColor);
     this.moveElement(shape); 
+    this.moveElement(text); 
   },
 
   paintRoute : function(x, y, width, height, name, fillColor, borderColor){

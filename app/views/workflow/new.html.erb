@@ -50,11 +50,31 @@
           bpmn.plot(jsonObject);
           
           // Toolbox listeners
-          $('#toolbox-event').click(function(){
+          $('#toolbox > .tb-item').click(function(){
+            var el = $(this);
+            // After selecting toolbox item, we click on any location within 
+            // the canvas to draw the new element there.
             $('#canvas').one('click', function(event){
               var x = event.offsetX,
                   y = event.offsetY;
-              bpmn.paintEvent(x,y,30,30,'','#efefef','black');
+              switch (el.attr('id')) {
+                case 'tb-event':
+                  bpmn.paintEvent(x,y,30,30,'','#efefef','black');
+                  break;
+                case 'tb-implementation':
+                  bpmn.paintImplementation(x,y,90,60,'Text','#efefef','black');
+                  break;
+                case 'tb-route':
+                  bpmn.paintRoute(x,y,40,40,'Text','#efefef','black');
+                  break;
+                case 'tb-route':
+                  bpmn.paintRoute(x,y,40,40,'Text','#efefef','black');
+                  break;
+                default:
+                  // Do nothing
+              }
+              
+              
             });
           });
 
@@ -69,21 +89,21 @@
 Dynamic model:
 <!-- TODO needs images or some form of styling -->
 <div id="toolbox" style="height:40px;border:1px solid black;">
-    <span id="toolbox-default">default</span>
-    <span id="toolbox-event">event</span>
-    <span id="toolbox-implementation">implementation</span>
-    <span id="toolbox-route">route</span>
-    <span id="toolbox-edge">edge</span>
-    <span id="toolbox-participant">participant</span>
-    <span id="toolbox-gateway">gateway</span>
-    <span id="toolbox-lane">lane</span>
-    <span id="toolbox-boundaryevent">boundaryevent</span>
-    <span id="toolbox-receivetask">receivetask</span>
-    <span id="toolbox-sendtask">sendtask</span>
-    <span id="toolbox-subprocess">subprocess</span>
-    <span id="toolbox-datastore">datastore</span>
-    <span id="toolbox-text">text</span>
-    <!-- TODO transition? -->
+    <span id="tb-default" class="tb-item">default</span>
+    <span id="tb-event" class="tb-item">event</span>
+    <span id="tb-implementation" class="tb-item">implementation</span>
+    <span id="tb-route" class="tb-item">route</span>
+    <span id="tb-edge" class="tb-item">edge</span>
+    <span id="tb-participant" class="tb-item">participant</span>
+    <span id="tb-gateway" class="tb-item">gateway</span>
+    <span id="tb-lane" class="tb-item">lane</span>
+    <span id="tb-boundaryevent" class="tb-item">boundaryevent</span>
+    <span id="tb-receivetask" class="tb-item">receivetask</span>
+    <span id="tb-sendtask" class="tb-item">sendtask</span>
+    <span id="tb-subprocess" class="tb-item">subprocess</span>
+    <span id="tb-datastore" class="tb-item">datastore</span>
+    <span id="tb-text" class="tb-item">text</span>
+    <!-- TODO other items, such as transition? -->
 </div>
 <div id="canvas"></div>
 <%# This will get removed just keeping for testing %>
