@@ -4,7 +4,7 @@ class SimulationController < ApplicationController
   
   def index
     @mockdata = MockData.all
-    @simulation_results = simulation_results.all
+    @simulation_results = SimulationResult.all
   end
   
   def new
@@ -20,7 +20,7 @@ class SimulationController < ApplicationController
     respond_to do |format| 
       format.html
       format.json { render :json => @data.id}
-  end
+    end
   end
   
   def update
