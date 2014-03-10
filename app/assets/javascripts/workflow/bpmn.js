@@ -59,11 +59,28 @@ net.BpmnJS.prototype = {
           var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
           var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
           var width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
-          var borderColor = activity.NodeGraphicsInfos.BorderColor;
-          var fillColor = activity.NodeGraphicsInfos.FillColor;
-          this.paintShape(xCoordinate, yCoordinate, height, width, borderColor,fillColor, activity);
+          var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
+          var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
+          var name = activity.Name;
+          this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
         }
       }
+
+      // // TRANSITIONS
+      // if(jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
+      //   var transitions = jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition;
+      //   for(var j=0; j<transitions.length; j++){
+      //     var transition = transitions[j];
+      //     var xCoordinate = parseInt(transition.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate);
+      //     var yCoordinate = parseInt(transition.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
+      //     var height = parseInt(transition.NodeGraphicsInfos.NodeGraphicsInfo.Height);
+      //     var width = parseInt(transition.NodeGraphicsInfos.NodeGraphicsInfo.Width);
+      //     var borderColor = transition.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
+      //     var fillColor = transition.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
+      //     var name = transition.Name;
+      //     this.paintActivity(transition, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
+      //   }
+      // }
 
       // if(jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
       //   var transitions = jsonObject.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition;
@@ -86,14 +103,6 @@ net.BpmnJS.prototype = {
     //this.moveElement();
   },
 
-  paintActivity : function(x, y, height, width, borderColor, fillColor, activity){
-
-  },
-
-  paintTransition : function(){
-
-  },
-  
   moveElement : function(){
      var  start = function () {
             this.odx = 0;
@@ -112,15 +121,16 @@ net.BpmnJS.prototype = {
         el.drag(move, start, up)    
     });
   },
-  
-  paintShape : function(x, y, height, width, borderColor, fillColor, activity){
+
+  paintTransition : function(){
+
     // GET THE NAME OF THE EVENT
-    for(var eventName in activity.Event){
-        switch(eventName){
-        case "StartEvent":
-          console.log("StartEvent");
-           this.paintStartEvent(x,y,width, height);
-           break;
+    // for(var eventName in activity.Event){
+    //     switch(eventName){
+    //     case "StartEvent":
+    //       console.log("StartEvent");
+    //        this.paintStartEvent(x,y,width, height);
+    //        break;
         // case "EndEvent":
         //    this.paintEndEvent(x,y,width, height, element, element.localName, bpmnElement);
         //    break;
@@ -157,12 +167,61 @@ net.BpmnJS.prototype = {
         // case "DataStoreReference":
         //    this.paintDataStoreReference(x,y,width, height, element);
         //    break;
-        default: 
-           // this.paintDefault(x,y,width, height, element);
-           break;
+        // default: 
+        //     this.paintDefault(x,y,width, height, element);
+        //    break;
+      // }
+    // }
+
+  },
+  
+  paintActivity : function(activity, x, y, height, width, borderColor, fillColor, name){
+    for(var activityProperty in activity)
+    {
+      console.log(activityProperty);
+      switch(activityProperty){
+        
+        case 'Event':
+          this.paintEvent(x,y,width, height, name, fillColor, borderColor);
+          break;
+
+        case 'Implementation':
+
+          if(activity.Implementation.hasOwnProperty('Task'))
+            this.paintTask(x,y,width,height, name, fillColor, borderColor);
+          
+          break;
+
+        case 'Route':
+        break;
       }
     }
-  
+  },
+
+  paintEvent : function(x, y, width, height, name, fillColor, borderColor){
+    var shape = this.paper.circle(x+width/2, y+height/2, width/2);
+    var cssClass = "";
+    console.log(fillColor);
+    $(shape.node).attr("fill",fillColor); 
+    $(shape.node).attr("border",borderColor); 
+  },
+
+  paintTask : function(x, y, width, height, name, fillColor, borderColor){
+    // paint shape
+    var shape = this.paper.rect(x, y, width, height, 5);
+
+    // add text
+    this.paper.text(x+width/2,y+height/2,name);
+
+    // add interactivity
+    //shape.hover(function(){shape.transform('S1.2')},function(){shape.transform('S1')})
+    //shape.click(function(){alert(name)});
+
+    // apply cssClass
+    var cssClass = "";
+    $(shape.node).attr("class",cssClass);
+    $(shape.node).attr("fill",fillColor); 
+    $(shape.node).attr("border",borderColor); 
   },
  
   paintEdge : function(docRoot, bpmnElement, path, x, y){
@@ -201,39 +260,12 @@ net.BpmnJS.prototype = {
     this.paper.text(x+width/2,y-10,name);
     $(shape.node).attr("class","exclusiveGateway");
   },
-  paintStartEvent : function(x, y, width, height){
-    console.log(width + ' ' + height);
-    console.log(x);
-    var shape = this.paper.circle(x+width/2, y+height/2, width/2);
-    var css = "";
-    $(shape.node).attr("class",css);
-  }, 
+
   paintBoundaryEvent : function(x, y, width, height,element){
     var shape = this.paper.circle(x+width/2, y+height/2, width/2);
     $(shape.node).attr("class","boundaryEvent");
   }, 
-  paintEndEvent : function(x, y, width, height,element, elementType, bpmnElement){
-    var shape = this.paper.circle(x+width/2, y+height/2, width/2);
-    var css = "";
-    $(shape.node).attr("class",css);
-  }, 
-  paintTask : function(x, y, width, height, element, elementType, bpmnElement){
-    // paint shape
-    var shape = this.paper.rect(x, y, width, height, 5);
-    var name = this.getElementName(element);
-    // add text
-    var re = new RegExp(' ', 'g');
-    name = name.replace(re,'\n');
-    this.paper.text(x+width/2,y+height/2,name);
 
-    // add interactivity
-    //shape.hover(function(){shape.transform('S1.2')},function(){shape.transform('S1')})
-    //shape.click(function(){alert(name)});
-
-    // apply css
-    var css = "";
-    $(shape.node).attr("class",css);
-  },
   paintReceiveTask : function(x, y, width, height, element, elementType, bpmnElement){
     // draw task shape
     this.paintTask(x, y, width, height, element, elementType, bpmnElement);
