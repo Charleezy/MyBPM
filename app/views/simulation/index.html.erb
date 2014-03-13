@@ -1,5 +1,6 @@
 <script>
 	$( document ).ready(function() {
+	/*
 		$("#create").click(function() {
 			
 			var json = "{[{'stage_num' : 'stage1', 'stage_data' : [{ 'name1' : 'fieldname1', 'value1' : fieldvalue1 },{ 'name2' : 'fieldname2', 'value2' : fieldvalue2 } ]},{'stage_num' : 'stage2', 'stage_data' : [{ 'name3' : 'fieldname3', 'value3' : 'fieldvalue3' },{ 'name4' : 'fieldname4', 'value4' : 'fieldvalue4' }]}]}";
@@ -7,14 +8,14 @@
 			$.ajax({
 				url: "simulation.json", 
 				type: "POST",
-				data: {mockdata : { "workflow_id" : 1, "mockdata" : json }},
+				data: {mockdata : { "name" : "Sim Name", "workflow_id" : 1}},
 				success: function(sim_id) {
 					$('#alert_text').html('Simulation ' + sim_id + ' successfully created!');
 					$('#alert_status').show();
 				}
 			});
 		});
-		
+		*/
 		$(".delete").click(function() {
 			
 			var sim_id= $(this).parent('td').parent('tr').find('.sim_id').data('id');
@@ -52,40 +53,78 @@
 	});
 </script>
 
+<h1>My Simulations</h1>
 
-			<h1>Simulation</h1>
+<hr>
 
-			<div id="alert_status" class="alert alert-success alert-dismissable" style="display:none">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				<p id="alert_text">asfasf</p>
-			</div>
-			
-			<button type="button" class="btn btn-info" id="create">Create Mock Data</button>
+<div id="alert_status" class="alert alert-success alert-dismissable" style="display:none">
+	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+	<p id="alert_text"></p>
+</div>
 
-			<table class="table">
-				<thead>
-					  <tr>
-						<th>Simulation ID</th>
-						<th>Workflow ID</th>
-						<th>Mock Data</th>
-						<th></th>
-						<th></th>
-					  </tr>
-				</thead>
-				<tbody>
-					<% @mockdata.each do |data| %>
-						  <tr>
-							<td class="sim_id" data-id=<%= data.id %>><%= data.id %></td>
-							<td><%= data.workflow_id %></td>
-							<td><%= data.mockdata %></td>
-							<td>
-								<button class="delete">Delete</button>
-							</td>
-							<td>
-								<button class="update">Update</button>
-							</td>
-						  </tr>
-					<% end %>
-				</tbody>
-			</table>
-		
+<button type="button" class="btn btn-info" id="create" data-toggle="modal" data-target="#createSimulation" style="float:right; margin-bottom:5px;">Create Simulation</button>
+
+<table class="table table-striped" style="border:2px solid grey">
+	<thead>
+		  <tr style="background-color:#ddd">
+			<th class="col-md-1">ID</th>
+			<th class="col-md-4">Name</th>
+			<th class="col-md-4">Workflow ID</th>
+			<th class="col-md-3"></th>
+		  </tr>
+	</thead>
+	<tbody>
+		<% @mockdata.each do |data| %>
+			  <tr>
+				<td class="sim_id" data-id=<%= data.id %>><%= data.id %></td>
+				<td><%= data.name %></td>
+				<td><%= data.workflow_id %></td>
+				<td style="text-align:center">
+					<button class="run">Run</button>
+					<button class="delete">Delete</button>
+				</td>
+			  </tr>
+		<% end %>
+	</tbody>
+</table>
+
+<div class="modal fade" id="createSimulation" role="dialog" aria-labelledby="createSimulationModalLabel" aria-hidden="true" style="display:none">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="createSimulationModalLabel">Create Simulation</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-container" style="width: 80%; margin: 0 auto;">
+                    <div class="form-group">
+                        <div class="formLabel">
+                            <label for="simName">Name</label>
+                        </div>
+                        <div class="formField">
+                            <input id="simName" name="simName" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="formLabel">
+                            <label for="workflow">Workflow</label>
+                        </div>
+                        <div class="formField">
+							<select id="workflow" name="workflow" class="form-control">
+							
+							</select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="save" type="button" class="btn btn-primary" onclick="dosomething()">Create</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+
+        </div>
+    </div>
+</div>
