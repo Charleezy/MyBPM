@@ -1,0 +1,11 @@
+class CreateAccessibilities < ActiveRecord::Migration
+  def change
+    create_table :accessibilities do |t|
+      t.integer :workflow_id
+      t.integer :user_id
+      t.integer :highest_permission
+
+      t.timestamps
+    end
+  end
+end
