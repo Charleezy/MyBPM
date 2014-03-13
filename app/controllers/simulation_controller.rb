@@ -4,6 +4,7 @@ class SimulationController < ApplicationController
   
   def index
     @mockdata = MockData.all
+	@workflows = current_user.workflows
     @simulation_results = SimulationResult.all
   end
   
@@ -42,7 +43,7 @@ class SimulationController < ApplicationController
   end
   
   def simulation_params
-    params.require(:mockdata).permit(:workflow_id, :mockdata)
+    params.require(:mockdata).permit(:name, :workflow_id, :mockdata)
   end
   
 end

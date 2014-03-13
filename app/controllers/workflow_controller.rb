@@ -3,9 +3,6 @@ require 'json'
 
 class WorkflowController < ApplicationController
 
-	
-	
-
     def index
       @workflows = current_user.workflows
     end
