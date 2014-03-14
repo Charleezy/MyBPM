@@ -54,6 +54,6 @@ group :development do
 end
 
 # For validating xml
-#gem 'libxml-ruby', '1.1.3'
+gem 'libxml-ruby', '2.7.0'
 
 gem 'crack'
