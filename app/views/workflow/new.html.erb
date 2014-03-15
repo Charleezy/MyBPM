@@ -1,6 +1,7 @@
 <%#= form_for :bpmn do |f| %>
   <%#= f.file_field :bpmn %>
 <%# end %>
+<%= stylesheet_link_tag 'workflow' %>
 <%= javascript_include_tag 'ext_lib/xml2json.min.js' %>
 <%= javascript_include_tag 'ext_lib/raphael.js' %>
 <%= javascript_include_tag 'workflow/bpmn.js' %>
@@ -83,26 +84,31 @@
 
 
 <input type="button" value="Import" id="MyButton"></input>
-Dynamic model:
-
-<!-- TODO needs images or some form of styling -->
+<br>
 <div class="btn-group" id="toolbox">
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-default"> default</button>
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-event">
-      <span class="glyphicon glyphicon-asterisk"></span> Star
-    </button>
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-implementation">implementation</button>
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-route">route</button>
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-edge">edge</button>
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-participant">participant</button>
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-gateway">gateway</button>
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-lane">lane</button>
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-boundaryevent">boundaryevent</button>
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-receivetask">receivetask</button>
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-sendtask">sendtask</button>
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-subprocess">subprocess</button>
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-datastore">datastore</button>
-    <button type="button" class="btn btn-default btn-lg tb-item" id="tb-text">text</button>
+    
+    <button type="button" class="btn btn-default tb-item" id="tb-startevent"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-intermediateevent"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-endevent"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-task"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-transaction"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-subprocess"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-callactivity"></button>
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-implementation"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-route"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-edge"></button> -->
+    <button type="button" class="btn btn-default tb-item" id="tb-gateway"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-datastore"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-participant"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-lane"></button>
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-boundaryevent"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-receivetask"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-sendtask"></button> -->
+    <button type="button" class="btn btn-default tb-item" id="tb-sequenceflow"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-messageflow"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-association"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-annotation"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-eraser"></button>
     <!-- TODO other items, such as transition? -->
 </div>
 <div id="canvas"></div>

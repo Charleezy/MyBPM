@@ -5,6 +5,65 @@ div#canvas{
   background-color:white;
 }
 
+#toolbox {
+  border: 1px solid #bbb;
+  background-color: #efefef;
+  .tb-item {
+    width: 60px;
+    height: 60px;
+    border: none;
+    margin: 1px;
+  }
+  #tb-sequenceflow {
+    background-image: url('tools/sequenceflow.png');
+  }
+  #tb-association {
+    background-image: url('tools/association.png');
+  }
+  #tb-messageflow {
+    background-image: url('tools/messageflow.png');
+  }
+  #tb-startevent {
+    background-image: url('tools/startevent.png');
+  }
+  #tb-intermediateevent {
+    background-image: url('tools/intermediateevent.png');
+  }
+  #tb-endevent {
+    background-image: url('tools/endevent.png');
+  }
+  #tb-task {
+    background-image: url('tools/task.png');
+  }
+  #tb-transaction {
+    background-image: url('tools/transaction.png');
+  }
+  #tb-subprocess {
+    background-image: url('tools/subprocess.png');
+  }
+  #tb-callactivity {
+    background-image: url('tools/callactivity.png');
+  }
+  #tb-participant {
+    background-image: url('tools/pool.png');
+  }
+  #tb-lane {
+    background-image: url('tools/lane.png');
+  }
+  #tb-gateway {
+    background-image: url('tools/gateway.png');
+  }
+  #tb-datastore {
+    background-image: url('tools/datastore.png');
+  }
+  #tb-annotation {
+    background-image: url('tools/annotation.png');
+  }
+  #tb-eraser {
+    background-image: url('tools/eraser.png');
+  }
+}
+
 .shape{
    fill:red;
 }
