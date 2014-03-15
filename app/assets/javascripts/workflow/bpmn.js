@@ -49,7 +49,7 @@ net.BpmnJS.prototype = {
       if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
         var transitions = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition;
         for(var j=0; j<transitions.length; j++){
-          console.log('painting transition ' + j);
+          
           var transition = transitions[j];
           var coordinatesArray = transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.Coordinates;
           var xOrigin = parseInt(coordinatesArray[0].XCoordinate);
@@ -92,8 +92,8 @@ net.BpmnJS.prototype = {
     //   if(el.shapeType !== 'Text'){
     //     alert('hi');
     //     el.hide();
-    //     console.log("Type: " + el.shapeType);
-    //     console.log(el.associatedXPDL.Id + "\n");
+    //     
+    //     
     //   }
     // });
 
@@ -159,7 +159,6 @@ net.BpmnJS.prototype = {
       
 
       if (this.pair){
-        console.log("has a pair");
         this.pair.translate(dx - this.odx, dy - this.ody);
         this.pair.odx = this.pair.attr("dx");
         this.pair.ody = this.pair.attr("dy");
@@ -167,7 +166,7 @@ net.BpmnJS.prototype = {
       }
       this.odx = dx;
       this.ody = dy;
-      //console.log('Testing1: dx:' + dx + " dy: "+ dy+' ox:' + this.odx + " oy: "+ this.ody);
+      //
     },
     up = function () {
     };
@@ -187,16 +186,11 @@ net.BpmnJS.prototype = {
     for(var i in xCoordinates){
       stringPath += "L"+xCoordinates[i]+","+yCoordinates[i];
     }
-
-    console.log('string = ' + stringPath);
-
     var shape = this.paper.path(stringPath);
 
     shape.linkedElements = linkedElements;
 
     shape.associatedXPDL = transition;
-
-    console.log("ID: " + shape.associatedXPDL.Id + "\n");
 
     shape.shapeType = 'Transition';
 
@@ -211,7 +205,7 @@ net.BpmnJS.prototype = {
 
     for(var activityProperty in xpdlActivity)
     {
-      console.log(activityProperty);
+      
       switch(activityProperty){
         
         case 'Event':
@@ -256,8 +250,10 @@ net.BpmnJS.prototype = {
     var text = this.paper.text(x+width/2,y+height/2,name);
     text.shapeType = 'Text';
 
+    // PAIRING SHAPE AND TEXT
     shape.pair = text;
     text.pair = shape;
+
     // add interactivity
     //shape.hover(function(){shape.transform('S1.2')},function(){shape.transform('S1')})
     //shape.click(function(){alert(name)});
@@ -270,17 +266,16 @@ net.BpmnJS.prototype = {
 
     return shape;
   },
-
   paintRoute : function(xpdlRoute, x, y, width, height, name, fillColor, borderColor){
-    x = x+width/2;
-    y = y+height/2;
-    var strPath = "M" + String(x) + " " + String(y-height/2) + ",L" + String(x+width/2) + " " + String(y) +",L" + String(x) + " " + String(y+height/2) + ",L" + String(x-width/2) + " " + String(y) + "Z";
-    console.log(strPath);
+    var strPath = "M" + String(x+width/2) + " " + String(y+height) + ",L" + String(x+width) + " " + String(y+height/2) +",L" + String(x+width/2) + " " + String(y) + ",L" + String(x) + " " + String(y+height/2) + "Z";
+    
     var shape = this.paper.path(strPath).attr("fill", fillColor);
     shape.associatedXPDL = xpdlRoute;
     shape.shapeType = 'Route';
     var text = this.paper.text(x+width/2,y+height/2,name);
     text.shapeType = 'Text';
+
+    // PAIRING SHAPE AND TEXT
     shape.pair = text;
     text.pair = shape;
     return shape;
