@@ -25,12 +25,9 @@
 			else
 			{
 				$.ajax({
-					url: "simulation.json", 
+					url: "simulation", 
 					type: "POST",
-					data: {mockdata : { "name" : sim_name, "workflow_id" : workflow_id}},
-					success: function(sim_id) {
-						location.reload();
-					}
+					data: {mockdata : { "name" : sim_name, "workflow_id" : workflow_id}}
 				});
 			}
 		});

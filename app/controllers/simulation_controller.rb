@@ -42,6 +42,10 @@ class SimulationController < ApplicationController
     end
   end
   
+  def edit
+  
+  end
+  
   def simulation_params
     params.require(:mockdata).permit(:name, :workflow_id, :mockdata)
   end
