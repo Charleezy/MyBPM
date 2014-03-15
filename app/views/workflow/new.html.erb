@@ -62,6 +62,40 @@
 				}
 			}
 		});
+
+    $('#canvas').height(500);
+      $('#canvas').width(2000);
+      if(!alreadyLoaded){
+          $('#toolbox').show();
+          var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
+          bpmn.plot();
+          
+          // Toolbox listeners
+          $('#toolbox > .tb-item').click(function(){
+            var el = $(this);
+            // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
+             var x = 10, y= 10;
+              switch (el.attr('id')) {
+                case 'tb-event':
+                  bpmn.moveElement(bpmn.paintEvent('xpdl stuff',x,y,30,30,'','#efefef','black'));
+                  break;
+                case 'tb-implementation':
+                  bpmn.moveElement(bpmn.paintImplementation('xpdl stuff',x,y,90,60,'Text','#efefef','black'));
+                  break;
+                case 'tb-route':
+                  bpmn.moveElement(bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black'));
+                  break;
+                case 'tb-route':
+                  bpmn.moveElement(bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black'));
+                  break;
+                default:
+                  // Do nothing
+              }
+
+          });
+
+          alreadyLoaded = true;
+      }
   
   });
  
@@ -85,21 +119,21 @@
 
 Dynamic model:
 <!-- TODO needs images or some form of styling -->
-<div id="toolbox" style="height:40px;border:1px solid black;">
-    <span id="tb-default" class="tb-item">default</span>
-    <span id="tb-event" class="tb-item">event</span>
-    <span id="tb-implementation" class="tb-item">implementation</span>
-    <span id="tb-route" class="tb-item">route</span>
-    <span id="tb-edge" class="tb-item">edge</span>
-    <span id="tb-participant" class="tb-item">participant</span>
-    <span id="tb-gateway" class="tb-item">gateway</span>
-    <span id="tb-lane" class="tb-item">lane</span>
-    <span id="tb-boundaryevent" class="tb-item">boundaryevent</span>
-    <span id="tb-receivetask" class="tb-item">receivetask</span>
-    <span id="tb-sendtask" class="tb-item">sendtask</span>
-    <span id="tb-subprocess" class="tb-item">subprocess</span>
-    <span id="tb-datastore" class="tb-item">datastore</span>
-    <span id="tb-text" class="tb-item">text</span>
+<div class="btn-group" id="toolbox"> <!-- style="height:40px;border:1px solid black;"-->
+    <button type="button" class="btn btn-default tb-item" id="tb-default"> default</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-event"> event</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-implementation">implementation</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-route">route</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-edge">edge</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-participant">participant</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-gateway">gateway</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-lane">lane</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-boundaryevent">boundaryevent</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-receivetask">receivetask</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-sendtask">sendtask</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-subprocess">subprocess</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-datastore">datastore</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-text">text</button>
     <!-- TODO other items, such as transition? -->
 </div>
 <div id="canvas"></div>
