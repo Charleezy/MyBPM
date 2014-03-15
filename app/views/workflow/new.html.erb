@@ -46,8 +46,8 @@
       $('#canvas').width(2000);
       if(!alreadyLoaded){
           $('#toolbox').show();
-          var bpmn = new net.BpmnJS($('#canvas')[0], []);
-          bpmn.plot(jsonObject);
+          var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
+          bpmn.plot();
           
           // Toolbox listeners
           $('#toolbox > .tb-item').click(function(){
@@ -59,16 +59,16 @@
                   y = event.offsetY;
               switch (el.attr('id')) {
                 case 'tb-event':
-                  bpmn.paintEvent(x,y,30,30,'','#efefef','black');
+                  bpmn.moveElement(bpmn.paintEvent(x,y,30,30,'','#efefef','black'));
                   break;
                 case 'tb-implementation':
-                  bpmn.paintImplementation(x,y,90,60,'Text','#efefef','black');
+                  bpmn.moveElement(bpmn.paintImplementation(x,y,90,60,'Text','#efefef','black'));
                   break;
                 case 'tb-route':
-                  bpmn.paintRoute(x,y,40,40,'Text','#efefef','black');
+                  bpmn.moveElement(bpmn.paintRoute(x,y,40,40,'Text','#efefef','black'));
                   break;
                 case 'tb-route':
-                  bpmn.paintRoute(x,y,40,40,'Text','#efefef','black');
+                  bpmn.moveElement(bpmn.paintRoute(x,y,40,40,'Text','#efefef','black'));
                   break;
                 default:
                   // Do nothing
