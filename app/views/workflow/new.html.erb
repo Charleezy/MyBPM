@@ -52,11 +52,8 @@
           // Toolbox listeners
           $('#toolbox > .tb-item').click(function(){
             var el = $(this);
-            // After selecting toolbox item, we click on any location within 
-            // the canvas to draw the new element there.
-            $('#canvas').one('click', function(event){
-              var x = event.offsetX,
-                  y = event.offsetY;
+            // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
+             var x = 10, y= 10;
               switch (el.attr('id')) {
                 case 'tb-event':
                   bpmn.moveElement(bpmn.paintEvent('xpdl stuff',x,y,30,30,'','#efefef','black'));
@@ -73,9 +70,7 @@
                 default:
                   // Do nothing
               }
-              
-              
-            });
+
           });
 
           alreadyLoaded = true;
