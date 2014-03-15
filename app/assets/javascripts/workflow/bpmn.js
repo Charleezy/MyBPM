@@ -42,6 +42,8 @@ net.BpmnJS = function(xpdlJson, canvas){
   connections.push(this.paper.connection(this.paper, rex, circ, "black", "#fff"))
 
 };
+
+//Paints the connections between two objects
 Raphael.fn.connection =function (paper, obj1, obj2, line, bg) {
       if (obj1.line && obj1.from && obj1.to) {
           line = obj1;
@@ -218,7 +220,7 @@ net.BpmnJS.prototype = {
     move = function(dx, dy) {
       this.translate(dx - this.odx, dy - this.ody);
       
-
+      //Check for text 
       if (this.pair){
         this.pair.translate(dx - this.odx, dy - this.ody);
         this.pair.odx = this.pair.attr("dx");
@@ -228,7 +230,8 @@ net.BpmnJS.prototype = {
       this.odx = dx;
       this.ody = dy;
       
-        for (var i = connections.length; i--;){
+      //Check for connections and reconnect them
+      for (var i = connections.length; i--;){
         this.paper.connection(this.paper, connections[i])
       }
     },
