@@ -156,6 +156,15 @@ net.BpmnJS.prototype = {
     },
     move = function(dx, dy) {
       this.translate(dx - this.odx, dy - this.ody);
+      
+
+      if (this.pair){
+        console.log("has a pair");
+        this.pair.translate(dx - this.odx, dy - this.ody);
+        this.pair.odx = this.pair.attr("dx");
+        this.pair.ody = this.pair.attr("dy");
+
+      }
       this.odx = dx;
       this.ody = dy;
       //console.log('Testing1: dx:' + dx + " dy: "+ dy+' ox:' + this.odx + " oy: "+ this.ody);
@@ -247,6 +256,8 @@ net.BpmnJS.prototype = {
     var text = this.paper.text(x+width/2,y+height/2,name);
     text.shapeType = 'Text';
 
+    shape.pair = text;
+    text.pair = shape;
     // add interactivity
     //shape.hover(function(){shape.transform('S1.2')},function(){shape.transform('S1')})
     //shape.click(function(){alert(name)});
@@ -270,7 +281,8 @@ net.BpmnJS.prototype = {
     shape.shapeType = 'Route';
     var text = this.paper.text(x+width/2,y+height/2,name);
     text.shapeType = 'Text';
-
+    shape.pair = text;
+    text.pair = shape;
     return shape;
     
   },
