@@ -31,6 +31,8 @@ net = {};
 // Constructor
 net.BpmnJS = function(xpdlJson, canvas){
 
+  this.connecting = false;
+
   this.xpdlJson = xpdlJson;
 
   // Paint canvas
@@ -87,17 +89,38 @@ net.BpmnJS.prototype = {
       }
     }
 
-    // // SHOW ALL IDs
-    // this.paper.forEach(function(el){
-    //   if(el.shapeType !== 'Text'){
-    //     alert('hi');
-    //     el.hide();
-    //     
-    //     
-    //   }
-    // });
-
     var globalPaper = this.paper;
+
+    var test = this;
+
+    globalPaper.forEach(function (el){
+      el.click(function(){
+        console.log(test.connecting);
+        if(test.connecting){
+          if(test.firstSelected === false){
+            alert('first');
+            test.firstSelected = el;
+          }
+          else{
+            alert('second');
+            test.firstSelected = false;
+            console.log(test.firstSelected.associatedXPDL);
+            var x1 = parseInt(test.firstSelected.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.xCoordinate) + test.firstSelected.dx
+              , y1 = parseInt(test.firstSelected.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.yCoordinate) + test.firstSelected.dy
+              , x2 = parseInt(el.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.xCoordinate) + el.dx
+              , y2 = parseInt(el.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.yCoordinate) + el.dy;
+            var strPath = "M" + x1 + "," + y1 + "L" + x2 + "," + y2;
+            console.log(strPath);
+            var shape = test.paper.path(strPath).attr("fill", fillColor);
+            test.connecting = false;
+          }
+          
+
+        }
+
+      });
+    });
+
     // LINK THE ACTIVITIES TO THE TRANSITIONS
     globalPaper.forEach(function (transition){
       
@@ -271,6 +294,7 @@ net.BpmnJS.prototype = {
     
     var shape = this.paper.path(strPath).attr("fill", fillColor);
     shape.associatedXPDL = xpdlRoute;
+    console.log(shape.associatedXPDL);
     shape.shapeType = 'Route';
     var text = this.paper.text(x+width/2,y+height/2,name);
     text.shapeType = 'Text';

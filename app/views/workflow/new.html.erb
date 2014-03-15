@@ -69,6 +69,10 @@
                 case 'tb-route':
                   bpmn.moveElement(bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black'));
                   break;
+                case 'tb-connect':
+                  bpmn.connecting = true;
+                  this.firstSelected = false;
+                  alert('click on 2 objects to connect them');
                 default:
                   // Do nothing
               }
@@ -101,6 +105,7 @@ Dynamic model:
     <button type="button" class="btn btn-default tb-item" id="tb-subprocess">subprocess</button>
     <button type="button" class="btn btn-default tb-item" id="tb-datastore">datastore</button>
     <button type="button" class="btn btn-default tb-item" id="tb-text">text</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-connect">connect</button>
     <!-- TODO other items, such as transition? -->
 </div>
 <div id="canvas"></div>
