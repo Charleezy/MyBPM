@@ -1,4 +1,11 @@
+require 'crack'
+require 'json'
+
 class WorkflowController < ApplicationController
+
+	
+	
+
     def index
       @workflows = current_user.workflows
     end
@@ -37,8 +44,24 @@ class WorkflowController < ApplicationController
       @workflow.destroy
       redirect_to :index, :notice => 'Workflow was deleted.'
     end
+	
+	def import
+	
+	end
+	
+	def xpdltojson 
+		myXML = Crack::XML.parse(File.read("data/XML.txt"));
+		myJSON = myXML.to_json;
+		
+		respond_to do |format| 
+			format.json { render :json => myJSON}
+		end
+	end
+	
+	
 
 
+	
   private 
 
     def workflow_params

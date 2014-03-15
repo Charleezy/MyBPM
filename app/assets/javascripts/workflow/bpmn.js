@@ -87,28 +87,23 @@ net.BpmnJS.prototype = {
         }
       }
     }
-
-    //Allows elements to be draggable
-    this.moveElement();
   },
 
-  moveElement : function(){
-     var  start = function () {
-            this.odx = 0;
-            this.ody = 0;
-          },
-          move = function (dx, dy) {
-            this.translate(dx - this.odx, dy - this.ody);
-            this.odx = dx;
-            this.ody = dy;
-            //console.log('Testing1: dx:' + dx + " dy: "+ dy+' ox:' + this.odx + " oy: "+ this.ody);
-          },
-          up = function () {
-          };
+  moveElement : function(element) {
+    var start = function() {
+      this.odx = 0;
+      this.ody = 0;
+    },
+    move = function(dx, dy) {
+      this.translate(dx - this.odx, dy - this.ody);
+      this.odx = dx;
+      this.ody = dy;
+      //console.log('Testing1: dx:' + dx + " dy: "+ dy+' ox:' + this.odx + " oy: "+ this.ody);
+    },
+    up = function () {
+    };
     
-    this.paper.forEach(function(el){
-        el.drag(move, start, up)    
-    });
+    element.drag(move, start, up);  
   },
 
   paintTransition : function(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor){
@@ -123,6 +118,7 @@ net.BpmnJS.prototype = {
     var shape = this.paper.path(stringPath);
 
     $(shape.node).attr('border', borderColor);
+    this.moveElement(shape);
   },
   
   paintActivity : function(activity, x, y, height, width, borderColor, fillColor, name){
@@ -152,9 +148,9 @@ net.BpmnJS.prototype = {
   paintEvent : function(x, y, width, height, name, fillColor, borderColor){
     var shape = this.paper.circle(x+width/2, y+height/2, width/2);
     var cssClass = "";
-    console.log(fillColor);
     $(shape.node).attr("fill",fillColor); 
-    $(shape.node).attr("border",borderColor); 
+    $(shape.node).attr("border",borderColor);
+    this.moveElement(shape);
   },
 
   paintImplementation : function(x, y, width, height, name, fillColor, borderColor){
@@ -162,7 +158,7 @@ net.BpmnJS.prototype = {
     var shape = this.paper.rect(x, y, width, height, 5);
 
     // add text
-    this.paper.text(x+width/2,y+height/2,name);
+    var text = this.paper.text(x+width/2,y+height/2,name);
 
     // add interactivity
     //shape.hover(function(){shape.transform('S1.2')},function(){shape.transform('S1')})
@@ -172,7 +168,9 @@ net.BpmnJS.prototype = {
     var cssClass = "";
     $(shape.node).attr("class",cssClass);
     $(shape.node).attr("fill",fillColor); 
-    $(shape.node).attr("border",borderColor); 
+    $(shape.node).attr("border",borderColor);
+    this.moveElement(shape); 
+    this.moveElement(text); 
   },
 
   paintRoute : function(x, y, width, height, name, fillColor, borderColor){
@@ -182,6 +180,7 @@ net.BpmnJS.prototype = {
 
     $(shape.node).attr("fill", fillColor);
     $(shape.node).attr("border",borderColor);
+    this.moveElement(shape);
   },
  
   paintEdge : function(docRoot, bpmnElement, path, x, y){
@@ -195,7 +194,8 @@ net.BpmnJS.prototype = {
     path.attr({'arrow-end':'block-wide-long'});
     var css = "";
     $(path.node).attr("class",css);
-    this.paper.text(x+15,y+10,name);
+    var text = this.paper.text(x+15,y+10,name);
+    this.moveElement(text);
   },
   
   paintParticipant : function(x, y, width, height,element){
@@ -203,10 +203,12 @@ net.BpmnJS.prototype = {
     var shape = this.paper.rect(x, y, width, height);
     $(shape.node).attr("class","participant");
     this.paper.text(x+15,y+height/2,name).transform("r270");
+    this.moveElement(shape);
   },
   paintLane : function(x, y, width, height,element){
     var shape = this.paper.rect(x, y, width, height);
     $(shape.node).attr("class","lane");
+    this.moveElement(shape);
   },
   paintExclusiveGateway : function(x, y, width, height,element){
     var name = this.getElementName(element);
@@ -219,32 +221,40 @@ net.BpmnJS.prototype = {
     this.paper.text(x+width/2,y+height/2,'X').attr({'font-size':16,'font-weight':'bold'});
     this.paper.text(x+width/2,y-10,name);
     $(shape.node).attr("class","exclusiveGateway");
+    this.moveElement(shape);
   },
 
   paintBoundaryEvent : function(x, y, width, height,element){
     var shape = this.paper.circle(x+width/2, y+height/2, width/2);
     $(shape.node).attr("class","boundaryEvent");
+    this.moveElement(shape);
   }, 
 
   paintReceiveTask : function(x, y, width, height, element, elementType, bpmnElement){
     // draw task shape
     this.paintTask(x, y, width, height, element, elementType, bpmnElement);
     // draw envelope
-    this.paper.rect(x+10, y+10,20, 15);
-    this.paper.path("M"+(x+10)+" "+(y+10)+"L"+(x+20)+" "+(y+20)+ "L" +(x+30)+" "+(y+10));
+    var shape1 = this.paper.rect(x+10, y+10,20, 15);
+    var shape2 = this.paper.path("M"+(x+10)+" "+(y+10)+"L"+(x+20)+" "+(y+20)+ "L" +(x+30)+" "+(y+10));
+    this.moveElement(shape1);
+    this.moveElement(shape2);
   },
   paintSendTask : function(x, y, width, height, element, elementType, bpmnElement){
     this.paintTask(x, y, width, height, element, elementType, bpmnElement);
-    this.paper.rect(x+10, y+10,20, 15).attr("fill","black");
-    this.paper.path("M"+(x+10)+" "+(y+10)+"L"+(x+20)+" "+(y+20)+ "L" +(x+30)+" "+(y+10)).attr("stroke","white");
+    var shape1 = this.paper.rect(x+10, y+10,20, 15).attr("fill","black");
+    var shape2 = this.paper.path("M"+(x+10)+" "+(y+10)+"L"+(x+20)+" "+(y+20)+ "L" +(x+30)+" "+(y+10)).attr("stroke","white");
+    this.moveElement(shape1);
+    this.moveElement(shape2);
   },
   paintSubProcess : function(x, y, width, height,element){
     var shape = this.paper.rect(x, y, width, height, 5);
     $(shape.node).attr("class","subProcess");
+    this.moveElement(shape);
   },
   paintDataStoreReference : function(x, y, width, height,element){
     var shape = this.paper.rect(x, y, width, height, 5);
     $(shape.node).attr("class","dataStoreReference");
+    this.moveElement(shape);
   },
   paintTextAnnotation : function(x, y, width, height,element){
     var shape = this.paper.rect(x, y, width, height);
@@ -255,11 +265,13 @@ net.BpmnJS.prototype = {
     $(shape.node).attr("class","textAnnotation");
     $(this.paper.path("M"+x + " " + y + "L"+(x+width/2) + " " +y).node).attr("stroke-dasharray","5,5");
     $(this.paper.path("M"+x + " " + y + "L"+ x + " " +(y+height/2)).node).attr("stroke-dasharray","5,5");
+    this.moveElement(shape);
   },
   paintDefault : function(x, y, width, height,element){
     var shape = this.paper.rect(x, y, width, height, 5);
     this.paper.text(x+5,y+5,element.localName);
     $(shape.node).attr("class","shape");
+    this.moveElement(shape);
   },
   getCss: function(bpmnElement, cssClass){
     for(i in this.highlighted){
