@@ -12,13 +12,20 @@ private
 
   def copy_to_file
     # Write data to the file.
+    unless File.directory?(file_directory)
+      FileUtils.mkdir_p(file_directory)
+    end
     File.open(file_name, 'w') { |file| file.write( xpdl ) }
   end
 
   def file_name
+    file_directory + "#{id}"
+  end
+
+  def file_directory
     # Calculate and return the expected file name.
     prefix = Rails.root
-    "#{prefix}/db/workflows/#{user_id}/#{id}"
+    "#{prefix}/db/workflows/#{user_id}/"
   end
 
   def get_file
