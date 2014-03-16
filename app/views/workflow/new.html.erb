@@ -8,9 +8,6 @@
 <%= javascript_include_tag 'workflow/graffle.js' %>
 <script type="text/javascript">
   $(function(){
-    $('#toolbox').hide();
-    $('#instructions').hide();
-
     var client = new XMLHttpRequest();
 
     // GET JSON FILE
@@ -42,9 +39,10 @@
     $('#bpmn').html(bpmnText);
     $('#newXPDL').html(newXPDLText);
 
+    // Workflow editor instructions.
     $('#help').click(function() {
       $(this).toggleClass('active');
-      $('#instructions').toggle();
+      $('#instructions').toggleClass('hide');
     });
 
     var alreadyLoaded = false;
@@ -52,7 +50,7 @@
     // WHEN YOU CLICK THE IMPORT BUTTON
     $('#MyButton').click(function(){
       if(!alreadyLoaded){
-          $('#toolbox').show();
+          $('#toolbox').removeClass('hide');
           var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
           bpmn.plot();
 
@@ -81,9 +79,14 @@
                   break;
                 case 'tb-sequenceflow':
                   el.toggleClass('active hover');
-                  bpmn.onConnect();
-                  // el.removeClass('active hover');
-                  // TODO need callback
+                  $('#connect-instructions').toggleClass('hide');
+                  bpmn.onConnect(function(e) {
+                    if (e === 'success') {
+                      // We have successfully connected two elements.
+                      el.removeClass('active hover');
+                      $('#connect-instructions').addClass('hide');
+                    }
+                  });
                   break;
                 default:
                   // Do nothing
@@ -104,7 +107,7 @@
   <div class="col-md-11"><h3 id="workflow-name">My Workflow</h3></div>
   <div class="col-md-1"><button type="button" class="btn btn-default glyphicon glyphicon-question-sign" id="help"></button></div>
 </div>
-<div id="instructions" class="panel panel-info">
+<div id="instructions" class="panel panel-info hide">
   <div class="panel-heading">
     Instructions:
   </div>
@@ -115,10 +118,16 @@
     </ul>
   </div>
 </div>
-<div class="btn-group" id="toolbox">
-    <button type="button" class="btn btn-default tb-item" id="tb-startevent"></button>
-    <button type="button" class="btn btn-default tb-item" id="tb-intermediateevent"></button>
-    <button type="button" class="btn btn-default tb-item" id="tb-endevent"></button>
+<div id="connect-instructions" class="panel panel-primary hide">
+  <div class="panel-heading">
+    Click on two elements in your workflow to connect them...
+  </div>
+</div>
+<div class="btn-group hide" id="toolbox">
+    <!-- The buttons with dark borders have been currently implemented (have an associated action). -->
+    <button type="button" class="btn btn-default tb-item" id="tb-startevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-intermediateevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-endevent" style="border:2px solid #333"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-task"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-transaction"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-subprocess"></button>
@@ -133,11 +142,11 @@
     <!-- <button type="button" class="btn btn-default tb-item" id="tb-boundaryevent"></button> -->
     <!-- <button type="button" class="btn btn-default tb-item" id="tb-receivetask"></button> -->
     <!-- <button type="button" class="btn btn-default tb-item" id="tb-sendtask"></button> -->
-    <button type="button" class="btn btn-default tb-item" id="tb-sequenceflow"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-sequenceflow" style="border:2px solid #333"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-messageflow"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-association"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-annotation"></button>
-    <button type="button" class="btn btn-default tb-item" id="tb-clearcanvas"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-clearcanvas" style="border:2px solid #333"></button>
 </div>
 <div id="canvas"></div>
 <div id="editor-contextmenu" class="dropdown clearfix">

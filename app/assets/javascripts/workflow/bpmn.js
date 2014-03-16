@@ -37,13 +37,12 @@ function assert(condition, message) {
 // Constructor
 net.BpmnJS = function(xpdlJson, canvas){
 
-  this.connecting = false;
-
   this.xpdlJson = xpdlJson;
 
   // Paint canvas
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
   this.connections = [];
+  this.isConnecting = false;
 };
 
 // Shared functions
@@ -186,7 +185,6 @@ net.BpmnJS.prototype = {
 
   enableContextMenu: function(element) {
     var contextMenu = $('#editor-contextmenu');
-    console.log(element);
     $(element).on('contextmenu', function(e) {
       contextMenu.css({
         display: "block",
@@ -206,8 +204,7 @@ net.BpmnJS.prototype = {
     });
   },
 
-  onConnect: function() {
-    console.log('connectElements');
+  onConnect: function(callback) {
     var me = this,
         firstSelected,
         secondSelected;
@@ -230,13 +227,13 @@ net.BpmnJS.prototype = {
           me.paper.forEach(function (el) {
             $(el[0]).unbind('click');
           });
+          callback('success');  // we have finished connecting
         }
       });
     });
   },
 
   connectElements: function(element1, element2) {
-    console.log('connectElements params');
     var connection = this.paper.connection(element1, element2, "#000", "#000|2");
     // console.log(connection);
     // FIXME this.enableContextMenu(connection.bg[0]);
