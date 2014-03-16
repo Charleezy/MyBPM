@@ -5,6 +5,7 @@
 <%= javascript_include_tag 'ext_lib/xml2json.min.js' %>
 <%= javascript_include_tag 'ext_lib/raphael.js' %>
 <%= javascript_include_tag 'workflow/bpmn.js' %>
+<%= javascript_include_tag 'workflow/graffle.js' %>
 <script type="text/javascript">
   $(function(){
     $('#toolbox').hide();
@@ -78,10 +79,8 @@
                     bpmn.clear();
                   }
                   break;
-                case 'tb-connect':
-                  bpmn.connecting = true;
-                  this.firstSelected = false;
-                  alert('click on 2 objects to connect them');
+                case 'tb-sequenceflow':
+                  bpmn.onConnect();
                   break;
                 default:
                   // Do nothing

@@ -27,6 +27,12 @@
 // Namespace
 var net = net || {};
 net = {};
+
+function assert(condition, message) {
+  if (!condition) {
+      throw message || "Assertion failed";
+  }
+}
         
 // Constructor
 net.BpmnJS = function(xpdlJson, canvas){
@@ -37,6 +43,7 @@ net.BpmnJS = function(xpdlJson, canvas){
 
   // Paint canvas
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
+  console.log(this.paper);
 };
 
 // Shared functions
@@ -93,33 +100,36 @@ net.BpmnJS.prototype = {
 
     var test = this;
 
-    globalPaper.forEach(function (el){
-      el.click(function(){
-        console.log(test.connecting);
-        if(test.connecting){
-          if(test.firstSelected === false){
-            alert('first');
-            test.firstSelected = el;
-          }
-          else{
-            alert('second');
-            test.firstSelected = false;
-            console.log(test.firstSelected.associatedXPDL);
-            var x1 = parseInt(test.firstSelected.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.xCoordinate) + test.firstSelected.dx
-              , y1 = parseInt(test.firstSelected.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.yCoordinate) + test.firstSelected.dy
-              , x2 = parseInt(el.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.xCoordinate) + el.dx
-              , y2 = parseInt(el.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.yCoordinate) + el.dy;
-            var strPath = "M" + x1 + "," + y1 + "L" + x2 + "," + y2;
-            console.log(strPath);
-            var shape = test.paper.path(strPath).attr("fill", fillColor);
-            test.connecting = false;
-          }
+    // globalPaper.forEach(function (el){
+    //   el.click(function(){
+    //     // console.log(test.connecting);
+    //     if(test.connecting){
+    //       console.log('connecting');
+    //       console.log('firstSelected:',test.firstSelected);
+    //       if(test.firstSelected === false || test.firstSelected === undefined){
+    //         console.log('first not selected');
+    //         test.firstSelected = el;
+    //       }
+    //       else{
+    //         console.log('first selected');
+    //         test.firstSelected = false;
+    //         console.log(el.associatedXPDL);
+    //         console.log(test.firstSelected.associatedXPDL);
+    //         var x1 = parseInt(test.firstSelected.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.xCoordinate) + test.firstSelected.dx
+    //           , y1 = parseInt(test.firstSelected.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.yCoordinate) + test.firstSelected.dy
+    //           , x2 = parseInt(el.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.xCoordinate) + el.dx
+    //           , y2 = parseInt(el.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.yCoordinate) + el.dy;
+    //         var strPath = "M" + x1 + "," + y1 + "L" + x2 + "," + y2;
+    //         console.log(strPath);
+    //         var shape = test.paper.path(strPath).attr("fill", fillColor);
+    //         test.connecting = false;
+    //       }
           
 
-        }
+    //     }
 
-      });
-    });
+    //   });
+    // });
 
     // LINK THE ACTIVITIES TO THE TRANSITIONS
     globalPaper.forEach(function (transition){
@@ -195,30 +205,79 @@ net.BpmnJS.prototype = {
     });
   },
 
+  onConnect: function() {
+    console.log('connectElements');
+    var firstSelected = false,
+        secondSelected = false;
+    $(this.paper.canvas).mousedown(function(e){
+      firstSelected = true;
+    });
+    // var me = this,
+    //     firstSelected,
+    //     secondSelected;
+
+    // me.paper.forEach(function (el) {
+    //   if (el.hasOwnProperty('associatedXPDL') === false) {
+    //     return; // ignore those without associated XPDLs
+    //   }
+    //   $(el[0]).one('click', function() {
+    //     if (firstSelected === undefined) {
+    //       firstSelected = el;
+    //     } else {  // first has already been selected
+    //       secondSelected = el;
+    //       assert(firstSelected !== undefined && secondSelected !== undefined,
+    //         'Both required elements not selected for a connection.');
+    //       // Both elements now selected; proceed to connect them.
+    //       me.connectElements(firstSelected, secondSelected);
+    //     }
+    //   });
+    // });
+  },
+
+  connectElements: function(element1, element2) {
+    console.log('connectElements params');
+    console.log(element1.pair.attr('dx'));
+    // We want to draw a path connecting the centers of both elements.
+    var x1 = parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate) +
+             parseInt(element1.dx) +
+             parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Width) / 2,
+        y1 = parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate) +
+             parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Height) / 2,
+        x2 = parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate) +
+             parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Width) / 2,
+        y2 = parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate) +
+             parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Height) / 2;
+    // We now have the center coordinates, but we need to apply an offset for the path so that 
+    // we don't actually draw over the element.
+
+    var strPath = "M" + x1 + " " + y1 + "L" + x2 + " " + y2;
+    console.log(strPath);
+    var shape = this.paper.path(strPath).attr('arrow-end','block-wide-long');;
+  },
+
   moveElement : function(element) {
-    var start = function() {
-      this.odx = 0;
-      this.ody = 0;
-    },
-    move = function(dx, dy) {
-      this.translate(dx - this.odx, dy - this.ody);
-      
-
-      if (this.pair){
-        this.pair.translate(dx - this.odx, dy - this.ody);
-        this.pair.odx = this.pair.attr("dx");
-        this.pair.ody = this.pair.attr("dy");
-
-      }
-      this.odx = dx;
-      this.ody = dy;
-      //
-    },
-    up = function () {
-    };
+    var dragger = function() {
+          this.odx = 0;
+          this.ody = 0;
+          this.animate({"fill-opacity": .2}, 500);
+        },
+        move = function(dx, dy) {
+          this.translate(dx - this.odx, dy - this.ody);
+          
+          if (this.pair) {
+            this.pair.translate(dx - this.odx, dy - this.ody);
+            this.pair.odx = this.pair.attr("dx");
+            this.pair.ody = this.pair.attr("dy");
+          }
+          this.odx = dx;
+          this.ody = dy;
+        },
+        up = function () {
+          this.animate({"fill-opacity": 1}, 500);
+        };
     
     this.enableContextMenu(element);  // for new elements added
-    element.drag(move, start, up);  
+    element.drag(move, dragger, up);  
   },
 
   getById : function(id){
@@ -318,7 +377,6 @@ net.BpmnJS.prototype = {
     
     var shape = this.paper.path(strPath).attr("fill", fillColor);
     shape.associatedXPDL = xpdlRoute;
-    console.log(shape.associatedXPDL);
     shape.shapeType = 'Route';
     var text = this.paper.text(x+width/2,y+height/2,name);
     text.shapeType = 'Text';
@@ -329,6 +387,36 @@ net.BpmnJS.prototype = {
     return shape;
     
   },
+
+  // paintEdge : function(docRoot, bpmnElement, path, x, y){
+  //   var element = docRoot.selectNodeSet("//*[@id="+bpmnElement+"]").item(0);
+  //   var name = this.getElementName(element);
+    
+  //   var path = this.paper.path(path);
+  //   if(element.localName == "messageFlow"){
+  //     $(path.node).attr("stroke-dasharray","5,5");
+  //   }
+  //   path.attr({'arrow-end':'block-wide-long'});
+  //   var css = this.getCss(bpmnElement, "edge")
+  //   $(path.node).attr("class",css);
+  //   this.paper.text(x+15,y+10,name);
+  // },
+
+  // paintTextAnnotation : function(x, y, width, height,element){
+  //   var shape = this.paper.rect(x, y, width, height);
+  //   var text = element.getFirstChild().getFirstChild().getNodeValue();
+  //   var re = new RegExp(' ', 'g');
+  //   text = text.replace(re,'\n');
+  //   this.paper.text(x+width/2,y+height/2,text).attr({'font-size':8});
+  //   $(shape.node).attr("class","textAnnotation");
+  //   $(this.paper.path("M"+x + " " + y + "L"+(x+width/2) + " " +y).node).attr("stroke-dasharray","5,5");
+  //   $(this.paper.path("M"+x + " " + y + "L"+ x + " " +(y+height/2)).node).attr("stroke-dasharray","5,5");
+  // },
+
+  // paintDataStoreReference : function(x, y, width, height,element){
+  //   var shape = this.paper.rect(x, y, width, height, 5);
+  //   $(shape.node).attr("class","dataStoreReference");
+  // },
  
   getCss: function(bpmnElement, cssClass){
     for(i in this.highlighted){
