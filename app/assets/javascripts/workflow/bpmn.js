@@ -43,7 +43,7 @@ net.BpmnJS = function(xpdlJson, canvas){
 
   // Paint canvas
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
-  console.log(this.paper);
+  this.connections = [];
 };
 
 // Shared functions
@@ -98,7 +98,9 @@ net.BpmnJS.prototype = {
 
     var globalPaper = this.paper;
 
-    var test = this;
+    // var test = this;
+
+    
 
     // globalPaper.forEach(function (el){
     //   el.click(function(){
@@ -173,7 +175,6 @@ net.BpmnJS.prototype = {
 
     // MAKE ELEMENTS (NOT LINES) DRAGGABLE
     this.paper.forEach(function (el){
-      console.log('here');
       if(el.type !== 'Transition'){
         this.moveElement(el);
         this.enableContextMenu(el);
@@ -199,6 +200,7 @@ net.BpmnJS.prototype = {
         contextMenu.hide();
       });
       $('body:not(#editor-contextmenu)').click(function() {
+        contextMenu.off('click', 'a');
         contextMenu.hide();
       });
       return false;
@@ -207,56 +209,56 @@ net.BpmnJS.prototype = {
 
   onConnect: function() {
     console.log('connectElements');
-    var firstSelected = false,
-        secondSelected = false;
-    $(this.paper.canvas).mousedown(function(e){
-      firstSelected = true;
-    });
-    // var me = this,
-    //     firstSelected,
-    //     secondSelected;
+    var me = this,
+        firstSelected,
+        secondSelected;
 
-    // me.paper.forEach(function (el) {
-    //   if (el.hasOwnProperty('associatedXPDL') === false) {
-    //     return; // ignore those without associated XPDLs
-    //   }
-    //   $(el[0]).one('click', function() {
-    //     if (firstSelected === undefined) {
-    //       firstSelected = el;
-    //     } else {  // first has already been selected
-    //       secondSelected = el;
-    //       assert(firstSelected !== undefined && secondSelected !== undefined,
-    //         'Both required elements not selected for a connection.');
-    //       // Both elements now selected; proceed to connect them.
-    //       me.connectElements(firstSelected, secondSelected);
-    //     }
-    //   });
-    // });
+    me.paper.forEach(function (el) {
+      if (el.hasOwnProperty('associatedXPDL') === false) {
+        return; // ignore those without associated XPDLs
+      }
+      $(el[0]).click(function() {
+        if (firstSelected === undefined) {
+          firstSelected = el;
+        }
+        else {  // first has already been selected
+          secondSelected = el;
+          assert(firstSelected !== undefined && secondSelected !== undefined,
+            'Both required elements not selected for a connection.');
+          // Both elements now selected; proceed to connect them.
+          me.connectElements(firstSelected, secondSelected);
+          // Unbind click listener for all elements.
+          me.paper.forEach(function (el) {
+            $(el[0]).unbind('click');
+          });
+        }
+      });
+    });
   },
 
   connectElements: function(element1, element2) {
     console.log('connectElements params');
-    console.log(element1.pair.attr('dx'));
-    // We want to draw a path connecting the centers of both elements.
-    var x1 = parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate) +
-             parseInt(element1.dx) +
-             parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Width) / 2,
-        y1 = parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate) +
-             parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Height) / 2,
-        x2 = parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate) +
-             parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Width) / 2,
-        y2 = parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate) +
-             parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Height) / 2;
-    // We now have the center coordinates, but we need to apply an offset for the path so that 
-    // we don't actually draw over the element.
+    this.connections.push(this.paper.connection(element1, element2, "#000"));
+    // // We want to draw a path connecting the centers of both elements.
+    // var x1 = parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate) +
+    //          parseInt(element1.dx) +
+    //          parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Width) / 2,
+    //     y1 = parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate) +
+    //          parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Height) / 2,
+    //     x2 = parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate) +
+    //          parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Width) / 2,
+    //     y2 = parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate) +
+    //          parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Height) / 2;
+    // // We now have the center coordinates, but we need to apply an offset for the path so that 
+    // // we don't actually draw over the element.
 
-    var strPath = "M" + x1 + " " + y1 + "L" + x2 + " " + y2;
-    console.log(strPath);
-    var shape = this.paper.path(strPath).attr('arrow-end','block-wide-long');;
+    // var strPath = "M" + x1 + " " + y1 + "L" + x2 + " " + y2;
+    // var shape = this.paper.path(strPath).attr('arrow-end','block-wide-long');
   },
 
   moveElement : function(element) {
-    var dragger = function() {
+    var connections = this.connections,
+        dragger = function() {
           this.odx = 0;
           this.ody = 0;
           this.animate({"fill-opacity": .2}, 500);
@@ -269,6 +271,10 @@ net.BpmnJS.prototype = {
             this.pair.odx = this.pair.attr("dx");
             this.pair.ody = this.pair.attr("dy");
           }
+          for (var i = connections.length; i--;) {
+            this.paper.connection(connections[i]);
+          }
+
           this.odx = dx;
           this.ody = dy;
         },
@@ -276,7 +282,9 @@ net.BpmnJS.prototype = {
           this.animate({"fill-opacity": 1}, 500);
         };
     
-    this.enableContextMenu(element);  // for new elements added
+    // TODO move enableContextMenu() somewhere else...
+    // this needs to be called for every element (newly added as well)
+    this.enableContextMenu(element);
     element.drag(move, dragger, up);  
   },
 
@@ -293,6 +301,7 @@ net.BpmnJS.prototype = {
       stringPath += "L"+xCoordinates[i]+","+yCoordinates[i];
     }
     var shape = this.paper.path(stringPath);
+    // var shape = this.paper.path(stringPath).attr('cursor', 'move');
 
     shape.linkedElements = linkedElements;
 
@@ -335,6 +344,7 @@ net.BpmnJS.prototype = {
   },
 
   paintEvent : function(xpdlEvent, x, y, width, height, name, fillColor, borderColor){
+    // var shape = this.paper.circle(x+width/2, y+height/2, width/2).attr('cursor', 'move');
     var shape = this.paper.circle(x+width/2, y+height/2, width/2);
     shape.associatedXPDL = xpdlEvent;
 
@@ -348,11 +358,13 @@ net.BpmnJS.prototype = {
 
   paintImplementation : function(xpdlImplementation, x, y, width, height, name, fillColor, borderColor){
     // paint shape
+    // var shape = this.paper.rect(x, y, width, height, 5).attr('cursor', 'move');
     var shape = this.paper.rect(x, y, width, height, 5);
     shape.associatedXPDL = xpdlImplementation;
     shape.shapeType = 'Implementation';
 
     // add text
+    // var text = this.paper.text(x+width/2,y+height/2,name).attr('cursor', 'move');
     var text = this.paper.text(x+width/2,y+height/2,name);
     text.shapeType = 'Text';
 
@@ -375,9 +387,11 @@ net.BpmnJS.prototype = {
   paintRoute : function(xpdlRoute, x, y, width, height, name, fillColor, borderColor){
     var strPath = "M" + String(x+width/2) + " " + String(y+height) + ",L" + String(x+width) + " " + String(y+height/2) +",L" + String(x+width/2) + " " + String(y) + ",L" + String(x) + " " + String(y+height/2) + "Z";
     
-    var shape = this.paper.path(strPath).attr("fill", fillColor);
+    // var shape = this.paper.path(strPath).attr({fill: fillColor, cursor: 'move'});
+    var shape = this.paper.path(strPath).attr({fill: fillColor});
     shape.associatedXPDL = xpdlRoute;
     shape.shapeType = 'Route';
+    // var text = this.paper.text(x+width/2,y+height/2,name).attr('cursor', 'move');
     var text = this.paper.text(x+width/2,y+height/2,name);
     text.shapeType = 'Text';
 
