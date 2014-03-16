@@ -50,18 +50,23 @@
           bpmn.plot();
 
           // Context menu for canvas (on right-click)
-          var contextMenu = $('#editor-contextmenu');
-          $('#canvas').on('contextmenu', function(e) {
-            contextMenu.css({
-              display: "block",
-              left: e.pageX,
-              top: e.pageY
-            });
-            return false;
-          });
-          contextMenu.on('click', 'a', function() {
-             contextMenu.hide();
-          });
+          // var contextMenu = $('#editor-contextmenu');
+          // $('#canvas').on('contextmenu', function(e) {
+          //   contextMenu.css({
+          //     display: "block",
+          //     left: e.pageX,
+          //     top: e.pageY
+          //   });
+          //   return false;
+          // });
+          // contextMenu.on('click', 'a', function() {
+          //   switch ($(this).attr('id')) {
+          //     case 'remove-element':
+          //       alert('remove element');
+          //       break;
+          //   }
+          //   contextMenu.hide();
+          // });
           
           // Toolbox listeners
           $('#toolbox > .tb-item').click(function(){
@@ -132,11 +137,11 @@
 <div id="canvas"></div>
 <div id="editor-contextmenu" class="dropdown clearfix">
   <ul class="dropdown-menu" role="menu">
-    <li><a href="#">Action</a></li>
-    <li><a href="#">Another action</a></li>
+    <li><a id="remove-element">Remove</a></li>
+    <!-- <li><a href="#">Another action</a></li>
     <li><a href="#">Something else here</a></li>
     <li class="divider"></li>
-    <li><a href="#">Separated link</a></li>
+    <li><a href="#">Separated link</a></li> -->
   </ul>
 </div>
 <div id="bottom-toolbar">

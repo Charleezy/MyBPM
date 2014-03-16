@@ -139,14 +139,32 @@ net.BpmnJS.prototype = {
     });
 
     // MAKE ELEMENTS (NOT LINES) DRAGGABLE
-    var func = this.moveElement;
     this.paper.forEach(function (el){
       if(el.type !== 'Transition'){
-        func(el);
+        this.moveElement(el);
+        this.enableContextMenu(el);
       }
+    }, this);
+  },
+
+  enableContextMenu: function(element) {
+    var contextMenu = $('#editor-contextmenu');
+    $(element[0]).on('contextmenu', function(e) {
+      contextMenu.css({
+        display: "block",
+        left: e.pageX,
+        top: e.pageY
+      });
+      contextMenu.on('click', 'a', function() {
+        // Remove element from paper and hide contextmenu
+        $(element[0]).remove();
+        contextMenu.hide();
+      });
+      $('body:not(#editor-contextmenu)').click(function() {
+        contextMenu.hide();
+      });
+      return false;
     });
-
-
   },
 
   moveElement : function(element) {
