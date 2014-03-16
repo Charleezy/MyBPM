@@ -1,7 +1,5 @@
 class SimulationController < ApplicationController
-  
-  layout "application"
-  
+    
   def index
 	@workflows = current_user.workflows
 	@workflow_ids = current_user.workflows.select("id")
@@ -44,6 +42,14 @@ class SimulationController < ApplicationController
   def edit
 	@simulation = MockData.find(params[:id])
 	@workflow = Workflow.find(@simulation.workflow_id)
+  end
+
+  def setup_side_nav_links
+    super
+    @subnav_links = [
+      {:text => "View all simulations", :url => simulation_index_path},
+      {:text => "Create a simulation", :url => new_simulation_path}
+    ]
   end
   
   def simulation_params

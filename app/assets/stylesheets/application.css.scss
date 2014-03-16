@@ -8,6 +8,24 @@
  * You're free to add application-wide styles to this file and they'll appear at the top of the
  * compiled file, but it's generally better to create a new file per style scope.
  *
- *= require_self
  *= require_tree .
+ *= require_self
  */
+
+body {
+  background-color: #f8f8f8;
+}
+
+#page-wrapper {
+  padding-top: 5px;
+  background-color: #fff;
+  border: 1px solid #e7e7e7;
+  border-top: none;
+  min-height: 600px;
+  position: relative;
+}
+
+#page-wrapper > .alert,
+#page-wrapper > .nav {
+  margin-bottom: 5px;
+}
