@@ -46,13 +46,13 @@ Raphael.fn.connection = function (obj1, obj2, line, bg) {
     // Change "L" to "C" here for curved path instead of straight-line:
     var path = ["M", x1.toFixed(3), y1.toFixed(3), "L", x2, y2, x3, y3, x4.toFixed(3), y4.toFixed(3)].join(",");
     if (line && line.line) {
-        line.bg && line.bg.attr({path: path});
+        // line.bg && line.bg.attr({path: path});
         line.line.attr({path: path});
     } else {
         var color = typeof line == "string" ? line : "#000";
         return {
-            bg: bg && bg.split && this.path(path).attr({stroke: bg.split("|")[0], fill: "none", "stroke-width": bg.split("|")[1] || 3}),
-            line: this.path(path).attr({stroke: color, fill: "none", "arrow-end": "block-wide-long"}),
+            // bg: bg && bg.split && this.path(path).attr({stroke: bg.split("|")[0], fill: "none", "stroke-width": bg.split("|")[1] || 3}),
+            line: this.path(path).attr({stroke: color, "stroke-width": 2, fill: "none", "arrow-end": "block-wide-long"}),
             from: obj1,
             to: obj2
         };

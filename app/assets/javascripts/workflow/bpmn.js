@@ -73,6 +73,7 @@ net.BpmnJS.prototype = {
         var transitions = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition;
         for(var j=0; j<transitions.length; j++){
           var transition = transitions[j];
+          console.log(transition);
           var coordinatesArray = transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.Coordinates;
           var xOrigin = parseInt(coordinatesArray[0].XCoordinate);
           var yOrigin = parseInt(coordinatesArray[0].YCoordinate);
@@ -157,6 +158,7 @@ net.BpmnJS.prototype = {
 
   enableContextMenu: function(element) {
     var contextMenu = $('#editor-contextmenu');
+    var me = this;
     $(element).on('contextmenu', function(e) {
       contextMenu.css({
         display: "block",
@@ -164,7 +166,6 @@ net.BpmnJS.prototype = {
         top: e.pageY
       });
       contextMenu.on('click', 'a', function() {
-        // Remove element from paper and hide contextmenu
         $(element).remove();
         contextMenu.hide();
       });
@@ -206,10 +207,8 @@ net.BpmnJS.prototype = {
   },
 
   connectElements: function(element1, element2) {
-    var connection = this.paper.connection(element1, element2, "#000", "#000|2");
-    connection.line.shapeType = 'Transition';
-    // console.log(connection);
-    // FIXME this.enableContextMenu(connection.bg[0]);
+    var connection = this.paper.connection(element1, element2, "#000");
+    connection.shapeType = 'Transition';
     this.connections.push(connection);
   },
 
@@ -258,26 +257,26 @@ net.BpmnJS.prototype = {
     return element;
   },
 
-  paintTransition : function(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor, linkedElements){
-    var stringPath = "M"+xOrigin+","+yOrigin;
+  // paintTransition : function(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor, linkedElements){
+  //   var stringPath = "M"+xOrigin+","+yOrigin;
 
-    for(var i in xCoordinates){
-      stringPath += "L"+xCoordinates[i]+","+yCoordinates[i];
-    }
-    var shape = this.paper.path(stringPath);
-    // var shape = this.paper.path(stringPath).attr('cursor', 'move');
+  //   for(var i in xCoordinates){
+  //     stringPath += "L"+xCoordinates[i]+","+yCoordinates[i];
+  //   }
+  //   var shape = this.paper.path(stringPath);
+  //   // var shape = this.paper.path(stringPath).attr('cursor', 'move');
 
-    shape.linkedElements = linkedElements;
+  //   shape.linkedElements = linkedElements;
 
-    shape.associatedXPDL = transition;
+  //   shape.associatedXPDL = transition;
 
-    shape.shapeType = 'Transition';
+  //   shape.shapeType = 'Transition';
 
-    $(shape.node).attr('border', borderColor);
+  //   $(shape.node).attr('border', borderColor);
     
 
-    return shape;
-  },
+  //   return shape;
+  // },
   
   paintActivity : function(xpdlActivity, x, y, height, width, borderColor, fillColor, name){
     var shape;
