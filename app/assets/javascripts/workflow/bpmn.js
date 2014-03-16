@@ -23,25 +23,6 @@
 
 // I modified some of this to make it work better, feel free to keep doing the same.
 
-
-// Namespace
-var net = net || {};
-net = {};
-var connections = [];
-
-// Constructor
-net.BpmnJS = function(xpdlJson, canvas){
-
-  this.xpdlJson = xpdlJson;
-
-  // Paint canvas
-  this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
-  var rex = this.paper.rect(10, 20, 150, 80).attr("fill", "cornflowerblue");
-
-  var circ = this.paper.circle(250, 50, 40).attr("fill", "orange");
-  connections.push(this.paper.connection(this.paper, rex, circ, "black", "#fff"))
-
-};
 Raphael.fn.connection =function (paper, obj1, obj2, line, bg) {
       if (obj1.line && obj1.from && obj1.to) {
           line = obj1;
@@ -97,7 +78,28 @@ Raphael.fn.connection =function (paper, obj1, obj2, line, bg) {
               to: obj2
           };
       }
-  };
+};
+
+
+// Namespace
+var net = net || {};
+net = {};
+var connections = [];
+
+// Constructor
+net.BpmnJS = function(xpdlJson, canvas){
+
+  this.xpdlJson = xpdlJson;
+
+  this.connecting = false;
+
+  this.firstToConnect = null;
+
+  // Paint canvas
+  this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
+
+};
+
 // Shared functions
 net.BpmnJS.prototype = {
   plot: function(){
@@ -143,22 +145,14 @@ net.BpmnJS.prototype = {
           var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
           var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
           var name = activity.Name;
-          this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
+          this.makeConnectable(this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name));
         }
       }
     }
 
-    // // SHOW ALL IDs
-    // this.paper.forEach(function(el){
-    //   if(el.shapeType !== 'Text'){
-    //     alert('hi');
-    //     el.hide();
-    //     
-    //     
-    //   }
-    // });
-
     var globalPaper = this.paper;
+    var globalBPMN = this;
+
     // LINK THE ACTIVITIES TO THE TRANSITIONS
     globalPaper.forEach(function (transition){
       
@@ -206,6 +200,34 @@ net.BpmnJS.prototype = {
         func(el);
       }
     });
+
+
+  },
+
+  makeConnectable : function(el){
+
+    var globalPaper = this.paper;
+    var globalBPMN = this;
+
+    el.click(function(){
+        if(globalBPMN.connecting){
+          
+          // THIS IS THE FIRST ELEMENT TO BE SELECTED
+          if(globalBPMN.firstToConnect === null){
+            console.log('first');
+            globalBPMN.firstToConnect = el;
+          }
+
+          // THIS IS THE SECOND (TIME TO CONNECT THE ELEMENTS)
+          else{
+            console.log('second');
+            connections.push(globalPaper.connection(globalPaper,globalBPMN.firstToConnect,el,"black","#fff"));
+            globalBPMN.connecting = false;
+            globalBPMN.firstToConnect = null;
+          }
+        }
+
+      });
 
 
   },

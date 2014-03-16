@@ -75,20 +75,35 @@
             var el = $(this);
             // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
              var x = 10, y= 10;
+             var shape = null;
               switch (el.attr('id')) {
                 case 'tb-event':
-                  bpmn.moveElement(bpmn.paintEvent('xpdl stuff',x,y,30,30,'','#efefef','black'));
+                  shape = bpmn.paintEvent('xpdl stuff',x,y,30,30,'','#efefef','black');
+                  bpmn.moveElement(shape);
+                  bpmn.makeConnectable(shape);
                   break;
                 case 'tb-implementation':
-                  bpmn.moveElement(bpmn.paintImplementation('xpdl stuff',x,y,90,60,'Text','#efefef','black'));
+                  shape = bpmn.paintImplementation('xpdl stuff',x,y,90,60,'Text','#efefef','black');
+                  bpmn.moveElement(shape);
+                  bpmn.makeConnectable(shape);
                   break;
                 case 'tb-route':
-                  bpmn.moveElement(bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black'));
+                  shape = bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black');
+                  bpmn.moveElement(shape);
+                  bpmn.makeConnectable(shape);
                   break;
                 case 'tb-route':
-                  bpmn.moveElement(bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black'));
+                  shape = bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black');
+                  bpmn.moveElement(shape);
+                  bpmn.makeConnectable(shape);
+                  break;
+                case 'tb-connect':
+                  bpmn.connecting = true;
+                  this.firstToConnect = null;
+                  console.log('click on 2 elements to connect them');
                   break;
                 default:
+                  break;
                   // Do nothing
               }
 
@@ -134,6 +149,7 @@ Dynamic model:
     <button type="button" class="btn btn-default tb-item" id="tb-subprocess">subprocess</button>
     <button type="button" class="btn btn-default tb-item" id="tb-datastore">datastore</button>
     <button type="button" class="btn btn-default tb-item" id="tb-text">text</button>
+    <button type="button" class="btn btn-default tb-item" id="tb-connect">connect</button>
     <!-- TODO other items, such as transition? -->
 </div>
 <div id="canvas"></div>
