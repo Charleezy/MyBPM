@@ -1,0 +1,44 @@
+<h1><%= @simulation.name %></h1>
+
+<hr>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		
+		var client = new XMLHttpRequest();
+
+		// GET JSON FILE
+		client.open('GET', 'https://dl.dropboxusercontent.com/s/yyimks43gemdazq/jsonFile.json?dl=1&token_hash=AAEwKPu9isScXrMb-m9dVvUkYjxLiZTsM2DcEiIvPbXFnQ',false);
+		client.send();
+		var jsonText = client.responseText;
+		
+		// GET XPDL FILE
+		client.open('GET', 'https://dl.dropboxusercontent.com/s/j1w6mr83r8ug0om/simpleWorkflow.xpdl?dl=1&token_hash=AAH7PHIpUBmIim-BUM6uC7WC8lAqG-36HYOqxJHkbm2WzA',false);
+		client.send();
+		var XPDLText = client.responseText;
+		
+		// CREATE THE JAVASCRIPT OBJECT BASED ON THE JSON FILE
+		var jsonObject = JSON.parse(jsonText);
+	
+		var alreadyLoaded = false;
+	
+		$.ajax({
+			beforeSend: function(req) {
+				req.setRequestHeader("Accept", "application/json");
+			},
+			url: "/workflow/xpdltojson", 
+			type: "POST",
+			success: function(data) {
+				$('#canvas').height(500);
+				$('#canvas').width(1000);
+				if(!alreadyLoaded){
+					var bpmn = new net.BpmnJS($('#canvas')[0], []);
+					bpmn.plot(jsonObject);
+					alreadyLoaded = true;
+				}
+			}
+		});
+	});
+</script>
+
+<div id="canvas"></div>

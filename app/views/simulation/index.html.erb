@@ -1,5 +1,8 @@
 <script>
 	$( document ).ready(function() {
+	
+		
+	
 		$('#createSimulation').on('hidden.bs.modal', function () {
 			$('#simName').parent('div').removeClass('has-error');
 			$('#simname_err').hide();
@@ -15,8 +18,7 @@
 	
 		$("#save").click(function() {
 			var sim_name = $('#simName').val();
-			var workflow_id = $('#workflow').find(":selected").text();
-			
+			var workflow_id = $('#workflow').find(":selected").val();
 			if (sim_name == "" || sim_name == null)
 			{
 				$('#simName').parent('div').addClass('has-error');
@@ -25,15 +27,21 @@
 			else
 			{
 				$.ajax({
+					beforeSend: function(req) {
+						req.setRequestHeader("Accept", "application/json");
+					},
 					url: "simulation", 
 					type: "POST",
-					data: {mockdata : { "name" : sim_name, "workflow_id" : workflow_id}}
+					data: {mockdata : { "name" : sim_name, "workflow_id" : workflow_id}},
+					success: function(sim_id) {
+						/*console.log("Simulation " + sim_id + " successfully created.");*/
+						location.reload();
+					}
 				});
 			}
 		});
 		
-		$(".delete").click(function() {
-			
+		$(".edit").click(function() {
 			var sim_id= $(this).parent('td').parent('tr').find('.sim_id').data('id');
 			
 			$.ajax({
@@ -47,6 +55,22 @@
 				}
 			});
 		});
+		
+		$(".delete").click(function() {
+			var sim_id= $(this).parent('td').parent('tr').find('.sim_id').data('id');
+			
+			$.ajax({
+				beforeSend: function(req) {
+					req.setRequestHeader("Accept", "application/json");
+				},
+				url: "simulation/" + sim_id, 
+				type: "DELETE",
+				success: function(sim_id) {
+					/*console.log("Simulation " + sim_id + " successfully deleted.");*/
+					location.reload();
+				}
+			});
+		});
 	});
 </script>
 
@@ -54,11 +78,18 @@
 
 <hr>
 
-<button type="button" class="btn btn-info" id="create" data-toggle="modal" data-target="#createSimulation" style="float:right; margin-bottom:5px;">
-	Create Simulation
-</button>
-
-<table class="table table-striped" style="border:2px solid grey">
+<% if(@workflows.count == 0) %>
+	<div class="alert alert-warning"><b>You must create a workflow before you can create any simulations!</b></div>
+	<button type="button" class="btn btn-info disabled" id="create" data-toggle="modal" data-target="#createSimulation" style="float:right; margin-bottom:5px;">
+		Create Simulation
+	</button>
+<% else %>
+	<button type="button" class="btn btn-info" id="create" data-toggle="modal" data-target="#createSimulation" style="float:right; margin-bottom:5px;">
+		Create Simulation
+	</button>
+<% end %>
+	
+<table class="table table-striped table-hover" style="border:2px solid grey">
 	<thead>
 		  <tr style="background-color:#ddd">
 			<th class="col-md-1">ID</th>
@@ -79,8 +110,8 @@
 					<td><%= data.name %></td>
 					<td><%= data.workflow_id %></td>
 					<td style="text-align:center">
-						<button class="run">Run</button>
-						<button class="delete">Delete</button>
+						<a href="<%= edit_simulation_path(data.id) %>">Edit</a>
+						<a class="delete" style="cursor:pointer; margin-left:5px;">Delete</a>
 					</td>
 				  </tr>
 			<% end %>
@@ -114,9 +145,9 @@
                         </div>
                         <div class="formField">
 							<select id="workflow" name="workflow" class="form-control">
-								<option>1</option>
-								<option>44</option>
-								<option>5453</option>
+								<% @workflows.each do |data| %>
+									<option value=<%= data.id %>><%= data.id %> (<%= data.name %>)</option>
+								<% end %>
 							</select>
                         </div>
                     </div>
