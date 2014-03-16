@@ -42,6 +42,7 @@
     $('#newXPDL').html(newXPDLText);
 
     $('#help').click(function() {
+      $(this).toggleClass('active');
       $('#instructions').toggle();
     });
 
@@ -109,7 +110,7 @@
   <div class="panel-body">
     <ul>
       <li>Click on a toolbox item to add it to your workflow.</li>
-      <li>Right-click on a workflow item for more options, such as removing it.</li>
+      <li>Right-click on a workflow item for more options (e.g. remove item).</li>
     </ul>
   </div>
 </div>
