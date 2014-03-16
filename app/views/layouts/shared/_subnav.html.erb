@@ -1,0 +1,7 @@
+<% if @subnav_links %>
+  <ul class="nav nav-tabs">
+    <% @subnav_links.each do |l| %>
+      <%= active_link_to l[:text], l[:url], :wrap_tag => :li, :active => :exclusive %>
+    <% end %>
+  </ul>
+<% end %>
