@@ -142,10 +142,12 @@ net.BpmnJS.prototype = {
 
     // MAKE ELEMENTS (NOT LINES) DRAGGABLE
     this.paper.forEach(function (el){
-      if(el.type !== 'Transition'){
+      // Don't bind move listener on Transitions (connections).
+      if(el.shapeType !== undefined && el.shapeType !== 'Transition'){ 
         this.moveElement(el);
-        this.enableContextMenu(el[0]);
       }
+      // Bind contextmenu to all elements, to enable options such as removing.
+      this.enableContextMenu(el[0]);
     }, this);
   },
 
@@ -205,6 +207,7 @@ net.BpmnJS.prototype = {
 
   connectElements: function(element1, element2) {
     var connection = this.paper.connection(element1, element2, "#000", "#000|2");
+    connection.line.shapeType = 'Transition';
     // console.log(connection);
     // FIXME this.enableContextMenu(connection.bg[0]);
     this.connections.push(connection);
@@ -348,8 +351,9 @@ net.BpmnJS.prototype = {
   paintRoute : function(xpdlRoute, x, y, width, height, name, fillColor, borderColor){
     var strPath = "M" + String(x+width/2) + " " + String(y+height) + ",L" + String(x+width) + " " + String(y+height/2) +",L" + String(x+width/2) + " " + String(y) + ",L" + String(x) + " " + String(y+height/2) + "Z";
     
-    // var shape = this.paper.path(strPath).attr({fill: fillColor, cursor: 'move'});
     var shape = this.paper.path(strPath).attr({fill: fillColor});
+    // var shape = this.paper.rect(x, y, width, height);
+    // shape.rotate(45, x, y);
     shape.associatedXPDL = xpdlRoute;
     shape.shapeType = 'Route';
     // var text = this.paper.text(x+width/2,y+height/2,name).attr('cursor', 'move');
@@ -359,6 +363,13 @@ net.BpmnJS.prototype = {
     // PAIRING SHAPE AND TEXT
     shape.pair = text;
     text.pair = shape;
+
+    var cssClass = "";
+    $(shape.node).attr("class",cssClass);
+    $(shape.node).attr("fill",fillColor); 
+    $(shape.node).attr("border",borderColor);
+
+    console.log(shape);
     return shape;
     
   },
