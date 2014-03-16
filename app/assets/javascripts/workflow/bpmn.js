@@ -26,100 +26,22 @@
 // Namespace
 var net = net || {};
 net = {};
-var connections = [];
+
+function assert(condition, message) {
+  if (!condition) {
+      throw message || "Assertion failed";
+  }
+}
 
 // Constructor
 net.BpmnJS = function(xpdlJson, canvas){
 
   this.xpdlJson = xpdlJson;
 
-  this.selectedShape = null;
-
   // Paint canvas
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
 
-};
-
-//Paints the connections between two object
-Raphael.fn.connection =function (paper, obj1, obj2, line, bg) {
-      objCon1 = obj1;
-      objCon2 = obj2;
-      if (obj1.line && obj1.from && obj1.to) {
-          line = obj1;
-          obj1 = line.from;
-          obj2 = line.to;
-      }
-      var bb1 = obj1.getBBox(),
-          bb2 = obj2.getBBox(),
-          p = [{x: bb1.x + bb1.width / 2, y: bb1.y - 1},
-          {x: bb1.x + bb1.width / 2, y: bb1.y + bb1.height + 1},
-          {x: bb1.x - 1, y: bb1.y + bb1.height / 2},
-          {x: bb1.x + bb1.width + 1, y: bb1.y + bb1.height / 2},
-          {x: bb2.x + bb2.width / 2, y: bb2.y - 1},
-          {x: bb2.x + bb2.width / 2, y: bb2.y + bb2.height + 1},
-          {x: bb2.x - 1, y: bb2.y + bb2.height / 2},
-          {x: bb2.x + bb2.width + 1, y: bb2.y + bb2.height / 2}],
-          d = {}, dis = [];
-      for (var i = 0; i < 4; i++) {
-          for (var j = 4; j < 8; j++) {
-              var dx = Math.abs(p[i].x - p[j].x),
-                  dy = Math.abs(p[i].y - p[j].y);
-              if ((i == j - 4) || (((i != 3 && j != 6) || p[i].x < p[j].x) && ((i != 2 && j != 7) || p[i].x > p[j].x) && ((i != 0 && j != 5) || p[i].y > p[j].y) && ((i != 1 && j != 4) || p[i].y < p[j].y))) {
-                  dis.push(dx + dy);
-                  d[dis[dis.length - 1]] = [i, j];
-              }
-          }
-      }
-      if (dis.length == 0) {
-          var res = [0, 4];
-      } else {
-          res = d[Math.min.apply(Math, dis)];
-      }
-      var x1 = p[res[0]].x,
-          y1 = p[res[0]].y,
-          x4 = p[res[1]].x,
-          y4 = p[res[1]].y;
-      dx = Math.max(Math.abs(x1 - x4) / 2, 10);
-      dy = Math.max(Math.abs(y1 - y4) / 2, 10);
-      var x2 = [x1, x1, x1 - dx, x1 + dx][res[0]].toFixed(3),
-          y2 = [y1 - dy, y1 + dy, y1, y1][res[0]].toFixed(3),
-          x3 = [0, 0, 0, 0, x4, x4, x4 - dx, x4 + dx][res[1]].toFixed(3),
-          y3 = [0, 0, 0, 0, y1 + dy, y1 - dy, y4, y4][res[1]].toFixed(3);
-      var path = ["M", x1.toFixed(3), y1.toFixed(3), "C", x2, y2, x3, y3, x4.toFixed(3), y4.toFixed(3)].join(",");
-      if (line && line.line) {
-          line.bg && line.bg.attr({path: path});
-          line.line.attr({path: path});
-      } else {
-          var color = typeof line == "string" ? line : "#000";
-          return {
-              bg: bg && bg.split && paper.path(path).attr({stroke: bg.split("|")[0], fill: "none", "stroke-width": bg.split("|")[1] || 3}),
-              line: paper.path(path).attr({stroke: color, fill: "none"}),
-              from: obj1,
-              to: obj2,
-              shape1: objCon1,
-              shape2: objCon2
-          };
-      }
-};
-
-
-// Namespace
-var net = net || {};
-net = {};
-var connections = [];
-
-// Constructor
-net.BpmnJS = function(xpdlJson, canvas){
-
-  this.xpdlJson = xpdlJson;
-
-  this.connecting = false;
-
-  this.firstToConnect = null;
-
-  // Paint canvas
-  this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
-
+  this.connections = [];
 };
 
 // Shared functions
@@ -190,10 +112,8 @@ net.BpmnJS.prototype = {
             }
           });
 
-          
-          
 
-          connections.push(this.paper.connection(this.paper,first,second,"black","#fff"));
+          this.connections.push(this.paper.connection(this.paper,first,second,"black","#fff"));
 
 
         }
@@ -202,6 +122,7 @@ net.BpmnJS.prototype = {
 
     var globalPaper = this.paper;
     var globalBPMN = this;
+
 
     // LINK THE ACTIVITIES TO THE TRANSITIONS
     globalPaper.forEach(function (transition){
@@ -244,14 +165,88 @@ net.BpmnJS.prototype = {
     });
 
     // MAKE ELEMENTS (NOT LINES) DRAGGABLE
-    var func = this.moveElement;
     this.paper.forEach(function (el){
       if(el.type !== 'Transition'){
-        func(el);
+        this.moveElement(el);
+        this.enableContextMenu(el[0]);
       }
+    }, this);
+  },
+
+  clear: function() {
+    this.paper.clear();
+  },
+
+  enableContextMenu: function(element) {
+    var contextMenu = $('#editor-contextmenu');
+    $(element).on('contextmenu', function(e) {
+      contextMenu.css({
+        display: "block",
+        left: e.pageX,
+        top: e.pageY
+      });
+      contextMenu.on('click', 'a', function() {
+        // Remove element from paper and hide contextmenu
+        $(element).remove();
+        contextMenu.hide();
+      });
+      $('body:not(#editor-contextmenu)').click(function() {
+        contextMenu.off('click', 'a');
+        contextMenu.hide();
+      });
+      return false;
     });
+  },
 
+  onConnect: function(callback) {
+    var me = this,
+        firstSelected,
+        secondSelected;
 
+    me.paper.forEach(function (el) {
+      if (el.hasOwnProperty('associatedXPDL') === false) {
+        return; // ignore those without associated XPDLs
+      }
+      $(el[0]).click(function() {
+        if (firstSelected === undefined) {
+          firstSelected = el;
+        }
+        else {  // first has already been selected
+          secondSelected = el;
+          assert(firstSelected !== undefined && secondSelected !== undefined,
+            'Both required elements not selected for a connection.');
+          // Both elements now selected; proceed to connect them.
+          me.connectElements(firstSelected, secondSelected);
+          // Unbind click listener for all elements.
+          me.paper.forEach(function (el) {
+            $(el[0]).unbind('click');
+          });
+          callback('success');  // we have finished connecting
+        }
+      });
+    });
+  },
+
+  connectElements: function(element1, element2) {
+    var connection = this.paper.connection(element1, element2, "#000", "#000|2");
+    // console.log(connection);
+    // FIXME this.enableContextMenu(connection.bg[0]);
+    this.connections.push(connection);
+    // // We want to draw a path connecting the centers of both elements.
+    // var x1 = parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate) +
+    //          parseInt(element1.dx) +
+    //          parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Width) / 2,
+    //     y1 = parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate) +
+    //          parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Height) / 2,
+    //     x2 = parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate) +
+    //          parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Width) / 2,
+    //     y2 = parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate) +
+    //          parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Height) / 2;
+    // // We now have the center coordinates, but we need to apply an offset for the path so that 
+    // // we don't actually draw over the element.
+
+    // var strPath = "M" + x1 + " " + y1 + "L" + x2 + " " + y2;
+    // var shape = this.paper.path(strPath).attr('arrow-end','block-wide-long');
   },
 
   makeConnectableAndSelectable : function(el){
@@ -292,42 +287,35 @@ net.BpmnJS.prototype = {
   },
 
   moveElement : function(element) {
-    var start = function() {
-      this.odx = 0;
-      this.ody = 0;
-    },
-    move = function(dx, dy) {
-      
-      // REMOVE THE GLOW IF IT'S MOVING
-      if(this.hasOwnProperty('glowEffect')){
-        this.glowEffect.remove();
-        this.toFront();
-        if(this.hasOwnProperty('pair')){
-          this.pair.toFront();
-        }
-      }
+    var connections = this.connections,
+        dragger = function() {
+          this.odx = 0;
+          this.ody = 0;
+          this.animate({"fill-opacity": .2}, 500);
+        },
+        move = function(dx, dy) {
+          this.translate(dx - this.odx, dy - this.ody);
+          
+          if (this.pair) {
+            this.pair.translate(dx - this.odx, dy - this.ody);
+            this.pair.odx = this.pair.attr("dx");
+            this.pair.ody = this.pair.attr("dy");
+          }
+          for (var i = connections.length; i--;) {
+            this.paper.connection(connections[i]);
+          }
 
-      this.translate(dx - this.odx, dy - this.ody);
-      
-      //Check for text 
-      if (this.pair){
-        this.pair.translate(dx - this.odx, dy - this.ody);
-        this.pair.odx = this.pair.attr("dx");
-        this.pair.ody = this.pair.attr("dy");
-
-      }
-      this.odx = dx;
-      this.ody = dy;
-      
-      //Check for connections and reconnect them
-      for (var i = connections.length; i--;){
-        this.paper.connection(this.paper, connections[i])
-      }
-    },
-    up = function () {
-    };
+          this.odx = dx;
+          this.ody = dy;
+        },
+        up = function () {
+          this.animate({"fill-opacity": 1}, 500);
+        };
     
-    element.drag(move, start, up);  
+    // TODO move enableContextMenu() somewhere else...
+    // this needs to be called for every element (newly added as well)
+    this.enableContextMenu(element);
+    element.drag(move, dragger, up);  
   },
 
   getById : function(id){
@@ -340,6 +328,7 @@ net.BpmnJS.prototype = {
     var stringPath = "";
 
     var shape = this.paper.path(stringPath);
+    // var shape = this.paper.path(stringPath).attr('cursor', 'move');
 
     shape.linkedElements = linkedElements;
 
@@ -382,6 +371,7 @@ net.BpmnJS.prototype = {
   },
 
   paintEvent : function(xpdlEvent, x, y, width, height, name, fillColor, borderColor){
+    // var shape = this.paper.circle(x+width/2, y+height/2, width/2).attr('cursor', 'move');
     var shape = this.paper.circle(x+width/2, y+height/2, width/2);
     shape.associatedXPDL = xpdlEvent;
 
@@ -395,11 +385,13 @@ net.BpmnJS.prototype = {
 
   paintImplementation : function(xpdlImplementation, x, y, width, height, name, fillColor, borderColor){
     // paint shape
+    // var shape = this.paper.rect(x, y, width, height, 5).attr('cursor', 'move');
     var shape = this.paper.rect(x, y, width, height, 5);
     shape.associatedXPDL = xpdlImplementation;
     shape.shapeType = 'Implementation';
 
     // add text
+    // var text = this.paper.text(x+width/2,y+height/2,name).attr('cursor', 'move');
     var text = this.paper.text(x+width/2,y+height/2,name);
     text.shapeType = 'Text';
 
@@ -422,9 +414,11 @@ net.BpmnJS.prototype = {
   paintRoute : function(xpdlRoute, x, y, width, height, name, fillColor, borderColor){
     var strPath = "M" + String(x+width/2) + " " + String(y+height) + ",L" + String(x+width) + " " + String(y+height/2) +",L" + String(x+width/2) + " " + String(y) + ",L" + String(x) + " " + String(y+height/2) + "Z";
     
-    var shape = this.paper.path(strPath).attr("fill", fillColor);
+    // var shape = this.paper.path(strPath).attr({fill: fillColor, cursor: 'move'});
+    var shape = this.paper.path(strPath).attr({fill: fillColor});
     shape.associatedXPDL = xpdlRoute;
     shape.shapeType = 'Route';
+    // var text = this.paper.text(x+width/2,y+height/2,name).attr('cursor', 'move');
     var text = this.paper.text(x+width/2,y+height/2,name);
     text.shapeType = 'Text';
 
@@ -434,6 +428,36 @@ net.BpmnJS.prototype = {
     return shape;
     
   },
+
+  // paintEdge : function(docRoot, bpmnElement, path, x, y){
+  //   var element = docRoot.selectNodeSet("//*[@id="+bpmnElement+"]").item(0);
+  //   var name = this.getElementName(element);
+    
+  //   var path = this.paper.path(path);
+  //   if(element.localName == "messageFlow"){
+  //     $(path.node).attr("stroke-dasharray","5,5");
+  //   }
+  //   path.attr({'arrow-end':'block-wide-long'});
+  //   var css = this.getCss(bpmnElement, "edge")
+  //   $(path.node).attr("class",css);
+  //   this.paper.text(x+15,y+10,name);
+  // },
+
+  // paintTextAnnotation : function(x, y, width, height,element){
+  //   var shape = this.paper.rect(x, y, width, height);
+  //   var text = element.getFirstChild().getFirstChild().getNodeValue();
+  //   var re = new RegExp(' ', 'g');
+  //   text = text.replace(re,'\n');
+  //   this.paper.text(x+width/2,y+height/2,text).attr({'font-size':8});
+  //   $(shape.node).attr("class","textAnnotation");
+  //   $(this.paper.path("M"+x + " " + y + "L"+(x+width/2) + " " +y).node).attr("stroke-dasharray","5,5");
+  //   $(this.paper.path("M"+x + " " + y + "L"+ x + " " +(y+height/2)).node).attr("stroke-dasharray","5,5");
+  // },
+
+  // paintDataStoreReference : function(x, y, width, height,element){
+  //   var shape = this.paper.rect(x, y, width, height, 5);
+  //   $(shape.node).attr("class","dataStoreReference");
+  // },
  
   getCss: function(bpmnElement, cssClass){
     for(i in this.highlighted){

@@ -1,13 +1,13 @@
 <%#= form_for :bpmn do |f| %>
   <%#= f.file_field :bpmn %>
 <%# end %>
+<%= stylesheet_link_tag 'workflow' %>
 <%= javascript_include_tag 'ext_lib/xml2json.min.js' %>
 <%= javascript_include_tag 'ext_lib/raphael.js' %>
 <%= javascript_include_tag 'workflow/bpmn.js' %>
+<%= javascript_include_tag 'workflow/graffle.js' %>
 <script type="text/javascript">
-  $(document).ready(function(){
-    $('#toolbox').hide();
-
+  $(function(){
     var client = new XMLHttpRequest();
 
     // GET JSON FILE
@@ -39,11 +39,14 @@
     $('#bpmn').html(bpmnText);
     $('#newXPDL').html(newXPDLText);
 
+    // Workflow editor instructions.
+    $('#help').click(function() {
+      $(this).toggleClass('active');
+      $('#instructions').toggleClass('hide');
+    });
+
     var alreadyLoaded = false;
 
-
- 
-  
   $("#convert").click(function() {
 			
 		$.ajax({
@@ -62,14 +65,15 @@
 				}
 			}
 		});
+  });
 
-    $('#canvas').height(500);
-      $('#canvas').width(2000);
+    // WHEN YOU CLICK THE IMPORT BUTTON
+    $('#MyButton').click(function(){
       if(!alreadyLoaded){
-          $('#toolbox').show();
+          $('#toolbox').removeClass('hide');
           var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
           bpmn.plot();
-          
+
           // Toolbox listeners
           $('#toolbox > .tb-item').click(function(){
             var el = $(this);
@@ -77,20 +81,14 @@
              var x = 10, y= 10;
              var shape = null;
               switch (el.attr('id')) {
-                case 'tb-event':
-                  shape = bpmn.paintEvent('xpdl stuff',x,y,30,30,'','#efefef','black');
-                  bpmn.moveElement(shape);
-                  bpmn.makeConnectableAndSelectable(shape);
+                case 'tb-startevent':
+                  bpmn.moveElement(bpmn.paintEvent('xpdl stuff',x,y,30,30,'','#efefef','black'));
                   break;
-                case 'tb-implementation':
-                  shape = bpmn.paintImplementation('xpdl stuff',x,y,90,60,'Text','#efefef','black');
-                  bpmn.moveElement(shape);
-                  bpmn.makeConnectableAndSelectable(shape);
+                case 'tb-intermediateevent':
+                  bpmn.moveElement(bpmn.paintEvent('xpdl stuff',x,y,30,30,'','#efefef','black'));
                   break;
-                case 'tb-route':
-                  shape = bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black');
-                  bpmn.moveElement(shape);
-                  bpmn.makeConnectableAndSelectable(shape);
+                case 'tb-endevent':
+                  bpmn.moveElement(bpmn.paintEvent('xpdl stuff',x,y,30,30,'','#efefef','black'));
                   break;
                 case 'tb-route':
                   shape = bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black');
@@ -101,6 +99,22 @@
                   bpmn.connecting = true;
                   this.firstToConnect = null;
                   
+                  break;
+                case 'tb-clearcanvas':
+                  if (confirm('Are you sure you want to clear the workflow?')) {
+                    bpmn.clear();
+                  }
+                  break;
+                case 'tb-sequenceflow':
+                  el.toggleClass('active hover');
+                  $('#connect-instructions').toggleClass('hide');
+                  bpmn.onConnect(function(e) {
+                    if (e === 'success') {
+                      // We have successfully connected two elements.
+                      el.removeClass('active hover');
+                      $('#connect-instructions').addClass('hide');
+                    }
+                  });
                   break;
                 default:
                   // Do nothing
@@ -145,27 +159,83 @@
 		<% end %>
 	</div>
 </div>
-
-<button type="button" class="btn btn-info" id="convert">Convert to JSON</button>
-
-Dynamic model:
-<!-- TODO needs images or some form of styling -->
-<div class="btn-group" id="toolbox"> <!-- style="height:40px;border:1px solid black;"-->
-    <button type="button" class="btn btn-default tb-item" id="tb-default"> default</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-event"> event</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-implementation">implementation</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-route">route</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-edge">edge</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-participant">participant</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-gateway">gateway</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-lane">lane</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-boundaryevent">boundaryevent</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-receivetask">receivetask</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-sendtask">sendtask</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-subprocess">subprocess</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-datastore">datastore</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-text">text</button>
-    <button type="button" class="btn btn-default tb-item" id="tb-connect">connect</button>
-    <!-- TODO other items, such as transition? -->
+<input type="button" value="Import" id="MyButton"></input>
+<br>
+<div id="workflow-info" class="row">
+  <div class="col-md-11"><h3 id="workflow-name">My Workflow</h3></div>
+  <div class="col-md-1"><button type="button" class="btn btn-default glyphicon glyphicon-question-sign" id="help"></button></div>
+</div>
+<div id="instructions" class="panel panel-info hide">
+  <div class="panel-heading">
+    Instructions:
+  </div>
+  <div class="panel-body">
+    <ul>
+      <li>Click on a toolbox item to add it to your workflow.</li>
+      <li>Right-click on a workflow item for more options (e.g. to remove item).</li>
+    </ul>
+  </div>
+</div>
+<div id="connect-instructions" class="panel panel-primary hide">
+  <div class="panel-heading">
+    Click on two elements in your workflow to connect them...
+  </div>
+</div>
+<div class="btn-group hide" id="toolbox">
+    <!-- The buttons with dark borders have been currently implemented (have an associated action). -->
+    <button type="button" class="btn btn-default tb-item" id="tb-startevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-intermediateevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-endevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-task"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-transaction"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-subprocess"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-callactivity"></button>
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-implementation"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-route"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-edge"></button> -->
+    <button type="button" class="btn btn-default tb-item" id="tb-gateway"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-datastore"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-participant"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-lane"></button>
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-boundaryevent"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-receivetask"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-sendtask"></button> -->
+    <button type="button" class="btn btn-default tb-item" id="tb-sequenceflow" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-messageflow"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-association"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-annotation"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-clearcanvas" style="border:2px solid #333"></button>
 </div>
 <div id="canvas"></div>
+<div id="editor-contextmenu" class="dropdown clearfix">
+  <ul class="dropdown-menu" role="menu">
+    <li><a id="remove-element">Remove</a></li>
+    <!-- <li><a href="#">Another action</a></li>
+    <li><a href="#">Something else here</a></li>
+    <li class="divider"></li>
+    <li><a href="#">Separated link</a></li> -->
+  </ul>
+</div>
+<div id="bottom-toolbar">
+  <button type="button" class="btn btn-primary" id="save">Save</button>
+  <button type="button" class="btn btn-default" id="convert">Convert to JSON</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+      Export <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#">As File...</a></li>
+      <li><a href="#">As Image...</a></li>
+    </ul>
+  </div>
+</div>
+<%# This will get removed just keeping for testing %>
+<br><br>
+XPDL
+<textarea id="XPDL" style="width:100%;height:200px;"></textarea>
+json
+<textarea id="json" style="width:100%;height:200px;"></textarea>
+bpmn
+<textarea id="bpmn" style="width:100%;height:200px;"></textarea>
+newXPDL
+<textarea id="newXPDL" style="width:100%;height:200px;"></textarea>
