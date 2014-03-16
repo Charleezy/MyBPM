@@ -155,7 +155,7 @@ net.BpmnJS.prototype = {
         top: e.pageY
       });
       // FIXME why is this called twice per element?
-      contextMenu.on('click', 'a', function() {
+      contextMenu.on('click', 'a#remove-element', function() {
         // Remove transitions.
         element.connections.forEach(function(connection) {
           if (connection.from === element) {
@@ -174,8 +174,32 @@ net.BpmnJS.prototype = {
         $(element[0]).remove();
         contextMenu.hide();
       });
+
+      // Listener for adding annotations
+      // TODO support editing/deleting annotation
+      // FIXME doesn't work for transitions
+      contextMenu.on('click', 'a#add-annotation', function() {
+        var textToAdd = prompt('Annotation:');
+        if (textToAdd == null || textToAdd.trim() == '') return;
+        var activity = element.associatedXPDL,
+            x = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate),
+            y = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate),
+            height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height),
+            width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
+
+        var text = me.paper.text(x+width/2, y+height/2, textToAdd);
+        text.shapeType = 'Text';
+
+        // PAIRING SHAPE AND TEXT
+        element.pair = text;
+        text.pair = element;
+        contextMenu.hide();
+      });
+
+      // Hide menu when click elsewhere.
       $('body:not(#editor-contextmenu)').click(function() {
-        contextMenu.off('click', 'a');
+        contextMenu.off('click', 'a#remove-element');
+        contextMenu.off('click', 'a#add-annotation');
         contextMenu.hide();
       });
       return false;
@@ -220,12 +244,22 @@ net.BpmnJS.prototype = {
   },
 
   removeConnection: function(element, connectionToRemove) {
+    // Remove 'connectionToRemove' from element's connections.
     element.connections.forEach(function(connection, index) {
       if (connection === connectionToRemove) {
         element.connections.splice(index, 1);
         return;
       }
     });
+    // Remove from global connections as well.
+    var me = this;
+    me.connections.forEach(function(connection, index) {
+      if (connection === connectionToRemove) {
+        me.connections.splice(index, 1);
+        return;
+      }
+    });
+    // Remove line connection from canvas.
     connectionToRemove.line.remove();
   },
 
@@ -254,10 +288,6 @@ net.BpmnJS.prototype = {
         up = function () {
           this.animate({"fill-opacity": 1}, 500);
         };
-    
-    // TODO move enableContextMenu() somewhere else...
-    // this needs to be called for every element (newly added as well)
-    this.enableContextMenu(element);
     element.drag(move, dragger, up);  
   },
 
@@ -375,10 +405,11 @@ net.BpmnJS.prototype = {
     var strPath = "M" + String(x+width/2) + " " + String(y+height) + ",L" + String(x+width) + " " + String(y+height/2) +",L" + String(x+width/2) + " " + String(y) + ",L" + String(x) + " " + String(y+height/2) + "Z";
     
     var shape = this.paper.path(strPath).attr({fill: fillColor});
+    // var shape = this.paper.rect(x, y, width, height);
     shape.outgoing = [];
     shape.incoming = [];
     shape.connections = [];
-    // var shape = this.paper.rect(x, y, width, height);
+
     // shape.rotate(45, x, y);
     shape.associatedXPDL = xpdlRoute;
     shape.shapeType = 'Route';
@@ -398,7 +429,7 @@ net.BpmnJS.prototype = {
     return shape;
     
   },
- 
+
   getCss: function(bpmnElement, cssClass){
     for(i in this.highlighted){
       if(this.highlighted[i] == bpmnElement){
@@ -407,5 +438,36 @@ net.BpmnJS.prototype = {
       }
     }
     return cssClass;
-  }
+  },
+
+  //===========================================================================
+  //  Driver/helper functions called by toolbox items in workflow editor.
+  //===========================================================================
+
+  // Common to all activities: allow drag/move and contextmenu
+  initActivity: function(activity) {
+    this.moveElement(activity);
+    this.enableContextMenu(activity);
+  },
+
+  initStartEvent: function(x, y) {
+    this.initActivity(this.paintEvent('startevent', x, y, 30, 30, '', 'green', 'black'));
+  },
+
+  initIntermediateEvent: function(x, y) {
+    this.initActivity(this.paintEvent('intermediateevent', x, y, 30, 30, '', 'gray', 'black'));
+  },
+
+  initEndEvent: function(x, y) {
+    this.initActivity(this.paintEvent('endevent', x, y, 30, 30, '', 'red', 'black'));
+  },
+
+  initGateway: function(x, y) {
+    this.initActivity(this.paintRoute('gateway', x, y, 40, 40, '', 'yellow', 'black'));
+  },
+  
+  initTask: function(x, y) {
+    this.initActivity(this.paintImplementation('task', x, y, 90, 60, '', 'blue', 'black'));
+  },
+  
 };      
