@@ -79,14 +79,11 @@ net.BpmnJS.prototype = {
 
           // Create link association between the two activities.
           // TODO changes to associatedXPDL required?
-          
+
           // element1.outgoing.push(element2);
           // element2.incoming.push(element1);
-          // create link in path (from, to)
 
-          var connection = me.connectElements(element1, element2);
-          element1.connections.push(connection);
-          element2.connections.push(connection);
+          me.connectElements(element1, element2);
         });
       }
     }
@@ -170,6 +167,10 @@ net.BpmnJS.prototype = {
           }
         });
         element.connections.length = 0;
+        if (element.pair !== undefined) {
+          // Remove element paired to this item (should be text).
+          element.pair.remove();
+        }
         $(element[0]).remove();
         contextMenu.hide();
       });
@@ -214,7 +215,8 @@ net.BpmnJS.prototype = {
     var connection = this.paper.connection(element1, element2, "#000");
     connection.shapeType = 'Transition';
     this.connections.push(connection);
-    return connection;
+    element1.connections.push(connection);
+    element2.connections.push(connection);
   },
 
   removeConnection: function(element, connectionToRemove) {
