@@ -3,8 +3,9 @@ class SimulationController < ApplicationController
   layout "application"
   
   def index
-    @mockdata = MockData.all
 	@workflows = current_user.workflows
+	@workflow_ids = current_user.workflows.select("id")
+    @mockdata = MockData.where(workflow_id: @workflow_ids)
     @simulation_results = SimulationResult.all
   end
   
@@ -19,7 +20,6 @@ class SimulationController < ApplicationController
   def create
     @data = MockData.create(simulation_params)
     respond_to do |format| 
-      format.html
       format.json { render :json => @data.id}
     end
   end
@@ -29,7 +29,7 @@ class SimulationController < ApplicationController
     @data.update(params[:mockdata].permit(:workflow_id, :mockdata))
     respond_to do |format| 
       format.html
-      format.json { render :json => @data.id}
+      format.json { render :json => @data.id }
     end
   end
   
@@ -37,13 +37,13 @@ class SimulationController < ApplicationController
     @data = MockData.find(params[:id])
     @data.destroy
     respond_to do |format| 
-      format.html
       format.json { render :json => @data.id}
     end
   end
   
   def edit
-  
+	@simulation = MockData.find(params[:id])
+	@workflow = Workflow.find(@simulation.workflow_id)
   end
   
   def simulation_params
