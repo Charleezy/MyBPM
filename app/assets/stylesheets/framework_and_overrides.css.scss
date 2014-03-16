@@ -1,12 +1,10 @@
 // import the CSS framework
 @import "bootstrap";
-
 /* blue */
 $bgDefault      : #428bca;//#d9edf7;
 $bgHighlight    : #285e8e;//#C1E5F6;
 $colDefault     : #cdddeb;//#568AA3;
 $colHover       : #FFF;//#31708f;  
-
 
 .navbar-default {
     background-color: $bgDefault;
