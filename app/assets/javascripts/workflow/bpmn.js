@@ -35,10 +35,6 @@ net.BpmnJS = function(xpdlJson, canvas){
 
   // Paint canvas
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
-  var rex = this.paper.rect(10, 20, 150, 80).attr("fill", "cornflowerblue");
-
-  var circ = this.paper.circle(250, 50, 40).attr("fill", "orange");
-  connections.push(this.paper.connection(this.paper, rex, circ, "black", "#fff"))
 
 };
 
@@ -127,6 +123,24 @@ net.BpmnJS.prototype = {
     // PAINT
     for(var i=0; i<this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess.length; i++){
       
+
+      // ACTIVITIES
+      if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Activities')){
+        var activities = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Activities.Activity;
+        for(var j=0; j<activities.length; j++){
+          var activity = activities[j];
+          var xCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate);
+          var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
+          var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
+          var width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
+          var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
+          var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
+          var name = activity.Name;
+          this.makeConnectable(this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name));
+        }
+      }
+
+
       // TRANSITIONS
       if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
         var transitions = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition;
@@ -149,23 +163,33 @@ net.BpmnJS.prototype = {
           linkedElements.push(String(transition.From));
           linkedElements.push(String(transition.To));
           this.paintTransition(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor, linkedElements);
-        }
-      }
-      
 
-      // ACTIVITIES
-      if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Activities')){
-        var activities = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Activities.Activity;
-        for(var j=0; j<activities.length; j++){
-          var activity = activities[j];
-          var xCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate);
-          var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
-          var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
-          var width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
-          var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
-          var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
-          var name = activity.Name;
-          this.makeConnectable(this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name));
+          var first = null, second = null;
+          // CONNECT ELEMENTS REFERENCED BY THE TRANSITION
+
+          // FIND THE ELEMENTS REFERENCED
+          this.paper.forEach(function (el){
+
+            if(el.shapeType === 'Event' || el.shapeType === 'Implementation' || el.shapeType === 'Route'){
+              console.log('comparing ' + el.associatedXPDL.Id + ' and ' + transition.From);
+              if(el.associatedXPDL.Id === transition.From){
+                first = el;
+              }
+
+              console.log('comparing ' + el.associatedXPDL.Id + ' and ' + transition.To);
+              if(el.associatedXPDL.Id === transition.To)
+              {
+                second = el;
+              }
+            }
+          });
+
+          console.log('first: ' + first);
+          console.log('second: ' + second);
+
+          connections.push(this.paper.connection(this.paper,first,second,"black","#fff"));
+
+
         }
       }
     }
@@ -288,11 +312,8 @@ net.BpmnJS.prototype = {
   },
 
   paintTransition : function(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor, linkedElements){
-    var stringPath = "M"+xOrigin+","+yOrigin;
+    var stringPath = "";
 
-    for(var i in xCoordinates){
-      stringPath += "L"+xCoordinates[i]+","+yCoordinates[i];
-    }
     var shape = this.paper.path(stringPath);
 
     shape.linkedElements = linkedElements;
