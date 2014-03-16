@@ -31,7 +31,7 @@
     
     // CREATE THE JAVASCRIPT OBJECT BASED ON THE JSON FILE
     var jsonObject = JSON.parse(jsonText);
-    console.log(jsonObject);
+    
 
     // FILL THE HTML ELEMENTS WITH TEXT
     $('#json').html(jsonText);
@@ -80,37 +80,53 @@
                 case 'tb-event':
                   shape = bpmn.paintEvent('xpdl stuff',x,y,30,30,'','#efefef','black');
                   bpmn.moveElement(shape);
-                  bpmn.makeConnectable(shape);
+                  bpmn.makeConnectableAndSelectable(shape);
                   break;
                 case 'tb-implementation':
                   shape = bpmn.paintImplementation('xpdl stuff',x,y,90,60,'Text','#efefef','black');
                   bpmn.moveElement(shape);
-                  bpmn.makeConnectable(shape);
+                  bpmn.makeConnectableAndSelectable(shape);
                   break;
                 case 'tb-route':
                   shape = bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black');
                   bpmn.moveElement(shape);
-                  bpmn.makeConnectable(shape);
+                  bpmn.makeConnectableAndSelectable(shape);
                   break;
                 case 'tb-route':
                   shape = bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black');
                   bpmn.moveElement(shape);
-                  bpmn.makeConnectable(shape);
+                  bpmn.makeConnectableAndSelectable(shape);
                   break;
                 case 'tb-connect':
                   bpmn.connecting = true;
                   this.firstToConnect = null;
-                  console.log('click on 2 elements to connect them');
+                  
                   break;
                 default:
-                  break;
                   // Do nothing
+                  break;
               }
 
           });
 
           alreadyLoaded = true;
       }
+
+      // DELETE FUNCTION 
+      $(document).keyup(function(e) {
+          switch(e.which){
+            // DELETE WHEN "DELETE" (46) OR "BACKSPACE" (8) IS PRESSED
+            case 46:
+            case 8:
+              // IT'S NOT REALLY DELETING RIGHT NOW, IT'S JUST HIDING
+              bpmn.selectedShape.glowEffect.remove();
+              bpmn.selectedShape.hide();
+              if(bpmn.selectedShape.hasOwnProperty('pair')){
+                bpmn.selectedShape.pair.hide();
+              }
+              break;
+          }       
+      });
   
   });
  

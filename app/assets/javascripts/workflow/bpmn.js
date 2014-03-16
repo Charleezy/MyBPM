@@ -33,6 +33,8 @@ net.BpmnJS = function(xpdlJson, canvas){
 
   this.xpdlJson = xpdlJson;
 
+  this.selectedShape = null;
+
   // Paint canvas
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
 
@@ -40,6 +42,8 @@ net.BpmnJS = function(xpdlJson, canvas){
 
 //Paints the connections between two object
 Raphael.fn.connection =function (paper, obj1, obj2, line, bg) {
+      objCon1 = obj1;
+      objCon2 = obj2;
       if (obj1.line && obj1.from && obj1.to) {
           line = obj1;
           obj1 = line.from;
@@ -91,7 +95,9 @@ Raphael.fn.connection =function (paper, obj1, obj2, line, bg) {
               bg: bg && bg.split && paper.path(path).attr({stroke: bg.split("|")[0], fill: "none", "stroke-width": bg.split("|")[1] || 3}),
               line: paper.path(path).attr({stroke: color, fill: "none"}),
               from: obj1,
-              to: obj2
+              to: obj2,
+              shape1: objCon1,
+              shape2: objCon2
           };
       }
 };
@@ -136,7 +142,7 @@ net.BpmnJS.prototype = {
           var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
           var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
           var name = activity.Name;
-          this.makeConnectable(this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name));
+          this.makeConnectableAndSelectable(this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name));
         }
       }
 
@@ -171,12 +177,12 @@ net.BpmnJS.prototype = {
           this.paper.forEach(function (el){
 
             if(el.shapeType === 'Event' || el.shapeType === 'Implementation' || el.shapeType === 'Route'){
-              console.log('comparing ' + el.associatedXPDL.Id + ' and ' + transition.From);
+              
               if(el.associatedXPDL.Id === transition.From){
                 first = el;
               }
 
-              console.log('comparing ' + el.associatedXPDL.Id + ' and ' + transition.To);
+              
               if(el.associatedXPDL.Id === transition.To)
               {
                 second = el;
@@ -184,8 +190,8 @@ net.BpmnJS.prototype = {
             }
           });
 
-          console.log('first: ' + first);
-          console.log('second: ' + second);
+          
+          
 
           connections.push(this.paper.connection(this.paper,first,second,"black","#fff"));
 
@@ -248,7 +254,7 @@ net.BpmnJS.prototype = {
 
   },
 
-  makeConnectable : function(el){
+  makeConnectableAndSelectable : function(el){
 
     var globalPaper = this.paper;
     var globalBPMN = this;
@@ -258,17 +264,26 @@ net.BpmnJS.prototype = {
           
           // THIS IS THE FIRST ELEMENT TO BE SELECTED
           if(globalBPMN.firstToConnect === null){
-            console.log('first');
+            
             globalBPMN.firstToConnect = el;
           }
 
           // THIS IS THE SECOND (TIME TO CONNECT THE ELEMENTS)
           else{
-            console.log('second');
+            
             connections.push(globalPaper.connection(globalPaper,globalBPMN.firstToConnect,el,"black","#fff"));
             globalBPMN.connecting = false;
             globalBPMN.firstToConnect = null;
           }
+        }
+
+        if(globalBPMN.selectedShape != null){
+          globalBPMN.selectedShape.glowEffect.remove();
+        }
+        globalBPMN.selectedShape = el;
+        globalBPMN.selectedShape.glowEffect = globalBPMN.selectedShape.glow();
+        if(globalBPMN.selectedShape.hasOwnProperty("pair")){
+          globalBPMN.selectedShape.pair.toFront();
         }
 
       });
@@ -282,6 +297,16 @@ net.BpmnJS.prototype = {
       this.ody = 0;
     },
     move = function(dx, dy) {
+      
+      // REMOVE THE GLOW IF IT'S MOVING
+      if(this.hasOwnProperty('glowEffect')){
+        this.glowEffect.remove();
+        this.toFront();
+        if(this.hasOwnProperty('pair')){
+          this.pair.toFront();
+        }
+      }
+
       this.translate(dx - this.odx, dy - this.ody);
       
       //Check for text 
