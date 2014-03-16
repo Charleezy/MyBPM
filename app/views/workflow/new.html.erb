@@ -44,9 +44,6 @@
 
     // WHEN YOU CLICK THE IMPORT BUTTON
     $('#MyButton').click(function(){
-
-      $('#canvas').height(500);
-      $('#canvas').width(2000);
       if(!alreadyLoaded){
           $('#toolbox').show();
           var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
@@ -85,8 +82,10 @@
 
 <input type="button" value="Import" id="MyButton"></input>
 <br>
+<div id="workflow-name" class="page-header">
+  <h3>My Workflow</h3>
+</div>
 <div class="btn-group" id="toolbox">
-    
     <button type="button" class="btn btn-default tb-item" id="tb-startevent"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-intermediateevent"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-endevent"></button>
@@ -109,10 +108,22 @@
     <button type="button" class="btn btn-default tb-item" id="tb-association"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-annotation"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-eraser"></button>
-    <!-- TODO other items, such as transition? -->
 </div>
 <div id="canvas"></div>
+<div id="bottom-toolbar">
+  <button type="button" class="btn btn-primary" id="save">Save</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+      Export <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#">As File...</a></li>
+      <li><a href="#">As Image...</a></li>
+    </ul>
+  </div>
+</div>
 <%# This will get removed just keeping for testing %>
+<br>
 XPDL
 <textarea id="XPDL" style="width:1050px;height:200px;margin:60px;"></textarea>
 json
