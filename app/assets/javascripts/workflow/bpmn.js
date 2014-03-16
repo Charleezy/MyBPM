@@ -23,6 +23,7 @@
 
 // I modified some of this to make it work better, feel free to keep doing the same.
 
+
 // Namespace
 var net = net || {};
 net = {};
@@ -32,7 +33,7 @@ function assert(condition, message) {
       throw message || "Assertion failed";
   }
 }
-
+        
 // Constructor
 net.BpmnJS = function(xpdlJson, canvas){
 
@@ -40,35 +41,17 @@ net.BpmnJS = function(xpdlJson, canvas){
 
   // Paint canvas
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
-
   this.connections = [];
 };
 
 // Shared functions
 net.BpmnJS.prototype = {
+
   plot: function(){
     
     // PAINT
     for(var i=0; i<this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess.length; i++){
       
-
-      // ACTIVITIES
-      if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Activities')){
-        var activities = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Activities.Activity;
-        for(var j=0; j<activities.length; j++){
-          var activity = activities[j];
-          var xCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate);
-          var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
-          var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
-          var width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
-          var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
-          var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
-          var name = activity.Name;
-          this.makeConnectableAndSelectable(this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name));
-        }
-      }
-
-
       // TRANSITIONS
       if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
         var transitions = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition;
@@ -91,37 +74,27 @@ net.BpmnJS.prototype = {
           linkedElements.push(String(transition.From));
           linkedElements.push(String(transition.To));
           this.paintTransition(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor, linkedElements);
+        }
+      }
 
-          var first = null, second = null;
-          // CONNECT ELEMENTS REFERENCED BY THE TRANSITION
-
-          // FIND THE ELEMENTS REFERENCED
-          this.paper.forEach(function (el){
-
-            if(el.shapeType === 'Event' || el.shapeType === 'Implementation' || el.shapeType === 'Route'){
-              
-              if(el.associatedXPDL.Id === transition.From){
-                first = el;
-              }
-
-              
-              if(el.associatedXPDL.Id === transition.To)
-              {
-                second = el;
-              }
-            }
-          });
-
-
-          this.connections.push(this.paper.connection(this.paper,first,second,"black","#fff"));
-
-
+      // ACTIVITIES
+      if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Activities')){
+        var activities = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Activities.Activity;
+        for(var j=0; j<activities.length; j++){
+          var activity = activities[j];
+          var xCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate);
+          var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
+          var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
+          var width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
+          var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
+          var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
+          var name = activity.Name;
+          this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
         }
       }
     }
 
     var globalPaper = this.paper;
-    var globalBPMN = this;
 
 
     // LINK THE ACTIVITIES TO THE TRANSITIONS
@@ -249,43 +222,6 @@ net.BpmnJS.prototype = {
     // var shape = this.paper.path(strPath).attr('arrow-end','block-wide-long');
   },
 
-  makeConnectableAndSelectable : function(el){
-
-    var globalPaper = this.paper;
-    var globalBPMN = this;
-
-    el.click(function(){
-        if(globalBPMN.connecting){
-          
-          // THIS IS THE FIRST ELEMENT TO BE SELECTED
-          if(globalBPMN.firstToConnect === null){
-            
-            globalBPMN.firstToConnect = el;
-          }
-
-          // THIS IS THE SECOND (TIME TO CONNECT THE ELEMENTS)
-          else{
-            
-            connections.push(globalPaper.connection(globalPaper,globalBPMN.firstToConnect,el,"black","#fff"));
-            globalBPMN.connecting = false;
-            globalBPMN.firstToConnect = null;
-          }
-        }
-
-        if(globalBPMN.selectedShape != null){
-          globalBPMN.selectedShape.glowEffect.remove();
-        }
-        globalBPMN.selectedShape = el;
-        globalBPMN.selectedShape.glowEffect = globalBPMN.selectedShape.glow();
-        if(globalBPMN.selectedShape.hasOwnProperty("pair")){
-          globalBPMN.selectedShape.pair.toFront();
-        }
-
-      });
-
-
-  },
-
   moveElement : function(element) {
     var connections = this.connections,
         dragger = function() {
@@ -325,8 +261,11 @@ net.BpmnJS.prototype = {
   },
 
   paintTransition : function(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor, linkedElements){
-    var stringPath = "";
+    var stringPath = "M"+xOrigin+","+yOrigin;
 
+    for(var i in xCoordinates){
+      stringPath += "L"+xCoordinates[i]+","+yCoordinates[i];
+    }
     var shape = this.paper.path(stringPath);
     // var shape = this.paper.path(stringPath).attr('cursor', 'move');
 
@@ -428,36 +367,6 @@ net.BpmnJS.prototype = {
     return shape;
     
   },
-
-  // paintEdge : function(docRoot, bpmnElement, path, x, y){
-  //   var element = docRoot.selectNodeSet("//*[@id="+bpmnElement+"]").item(0);
-  //   var name = this.getElementName(element);
-    
-  //   var path = this.paper.path(path);
-  //   if(element.localName == "messageFlow"){
-  //     $(path.node).attr("stroke-dasharray","5,5");
-  //   }
-  //   path.attr({'arrow-end':'block-wide-long'});
-  //   var css = this.getCss(bpmnElement, "edge")
-  //   $(path.node).attr("class",css);
-  //   this.paper.text(x+15,y+10,name);
-  // },
-
-  // paintTextAnnotation : function(x, y, width, height,element){
-  //   var shape = this.paper.rect(x, y, width, height);
-  //   var text = element.getFirstChild().getFirstChild().getNodeValue();
-  //   var re = new RegExp(' ', 'g');
-  //   text = text.replace(re,'\n');
-  //   this.paper.text(x+width/2,y+height/2,text).attr({'font-size':8});
-  //   $(shape.node).attr("class","textAnnotation");
-  //   $(this.paper.path("M"+x + " " + y + "L"+(x+width/2) + " " +y).node).attr("stroke-dasharray","5,5");
-  //   $(this.paper.path("M"+x + " " + y + "L"+ x + " " +(y+height/2)).node).attr("stroke-dasharray","5,5");
-  // },
-
-  // paintDataStoreReference : function(x, y, width, height,element){
-  //   var shape = this.paper.rect(x, y, width, height, 5);
-  //   $(shape.node).attr("class","dataStoreReference");
-  // },
  
   getCss: function(bpmnElement, cssClass){
     for(i in this.highlighted){
