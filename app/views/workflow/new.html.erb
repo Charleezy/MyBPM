@@ -70,12 +70,6 @@
                 case 'tb-endevent':
                   bpmn.moveElement(bpmn.paintEvent('xpdl stuff',x,y,30,30,'','#efefef','black'));
                   break;
-                case 'tb-implementation':
-                  bpmn.moveElement(bpmn.paintImplementation('xpdl stuff',x,y,90,60,'Text','#efefef','black'));
-                  break;
-                case 'tb-route':
-                  bpmn.moveElement(bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black'));
-                  break;
                 case 'tb-route':
                   bpmn.moveElement(bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black'));
                   break;
@@ -83,6 +77,11 @@
                   if (confirm('Are you sure you want to clear the workflow?')) {
                     bpmn.clear();
                   }
+                  break;
+                case 'tb-connect':
+                  bpmn.connecting = true;
+                  this.firstSelected = false;
+                  alert('click on 2 objects to connect them');
                   break;
                 default:
                   // Do nothing
@@ -136,7 +135,7 @@
     <button type="button" class="btn btn-default tb-item" id="tb-messageflow"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-association"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-annotation"></button>
-    <button type="button" class="btn btn-default tb-item" id="tb-clearcanvas"></a>
+    <button type="button" class="btn btn-default tb-item" id="tb-clearcanvas"></button>
 </div>
 <div id="canvas"></div>
 <div id="editor-contextmenu" class="dropdown clearfix">
