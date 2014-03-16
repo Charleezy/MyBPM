@@ -8,8 +8,10 @@ Mybpm::Application.routes.draw do
   root :to => "home#index"
 
   resources :workflow
+  match 'workflow' => 'workflow#index', :as => :workflows, :via => :get
   resources :simulation
-  
+  match 'simulation' => 'simulation#index', :as => :simulations, :via => :get
+
   post '/workflow/import', :controller => 'workflow', :action => 'import'
   post '/workflow/xpdltojson', :controller => 'workflow', :action => 'xpdltojson'
 
