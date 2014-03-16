@@ -140,6 +140,7 @@ net.BpmnJS.prototype = {
 
     // MAKE ELEMENTS (NOT LINES) DRAGGABLE
     this.paper.forEach(function (el){
+      console.log('here');
       if(el.type !== 'Transition'){
         this.moveElement(el);
         this.enableContextMenu(el);
@@ -193,6 +194,7 @@ net.BpmnJS.prototype = {
     up = function () {
     };
     
+    this.enableContextMenu(element);  // for new elements added
     element.drag(move, start, up);  
   },
 

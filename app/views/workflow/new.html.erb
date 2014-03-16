@@ -8,6 +8,7 @@
 <script type="text/javascript">
   $(function(){
     $('#toolbox').hide();
+    $('#instructions').hide();
 
     var client = new XMLHttpRequest();
 
@@ -39,6 +40,10 @@
     $('#XPDL').html(XPDLText);
     $('#bpmn').html(bpmnText);
     $('#newXPDL').html(newXPDLText);
+
+    $('#help').click(function() {
+      $('#instructions').toggle();
+    });
 
     var alreadyLoaded = false;
 
@@ -93,8 +98,20 @@
 
 <input type="button" value="Import" id="MyButton"></input>
 <br>
-<div id="workflow-name" class="page-header">
-  <h3>My Workflow</h3>
+<div id="workflow-info" class="row">
+  <div class="col-md-11"><h3 id="workflow-name">My Workflow</h3></div>
+  <div class="col-md-1"><button type="button" class="btn btn-default glyphicon glyphicon-question-sign" id="help"></button></div>
+</div>
+<div id="instructions" class="panel panel-info">
+  <div class="panel-heading">
+    Instructions:
+  </div>
+  <div class="panel-body">
+    <ul>
+      <li>Click on a toolbox item to add it to your workflow.</li>
+      <li>Right-click on a workflow item for more options, such as removing it.</li>
+    </ul>
+  </div>
 </div>
 <div class="btn-group" id="toolbox">
     <button type="button" class="btn btn-default tb-item" id="tb-startevent"></button>
