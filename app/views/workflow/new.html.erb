@@ -49,25 +49,6 @@
           var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
           bpmn.plot();
 
-          // Context menu for canvas (on right-click)
-          // var contextMenu = $('#editor-contextmenu');
-          // $('#canvas').on('contextmenu', function(e) {
-          //   contextMenu.css({
-          //     display: "block",
-          //     left: e.pageX,
-          //     top: e.pageY
-          //   });
-          //   return false;
-          // });
-          // contextMenu.on('click', 'a', function() {
-          //   switch ($(this).attr('id')) {
-          //     case 'remove-element':
-          //       alert('remove element');
-          //       break;
-          //   }
-          //   contextMenu.hide();
-          // });
-          
           // Toolbox listeners
           $('#toolbox > .tb-item').click(function(){
             var el = $(this);
@@ -91,6 +72,11 @@
                   break;
                 case 'tb-route':
                   bpmn.moveElement(bpmn.paintRoute('xpdl stuff',x,y,40,40,'Text','#efefef','black'));
+                  break;
+                case 'tb-clearcanvas':
+                  if (confirm('Are you sure you want to clear the workflow?')) {
+                    bpmn.clear();
+                  }
                   break;
                 default:
                   // Do nothing
@@ -132,7 +118,7 @@
     <button type="button" class="btn btn-default tb-item" id="tb-messageflow"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-association"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-annotation"></button>
-    <button type="button" class="btn btn-default tb-item" id="tb-eraser"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-clearcanvas"></a>
 </div>
 <div id="canvas"></div>
 <div id="editor-contextmenu" class="dropdown clearfix">
@@ -157,12 +143,12 @@
   </div>
 </div>
 <%# This will get removed just keeping for testing %>
-<br>
+<br><br>
 XPDL
-<textarea id="XPDL" style="width:1050px;height:200px;margin:60px;"></textarea>
+<textarea id="XPDL" style="width:100%;height:200px;"></textarea>
 json
-<textarea id="json" style="width:1050px;height:200px;margin:60px;"></textarea>
+<textarea id="json" style="width:100%;height:200px;"></textarea>
 bpmn
-<textarea id="bpmn" style="width:1050px;height:200px;margin:60px;"></textarea>
+<textarea id="bpmn" style="width:100%;height:200px;"></textarea>
 newXPDL
-<textarea id="newXPDL" style="width:1050px;height:200px;margin:60px;"></textarea>
+<textarea id="newXPDL" style="width:100%;height:200px;"></textarea>

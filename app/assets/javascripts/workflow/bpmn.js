@@ -147,6 +147,10 @@ net.BpmnJS.prototype = {
     }, this);
   },
 
+  clear: function() {
+    this.paper.clear();
+  },
+
   enableContextMenu: function(element) {
     var contextMenu = $('#editor-contextmenu');
     $(element[0]).on('contextmenu', function(e) {
