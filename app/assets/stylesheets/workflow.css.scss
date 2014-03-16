@@ -9,60 +9,109 @@ div#canvas{
 
 #toolbox {
   border: 1px solid #bbb;
-  background-color: #efefef;
+  background-color: #d9edf7;
   .tb-item {
     width: 60px;
     height: 60px;
     border: none;
     margin: 1px;
+    
   }
   #tb-sequenceflow {
     background-image: url('tools/sequenceflow.png');
+    &:hover {
+      background-image: url('tools/sequenceflow-hover.png');
+    }
   }
   #tb-association {
     background-image: url('tools/association.png');
+    &:hover {
+      background-image: url('tools/association-hover.png');
+    }
   }
   #tb-messageflow {
     background-image: url('tools/messageflow.png');
+    &:hover {
+      background-image: url('tools/messageflow-hover.png');
+    }
   }
   #tb-startevent {
     background-image: url('tools/startevent.png');
+    &:hover {
+      background-image: url('tools/startevent-hover.png');
+    }
   }
   #tb-intermediateevent {
     background-image: url('tools/intermediateevent.png');
+    &:hover {
+      background-image: url('tools/intermediateevent-hover.png');
+    }
   }
   #tb-endevent {
     background-image: url('tools/endevent.png');
+    &:hover {
+      background-image: url('tools/endevent-hover.png');
+    }
   }
   #tb-task {
     background-image: url('tools/task.png');
+    &:hover {
+      background-image: url('tools/task-hover.png');
+    }
   }
   #tb-transaction {
     background-image: url('tools/transaction.png');
+    &:hover {
+      background-image: url('tools/transaction-hover.png');
+    }
   }
   #tb-subprocess {
     background-image: url('tools/subprocess.png');
+    &:hover {
+      background-image: url('tools/subprocess-hover.png');
+    }
   }
   #tb-callactivity {
     background-image: url('tools/callactivity.png');
+    &:hover {
+      background-image: url('tools/callactivity-hover.png');
+    }
   }
   #tb-participant {
     background-image: url('tools/pool.png');
+    &:hover {
+      background-image: url('tools/pool-hover.png');
+    }
   }
   #tb-lane {
     background-image: url('tools/lane.png');
+    &:hover {
+      background-image: url('tools/lane-hover.png');
+    }
   }
   #tb-gateway {
     background-image: url('tools/gateway.png');
+    &:hover {
+      background-image: url('tools/gateway-hover.png');
+    }
   }
   #tb-datastore {
     background-image: url('tools/datastore.png');
+    &:hover {
+      background-image: url('tools/datastore-hover.png');
+    }
   }
   #tb-annotation {
     background-image: url('tools/annotation.png');
+    &:hover {
+      background-image: url('tools/annotation-hover.png');
+    }
   }
   #tb-clearcanvas {
     background-image: url('tools/clearcanvas.png');
+    &:hover {
+      background-image: url('tools/clearcanvas-hover.png');
+    }
   }
 }
 
