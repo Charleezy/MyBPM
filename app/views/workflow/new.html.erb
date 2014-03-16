@@ -6,7 +6,7 @@
 <%= javascript_include_tag 'ext_lib/raphael.js' %>
 <%= javascript_include_tag 'workflow/bpmn.js' %>
 <script type="text/javascript">
-  $(document).ready(function(){
+  $(function(){
     $('#toolbox').hide();
 
     var client = new XMLHttpRequest();
@@ -48,6 +48,20 @@
           $('#toolbox').show();
           var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
           bpmn.plot();
+
+          // Context menu for canvas (on right-click)
+          var contextMenu = $('#editor-contextmenu');
+          $('#canvas').on('contextmenu', function(e) {
+            contextMenu.css({
+              display: "block",
+              left: e.pageX,
+              top: e.pageY
+            });
+            return false;
+          });
+          contextMenu.on('click', 'a', function() {
+             contextMenu.hide();
+          });
           
           // Toolbox listeners
           $('#toolbox > .tb-item').click(function(){
@@ -55,7 +69,13 @@
             // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
              var x = 10, y= 10;
               switch (el.attr('id')) {
-                case 'tb-event':
+                case 'tb-startevent':
+                  bpmn.moveElement(bpmn.paintEvent('xpdl stuff',x,y,30,30,'','#efefef','black'));
+                  break;
+                case 'tb-intermediateevent':
+                  bpmn.moveElement(bpmn.paintEvent('xpdl stuff',x,y,30,30,'','#efefef','black'));
+                  break;
+                case 'tb-endevent':
                   bpmn.moveElement(bpmn.paintEvent('xpdl stuff',x,y,30,30,'','#efefef','black'));
                   break;
                 case 'tb-implementation':
@@ -110,6 +130,15 @@
     <button type="button" class="btn btn-default tb-item" id="tb-eraser"></button>
 </div>
 <div id="canvas"></div>
+<div id="editor-contextmenu" class="dropdown clearfix">
+  <ul class="dropdown-menu" role="menu">
+    <li><a href="#">Action</a></li>
+    <li><a href="#">Another action</a></li>
+    <li><a href="#">Something else here</a></li>
+    <li class="divider"></li>
+    <li><a href="#">Separated link</a></li>
+  </ul>
+</div>
 <div id="bottom-toolbar">
   <button type="button" class="btn btn-primary" id="save">Save</button>
   <div class="btn-group">

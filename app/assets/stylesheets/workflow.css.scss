@@ -66,6 +66,16 @@ div#canvas{
   }
 }
 
+#editor-contextmenu {
+  position: absolute;
+  display: none;
+  ul {
+    display: block;
+    position: static;
+    margin-bottom: 5px;
+  }
+}
+
 #bottom-toolbar {
   margin-top: 10px;
   float: right;
