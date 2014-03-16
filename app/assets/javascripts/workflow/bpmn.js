@@ -51,12 +51,27 @@ net.BpmnJS.prototype = {
     
     // PAINT
     for(var i=0; i<this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess.length; i++){
-      
+
+      // ACTIVITIES
+      if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Activities')){
+        var activities = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Activities.Activity;
+        for(var j=0; j<activities.length; j++){
+          var activity = activities[j];
+          var xCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate);
+          var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
+          var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
+          var width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
+          var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
+          var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
+          var name = activity.Name;
+          this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
+        }
+      }
+
       // TRANSITIONS
       if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
         var transitions = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition;
         for(var j=0; j<transitions.length; j++){
-          
           var transition = transitions[j];
           var coordinatesArray = transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.Coordinates;
           var xOrigin = parseInt(coordinatesArray[0].XCoordinate);
@@ -73,23 +88,11 @@ net.BpmnJS.prototype = {
           var linkedElements = Array();
           linkedElements.push(String(transition.From));
           linkedElements.push(String(transition.To));
-          this.paintTransition(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor, linkedElements);
-        }
-      }
 
-      // ACTIVITIES
-      if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Activities')){
-        var activities = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Activities.Activity;
-        for(var j=0; j<activities.length; j++){
-          var activity = activities[j];
-          var xCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate);
-          var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
-          var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
-          var width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
-          var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
-          var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
-          var name = activity.Name;
-          this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
+          var element1 = this.getById(transition.From);
+          var element2 = this.getById(transition.To);
+          // this.paintTransition(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor, linkedElements);
+          this.connectElements(element1, element2);
         }
       }
     }
@@ -205,21 +208,6 @@ net.BpmnJS.prototype = {
     // console.log(connection);
     // FIXME this.enableContextMenu(connection.bg[0]);
     this.connections.push(connection);
-    // // We want to draw a path connecting the centers of both elements.
-    // var x1 = parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate) +
-    //          parseInt(element1.dx) +
-    //          parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Width) / 2,
-    //     y1 = parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate) +
-    //          parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Height) / 2,
-    //     x2 = parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate) +
-    //          parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Width) / 2,
-    //     y2 = parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate) +
-    //          parseInt(element2.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Height) / 2;
-    // // We now have the center coordinates, but we need to apply an offset for the path so that 
-    // // we don't actually draw over the element.
-
-    // var strPath = "M" + x1 + " " + y1 + "L" + x2 + " " + y2;
-    // var shape = this.paper.path(strPath).attr('arrow-end','block-wide-long');
   },
 
   moveElement : function(element) {
@@ -254,10 +242,17 @@ net.BpmnJS.prototype = {
     element.drag(move, dragger, up);  
   },
 
-  getById : function(id){
-
-
-
+  getById : function(id) {
+    var element;
+    this.paper.forEach(function (el) {
+      if (el.hasOwnProperty('associatedXPDL') === true) {
+        if (el.associatedXPDL.Id === id) {
+          element = el;
+          return;
+        }
+      }
+    });
+    return element;
   },
 
   paintTransition : function(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor, linkedElements){

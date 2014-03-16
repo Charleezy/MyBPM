@@ -56,8 +56,6 @@
 			url: "/workflow/xpdltojson", 
 			type: "POST",
 			success: function(data) {
-				$('#canvas').height(500);
-				$('#canvas').width(2000);
 				if(!alreadyLoaded){
 					var bpmn = new net.BpmnJS($('#canvas')[0], []);
 					bpmn.plot(jsonObject);
