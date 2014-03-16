@@ -10,10 +10,10 @@
     <%= csrf_meta_tags %>
   </head>
   <body>
-    <%= render 'layouts/navigation' %>
+    <%= render 'layouts/shared/navigation' %>
     <div id="page-wrapper" class="container">
-      <%= render 'layouts/messages' %>
-      <%= render 'layouts/subnav' %>
+      <%= render 'layouts/shared/messages' %>
+      <%= render 'layouts/shared/subnav' %>
       <%= yield %>
     </div>
   </body>

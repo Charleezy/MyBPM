@@ -1,9 +1,0 @@
-<% if @subnav_links %>
-  <ul class="nav nav-tabs">
-    <% @subnav_links.each do |l| %>
-      <li class="<%= l[:url] == @current_uri ? 'active' : ''%>">
-        <a href="<%= l[:url] %>"><%= l[:text] %></a>
-      </li>
-    <% end %>
-  </ul>
-<% end %>

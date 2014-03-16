@@ -1,15 +1,17 @@
 // import the CSS framework
 @import "bootstrap";
-/* blue 
-$bgDefault      : #d9edf7;
-$bgHighlight    : #C1E5F6;
-$colDefault     : #568AA3;
-$colHover       : #31708f;  
+
+/* blue */
+$bgDefault      : #428bca;//#d9edf7;
+$bgHighlight    : #285e8e;//#C1E5F6;
+$colDefault     : #cdddeb;//#568AA3;
+$colHover       : #FFF;//#31708f;  
 
 
 .navbar-default {
     background-color: $bgDefault;
-    border-color: $bgHighlight;
+    //border-color: $bgHighlight;
+    border-radius: 0px;
     .navbar-brand {
         color: $colDefault;
         &:hover, &:focus {
@@ -53,4 +55,3 @@ $colHover       : #31708f;
             color: $colHover;
             background-color: $bgHighlight; }}
 }
-*/

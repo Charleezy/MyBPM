@@ -22,8 +22,10 @@ body {
   border: 1px solid #e7e7e7;
   border-top: none;
   min-height: 600px;
+  position: relative;
 }
 
-#page-wrapper > .alert {
+#page-wrapper > .alert,
+#page-wrapper > .nav {
   margin-bottom: 5px;
 }
