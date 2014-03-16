@@ -19,7 +19,7 @@ div#canvas{
   }
   #tb-sequenceflow {
     background-image: url('tools/sequenceflow.png');
-    &:hover {
+    &:hover, &.hover {
       background-image: url('tools/sequenceflow-hover.png');
     }
   }

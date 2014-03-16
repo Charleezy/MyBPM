@@ -80,7 +80,10 @@
                   }
                   break;
                 case 'tb-sequenceflow':
+                  el.toggleClass('active hover');
                   bpmn.onConnect();
+                  // el.removeClass('active hover');
+                  // TODO need callback
                   break;
                 default:
                   // Do nothing
@@ -108,7 +111,7 @@
   <div class="panel-body">
     <ul>
       <li>Click on a toolbox item to add it to your workflow.</li>
-      <li>Right-click on a workflow item for more options (e.g. remove item).</li>
+      <li>Right-click on a workflow item for more options (e.g. to remove item).</li>
     </ul>
   </div>
 </div>

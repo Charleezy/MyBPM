@@ -100,8 +100,6 @@ net.BpmnJS.prototype = {
 
     // var test = this;
 
-    
-
     // globalPaper.forEach(function (el){
     //   el.click(function(){
     //     // console.log(test.connecting);
@@ -177,7 +175,7 @@ net.BpmnJS.prototype = {
     this.paper.forEach(function (el){
       if(el.type !== 'Transition'){
         this.moveElement(el);
-        this.enableContextMenu(el);
+        this.enableContextMenu(el[0]);
       }
     }, this);
   },
@@ -188,7 +186,8 @@ net.BpmnJS.prototype = {
 
   enableContextMenu: function(element) {
     var contextMenu = $('#editor-contextmenu');
-    $(element[0]).on('contextmenu', function(e) {
+    console.log(element);
+    $(element).on('contextmenu', function(e) {
       contextMenu.css({
         display: "block",
         left: e.pageX,
@@ -196,7 +195,7 @@ net.BpmnJS.prototype = {
       });
       contextMenu.on('click', 'a', function() {
         // Remove element from paper and hide contextmenu
-        $(element[0]).remove();
+        $(element).remove();
         contextMenu.hide();
       });
       $('body:not(#editor-contextmenu)').click(function() {
@@ -238,7 +237,10 @@ net.BpmnJS.prototype = {
 
   connectElements: function(element1, element2) {
     console.log('connectElements params');
-    this.connections.push(this.paper.connection(element1, element2, "#000"));
+    var connection = this.paper.connection(element1, element2, "#000", "#000|2");
+    // console.log(connection);
+    // FIXME this.enableContextMenu(connection.bg[0]);
+    this.connections.push(connection);
     // // We want to draw a path connecting the centers of both elements.
     // var x1 = parseInt(element1.associatedXPDL.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate) +
     //          parseInt(element1.dx) +
