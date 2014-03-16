@@ -70,103 +70,107 @@ net.BpmnJS.prototype = {
 
       // TRANSITIONS
       if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
-        var transitions = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition;
-        for(var j=0; j<transitions.length; j++){
-          var transition = transitions[j];
-          console.log(transition);
-          var coordinatesArray = transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.Coordinates;
-          var xOrigin = parseInt(coordinatesArray[0].XCoordinate);
-          var yOrigin = parseInt(coordinatesArray[0].YCoordinate);
-          
-          var xCoordinates = [];
-          var yCoordinates = [];
-          for(var k=1; k<coordinatesArray.length; k++){
-            xCoordinates[k] = parseInt(coordinatesArray[k].XCoordinate);
-            yCoordinates[k] = parseInt(coordinatesArray[k].YCoordinate);
-          }
-          
-          var borderColor = transition.ConnectorGraphicsInfos.ConnectorGraphicsInfo.BorderColor;
-          var linkedElements = Array();
-          linkedElements.push(String(transition.From));
-          linkedElements.push(String(transition.To));
+        var transitions = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition,
+            me = this;
+        transitions.forEach(function(transition) {
+          // Reference the activities we're transitioning to/from.
+          var element1 = me.getById(transition.From);
+          var element2 = me.getById(transition.To);
 
-          var element1 = this.getById(transition.From);
-          var element2 = this.getById(transition.To);
-          // this.paintTransition(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor, linkedElements);
-          this.connectElements(element1, element2);
-        }
+          // Create link association between the two activities.
+          // TODO changes to associatedXPDL required?
+          
+          // element1.outgoing.push(element2);
+          // element2.incoming.push(element1);
+          // create link in path (from, to)
+
+          var connection = me.connectElements(element1, element2);
+          element1.connections.push(connection);
+          element2.connections.push(connection);
+        });
       }
     }
 
-    var globalPaper = this.paper;
-
+    // DEPRECATED. Associate on activities, not connections/transitions.
+    // Instead, for every activity, we maintain a list of "outgoing" paths and "incoming" paths.
 
     // LINK THE ACTIVITIES TO THE TRANSITIONS
-    globalPaper.forEach(function (transition){
-      
-      // IF IT'S A TRANSITION
-      if(transition.shapeType === 'Transition'){
+    // this.paper.forEach(function(el) {
+    //   if(el.shapeType !== undefined && el.shapeType !== 'Transition'){
 
-        // LOOK FOR THE ID OF ELEMENTS LINKED TO THAT TRANSITION
-        for(var i in transition.linkedElements){
+    //     // LOOK FOR THE ID OF ELEMENTS LINKED TO THAT TRANSITION
+    //     // for(var i in transition.linkedElements){
 
-          // FIND ELEMENT LINKED FROM AND LINK
-          globalPaper.forEach(function (el){
+    //     //   // FIND ELEMENT LINKED FROM AND LINK
+    //     //   globalPaper.forEach(function (el){
 
-            if(el.hasOwnProperty('associatedXPDL') && transition.associatedXPDL.From === el.associatedXPDL.Id){
-              transition.linkedFromElement = el;
-              // LINK THE OTHER WAY AROUND (ELEMENT -> TRANSITIONS)
-              el.transitionLinkedFrom = transition;
-              return false;
+    //     //     if(el.hasOwnProperty('associatedXPDL') && transition.associatedXPDL.From === el.associatedXPDL.Id){
+    //     //       transition.linkedFromElement = el;
+    //     //       // LINK THE OTHER WAY AROUND (ELEMENT -> TRANSITIONS)
+    //     //       el.transitionLinkedFrom = transition;
+    //     //       return false;
 
-            }
+    //     //     }
 
-          });
+    //     //   });
 
-          // FIND ELEMENT LINKED TO AND LINK
-          globalPaper.forEach(function (el){
+    //     //   // FIND ELEMENT LINKED TO AND LINK
+    //     //   globalPaper.forEach(function (el){
 
-            if(el.hasOwnProperty('associatedXPDL') && transition.associatedXPDL.To === el.associatedXPDL.Id){
-              transition.linkedToElement = el;
-              // LINK THE OTHER WAY AROUND (ELEMENT -> TRANSITIONS)
-              el.transitionLinkedTo = transition;
-              return false;
+    //     //     if(el.hasOwnProperty('associatedXPDL') && transition.associatedXPDL.To === el.associatedXPDL.Id){
+    //     //       transition.linkedToElement = el;
+    //     //       // LINK THE OTHER WAY AROUND (ELEMENT -> TRANSITIONS)
+    //     //       el.transitionLinkedTo = transition;
+    //     //       return false;
 
-            }
+    //     //     }
 
-          });
+    //     //   });
 
-        }
+    //     // }
 
-      }
-    });
+    //   }
+    // });
 
     // MAKE ELEMENTS (NOT LINES) DRAGGABLE
-    this.paper.forEach(function (el){
+    this.paper.forEach(function(el) {
       // Don't bind move listener on Transitions (connections).
       if(el.shapeType !== undefined && el.shapeType !== 'Transition'){ 
         this.moveElement(el);
       }
       // Bind contextmenu to all elements, to enable options such as removing.
-      this.enableContextMenu(el[0]);
+      this.enableContextMenu(el);
     }, this);
   },
 
   clear: function() {
     this.paper.clear();
+    this.connections.length = 0;
   },
 
   enableContextMenu: function(element) {
-    var contextMenu = $('#editor-contextmenu');
-    var me = this;
-    $(element).on('contextmenu', function(e) {
+    var contextMenu = $('#editor-contextmenu'),
+        me = this;
+    $(element[0]).on('contextmenu', function(e) {
       contextMenu.css({
         display: "block",
         left: e.pageX,
         top: e.pageY
       });
+      // FIXME why is this called twice per element?
       contextMenu.on('click', 'a', function() {
-        $(element).remove();
+        // Remove transitions.
+        element.connections.forEach(function(connection) {
+          if (connection.from === element) {
+            // Connection is outgoing from me.
+            me.removeConnection(connection.to, connection);
+          } else {
+            // Connnection is incoming to me.
+            me.removeConnection(connection.from, connection);
+          }
+        });
+        element.connections.length = 0;
+        $(element[0]).remove();
         contextMenu.hide();
       });
       $('body:not(#editor-contextmenu)').click(function() {
@@ -210,6 +214,17 @@ net.BpmnJS.prototype = {
     var connection = this.paper.connection(element1, element2, "#000");
     connection.shapeType = 'Transition';
     this.connections.push(connection);
+    return connection;
+  },
+
+  removeConnection: function(element, connectionToRemove) {
+    element.connections.forEach(function(connection, index) {
+      if (connection === connectionToRemove) {
+        element.connections.splice(index, 1);
+        return;
+      }
+    });
+    connectionToRemove.line.remove();
   },
 
   moveElement : function(element) {
@@ -257,6 +272,7 @@ net.BpmnJS.prototype = {
     return element;
   },
 
+  // DEPRECATED... use connectElements() instead.
   // paintTransition : function(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor, linkedElements){
   //   var stringPath = "M"+xOrigin+","+yOrigin;
 
@@ -310,6 +326,9 @@ net.BpmnJS.prototype = {
     // var shape = this.paper.circle(x+width/2, y+height/2, width/2).attr('cursor', 'move');
     var shape = this.paper.circle(x+width/2, y+height/2, width/2);
     shape.associatedXPDL = xpdlEvent;
+    shape.outgoing = [];
+    shape.incoming = [];
+    shape.connections = [];
 
     shape.shapeType = 'Event';
     var cssClass = "";
@@ -325,6 +344,9 @@ net.BpmnJS.prototype = {
     var shape = this.paper.rect(x, y, width, height, 5);
     shape.associatedXPDL = xpdlImplementation;
     shape.shapeType = 'Implementation';
+    shape.outgoing = [];
+    shape.incoming = [];
+    shape.connections = [];
 
     // add text
     // var text = this.paper.text(x+width/2,y+height/2,name).attr('cursor', 'move');
@@ -351,6 +373,9 @@ net.BpmnJS.prototype = {
     var strPath = "M" + String(x+width/2) + " " + String(y+height) + ",L" + String(x+width) + " " + String(y+height/2) +",L" + String(x+width/2) + " " + String(y) + ",L" + String(x) + " " + String(y+height/2) + "Z";
     
     var shape = this.paper.path(strPath).attr({fill: fillColor});
+    shape.outgoing = [];
+    shape.incoming = [];
+    shape.connections = [];
     // var shape = this.paper.rect(x, y, width, height);
     // shape.rotate(45, x, y);
     shape.associatedXPDL = xpdlRoute;
@@ -368,7 +393,6 @@ net.BpmnJS.prototype = {
     $(shape.node).attr("fill",fillColor); 
     $(shape.node).attr("border",borderColor);
 
-    console.log(shape);
     return shape;
     
   },
