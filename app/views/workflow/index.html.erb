@@ -1,6 +1,30 @@
+<script>
+	$( document ).ready(function() {	
+	
+	
+		$(".add").click(function() {
+			var workflow_id= $(this).parent('td').parent('tr').find('.workflow_id').data('id');
+			
+			$.ajax({
+					beforeSend: function(req) {
+						req.setRequestHeader("Accept", "application/json");
+					},
+					url: "share", 
+					type: "POST",
+					data: {user : {"email" : email}},
+					success: function(sim_id) {
+						location.reload();
+					}
+				});
+		});
+	});
+</script>
+
 
 <h1>Your Workflows</h1>
 <a id="create-work" href="<%= new_workflow_path %>" class="pull-right">Create a workflow</a>
+
+
 
 <table class="table table-striped table-hover">
   <thead>
@@ -21,20 +45,62 @@
           <td><%= workflow.name %></td>
           <td><%= workflow.id %></td>
           <td><a href="<%= workflow_path(workflow.id) %>">View</td>
+		  <td><button type="button" class="btn btn-info" id="share" data-toggle="modal" data-target="#shareWorkflow" style="float:right; margin-bottom:5px;">
+		Share 
+	</button>
+	</td>
+		 
         </tr>
       <% end %>
     <% end %>
   </tbody>
 </table>
 
-<script type="text/javascript">
 
+<script type="text/javascript">
   $('#create-work').click(function(){
     $.ajax({
       type: "POST",
       url: "/workflow",
       data: { workflow: { name: "TestDocument2", xpdl: "Test" }}
     })
-  });
-
+  });  
 </script>
+
+<div class="modal fade" id="shareWorkflow" role="dialog" aria-labelledby="createSimulationModalLabel" aria-hidden="true" style="display:none">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="createSimulationModalLabel">Share With...</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-container" style="width: 80%; margin: 0 auto;">
+                    <table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Email</th>
+								<th>View</th>
+								<th>Edit</th>
+							</tr>	
+						</thead>		
+					</table>
+                </div>
+            </div>
+			
+			<form class="form-inline" style="width: 75%; margin: 0 auto;">
+				<input type="text" id = "email" class="input-small" placeholder="Search for someone">
+				<button type="submit" id = "add" class="btn">Add</button>
+			</form>
+
+            <div class="modal-footer">
+                <button id="save" type="button" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+
+        </div>
+    </div>
+</div>
