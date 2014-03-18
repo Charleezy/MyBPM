@@ -6,7 +6,7 @@
 
   <% if user_signed_in? %>
     <%= active_link_to 'Edit profile', edit_user_registration_path, :wrap_tag => :li, :active => :exclusive %>
-    <%= active_link_to 'Logout', destroy_user_session_path, :wrap_tag => :li, :active => :exclusive %>
+    <%= active_link_to 'Logout', destroy_user_session_path, :wrap_tag => :li, :active => :exclusive, method: :delete %>
   <% else %>
     <%= active_link_to 'Sign up', new_user_registration_path, :wrap_tag => :li, :active => :exclusive %>
     <%= active_link_to 'Login', new_user_registration_path, :wrap_tag => :li, :active => :exclusive %>
