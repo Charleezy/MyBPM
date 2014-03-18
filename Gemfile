@@ -57,3 +57,5 @@ end
 #gem 'libxml-ruby', '2.7.0'
 
 gem 'crack'
+
+gem 'active_link_to'
