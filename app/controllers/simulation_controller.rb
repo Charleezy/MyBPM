@@ -44,14 +44,6 @@ class SimulationController < ApplicationController
 	@workflow = Workflow.find(@simulation.workflow_id)
   end
 
-  def setup_side_nav_links
-    super
-    @subnav_links = [
-      {:text => "View all simulations", :url => simulation_index_path},
-      {:text => "Create a simulation", :url => new_simulation_path}
-    ]
-  end
-  
   def simulation_params
     params.require(:mockdata).permit(:name, :workflow_id, :mockdata)
   end
