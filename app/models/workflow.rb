@@ -1,7 +1,7 @@
 class Workflow < ActiveRecord::Base
   belongs_to :user
 
-  attr_accessor :xpdl
+  attr_accessor :xpdl, :json
 
   # Causes ActiveRecord to run this method
   # before saving (creating or updating).

@@ -56,4 +56,9 @@ class SimulationController < ApplicationController
     params.require(:mockdata).permit(:name, :workflow_id, :mockdata)
   end
   
+  def json_to_xml
+	#@data = MockData.find(params[:id])
+	#do nothing test function
+  end
+  
 end

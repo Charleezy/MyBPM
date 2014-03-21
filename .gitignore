@@ -21,6 +21,7 @@
 *.lock
 
 # Files
+ .metadata/
  .idea/.name
  .idea/MyBPM.iml
  .idea/encoding
