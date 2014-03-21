@@ -4,7 +4,6 @@ require 'json'
 class WorkflowController < ApplicationController
   around_filter :exception_handler
 
-
   def index
     @workflows = current_user.workflows
   end

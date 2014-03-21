@@ -1,22 +1,47 @@
 <script>
 	$( document ).ready(function() {
-		$("#create").click(function() {
-			
-			var json = "{[{'stage_num' : 'stage1', 'stage_data' : [{ 'name1' : 'fieldname1', 'value1' : fieldvalue1 },{ 'name2' : 'fieldname2', 'value2' : fieldvalue2 } ]},{'stage_num' : 'stage2', 'stage_data' : [{ 'name3' : 'fieldname3', 'value3' : 'fieldvalue3' },{ 'name4' : 'fieldname4', 'value4' : 'fieldvalue4' }]}]}";
+	
 		
-			$.ajax({
-				url: "simulation.json", 
-				type: "POST",
-				data: {mockdata : { "workflow_id" : 1, "mockdata" : json }},
-				success: function(sim_id) {
-					$('#alert_text').html('Simulation ' + sim_id + ' successfully created!');
-					$('#alert_status').show();
-				}
-			});
+	
+		$('#createSimulation').on('hidden.bs.modal', function () {
+			$('#simName').parent('div').removeClass('has-error');
+			$('#simname_err').hide();
+			$('#simName').val("");
 		});
 		
-		$(".delete").click(function() {
-			
+		$('#simName').focus(function () {
+			if ($('#simName').parent('div').hasClass('has-error')) {
+				$('#simName').parent('div').removeClass('has-error');
+				$('#simname_err').hide();
+			}
+		});
+	
+		$("#save").click(function() {
+			var sim_name = $('#simName').val();
+			var workflow_id = $('#workflow').find(":selected").val();
+			if (sim_name == "" || sim_name == null)
+			{
+				$('#simName').parent('div').addClass('has-error');
+				$('#simname_err').show();
+			}
+			else
+			{
+				$.ajax({
+					beforeSend: function(req) {
+						req.setRequestHeader("Accept", "application/json");
+					},
+					url: "simulation", 
+					type: "POST",
+					data: {mockdata : { "name" : sim_name, "workflow_id" : workflow_id}},
+					success: function(sim_id) {
+						/*console.log("Simulation " + sim_id + " successfully created.");*/
+						location.reload();
+					}
+				});
+			}
+		});
+		
+		$(".edit").click(function() {
 			var sim_id= $(this).parent('td').parent('tr').find('.sim_id').data('id');
 			
 			$.ajax({
@@ -26,14 +51,12 @@
 				url: "simulation/" + sim_id, 
 				type: "DELETE",
 				success: function(sim_id) {
-					$('#alert_text').html('Simulation ' + sim_id + ' successfully deleted!');
-					$('#alert_status').show();
+					location.reload();
 				}
 			});
 		});
 		
-		$(".update").click(function() {
-			
+		$(".delete").click(function() {
 			var sim_id= $(this).parent('td').parent('tr').find('.sim_id').data('id');
 			
 			$.ajax({
@@ -41,51 +64,101 @@
 					req.setRequestHeader("Accept", "application/json");
 				},
 				url: "simulation/" + sim_id, 
-				type: "PUT",
-				data: {mockdata : { "workflow_id" : 2, "mockdata" : "updated_data" }},
+				type: "DELETE",
 				success: function(sim_id) {
-					$('#alert_text').html('Simulation ' + sim_id + ' has been updated!');
-					$('#alert_status').show();
+					/*console.log("Simulation " + sim_id + " successfully deleted.");*/
+					location.reload();
 				}
 			});
 		});
 	});
 </script>
 
+<h1>My Simulations</h1>
 
-			<h1>Simulation</h1>
+<hr>
 
-			<div id="alert_status" class="alert alert-success alert-dismissable" style="display:none">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				<p id="alert_text">asfasf</p>
-			</div>
-			
-			<button type="button" class="btn btn-info" id="create">Create Mock Data</button>
+<% if(@workflows.count == 0) %>
+	<div class="alert alert-warning"><b>You must create a workflow before you can create any simulations!</b></div>
+	<button type="button" class="btn btn-info disabled" id="create" data-toggle="modal" data-target="#createSimulation" style="float:right; margin-bottom:5px;">
+		Create Simulation
+	</button>
+<% else %>
+	<button type="button" class="btn btn-info" id="create" data-toggle="modal" data-target="#createSimulation" style="float:right; margin-bottom:5px;">
+		Create Simulation
+	</button>
+<% end %>
+	
+<table class="table table-striped table-hover" style="border:2px solid grey">
+	<thead>
+		  <tr style="background-color:#ddd">
+			<th class="col-md-1">ID</th>
+			<th class="col-md-4">Name</th>
+			<th class="col-md-4">Workflow ID</th>
+			<th class="col-md-3"></th>
+		  </tr>
+	</thead>
+	<tbody>
+		<% if(@mockdata.count == 0) %>
+		  <tr>
+			<td colspan="4">You have no simulations</td>
+		  </tr>
+		<% else %>
+			<% @mockdata.each do |data| %>
+				  <tr>
+					<td class="sim_id" data-id=<%= data.id %>><%= data.id %></td>
+					<td><%= data.name %></td>
+					<td><%= data.workflow_id %></td>
+					<td style="text-align:center">
+						<a href="<%= edit_simulation_path(data.id) %>">Edit</a>
+						<a class="delete" style="cursor:pointer; margin-left:5px;">Delete</a>
+					</td>
+				  </tr>
+			<% end %>
+		<% end %>
+	</tbody>
+</table>
 
-			<table class="table">
-				<thead>
-					  <tr>
-						<th>Simulation ID</th>
-						<th>Workflow ID</th>
-						<th>Mock Data</th>
-						<th></th>
-						<th></th>
-					  </tr>
-				</thead>
-				<tbody>
-					<% @mockdata.each do |data| %>
-						  <tr>
-							<td class="sim_id" data-id=<%= data.id %>><%= data.id %></td>
-							<td><%= data.workflow_id %></td>
-							<td><%= data.mockdata %></td>
-							<td>
-								<button class="delete">Delete</button>
-							</td>
-							<td>
-								<button class="update">Update</button>
-							</td>
-						  </tr>
-					<% end %>
-				</tbody>
-			</table>
-		
+<div class="modal fade" id="createSimulation" role="dialog" aria-labelledby="createSimulationModalLabel" aria-hidden="true" style="display:none">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="createSimulationModalLabel">Create Simulation</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-container" style="width: 80%; margin: 0 auto;">
+                    <div class="form-group">
+                        <div class="formLabel">
+                            <label for="simName">Name</label>
+                        </div>
+                        <div class="formField">
+                            <input id="simName" name="simName" type="text" class="form-control" />
+                        </div>
+						<p id="simname_err" class="validation_msg" style="display:none; color:red;">Name is a mandatory field.</p>
+                    </div>
+                    <div class="form-group">
+                        <div class="formLabel">
+                            <label for="workflow">Workflow</label>
+                        </div>
+                        <div class="formField">
+							<select id="workflow" name="workflow" class="form-control">
+								<% @workflows.each do |data| %>
+									<option value=<%= data.id %>><%= data.id %> (<%= data.name %>)</option>
+								<% end %>
+							</select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="save" type="button" class="btn btn-primary">Create</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+
+        </div>
+    </div>
+</div>
