@@ -181,6 +181,10 @@ net.BpmnJS.prototype = {
       contextMenu.on('click', 'a#add-annotation', function() {
         var textToAdd = prompt('Annotation:');
         if (textToAdd == null || textToAdd.trim() == '') return;
+        if (element.pair !== undefined) {
+          // Remove element paired to this item (should be text).
+          element.pair.remove();
+        }
         var activity = element.associatedXPDL,
             x = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate),
             y = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate),
