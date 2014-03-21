@@ -1,5 +1,7 @@
 <script type="text/javascript">
 	$(function(){
+		var mockdata = {};
+	
 		var client = new XMLHttpRequest();
 
 		// GET JSON FILE
@@ -35,6 +37,26 @@
 		$('#static_canvas').on( "click", "rect", function() {
 			$('#addData').modal('show');
 		});
+		
+		$('#addData').on('hidden.bs.modal', function () {
+			$('#key').val("");
+			$('#value').val("");
+			$('#add_data_err').hide();
+		});
+		
+		$('#add').click(function() {
+			var key = $('#key').val();
+			var value = $('#value').val();
+			
+			if (key == "" || value == "") {
+				$('#add_data_err').show();
+			}
+			else {
+				mockdata[key] = value;
+				console.log(mockdata);
+				$('#addData').modal('hide');
+			}
+		});
 	
 	});
 </script>
@@ -68,14 +90,17 @@
             </div>
 
             <div class="modal-body">
-                <div class="form-container">
-                    <div class="key_val row">
+                <div class="form-container row">
+					<div id="add_data_err" class="alert alert-danger">
+						<strong>Error:</strong> Key and value cannot be blank!
+					</div>
+                    <div class="keyval_row row">
 						<div class="col-md-6">
 							<div class="formLabel">
 								<label for="key">Key</label>
 							</div>
 							<div class="formField">
-								<input name="key" type="text" class="form-control" />
+								<input id="key" name="key" type="text" class="form-control" />
 							</div>
 						</div>
 						<div class="col-md-6">
@@ -83,7 +108,7 @@
 								<label for="value">Value</label>
 							</div>
 							<div class="formField">
-								<input name="value" type="text" class="form-control" />
+								<input id="value" name="value" type="text" class="form-control" />
 							</div>
 						</div>
                     </div>

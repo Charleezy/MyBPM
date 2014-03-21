@@ -2,6 +2,10 @@
 	text-align:center;
 }
 
+#add_data_err {
+	display:none;
+}
+
 #addData {
 	display:none;
 }
@@ -27,6 +31,11 @@
 
 .heading {
 	padding-left:0px;
+}
+
+.keyval_row {
+	width:80%;
+	margin:0 auto;
 }
 
 #sim_container {
