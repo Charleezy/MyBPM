@@ -53,11 +53,16 @@
 			}
 			else {
 				mockdata[key] = value;
-				console.log(mockdata);
 				$('#addData').modal('hide');
 			}
 		});
-	
+		
+		$('#clear_mockdata').click(function() {
+			var answer = confirm('Are you sure you want to delete all your mock data?');
+			if(answer == true) {
+				mockdata = { };
+			}
+		});
 	});
 </script>
 
@@ -78,6 +83,7 @@
 </div>
 
 <button type="button" class="btn btn-primary" id="save_mockdata">Save Simulation</button>
+<button type="button" class="btn btn-primary" id="clear_mockdata">Clear Mock Data</button>
 <button type="button" class="btn btn-primary" id="run_sim"><span class="glyphicon glyphicon-play"></span></button>
 
 <div class="modal fade" id="addData" role="dialog" aria-labelledby="addDataModalLabel" aria-hidden="true">
