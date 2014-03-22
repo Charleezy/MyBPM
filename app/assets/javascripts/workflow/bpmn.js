@@ -35,9 +35,10 @@ function assert(condition, message) {
 }
         
 // Constructor
-net.BpmnJS = function(xpdlJson, canvas){
+net.BpmnJS = function(xpdlJson, canvas, isStatic){
 
   this.xpdlJson = xpdlJson;
+  this.isStatic = isStatic;
 
   // Paint canvas
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
@@ -48,6 +49,8 @@ net.BpmnJS = function(xpdlJson, canvas){
 net.BpmnJS.prototype = {
 
   plot: function(){
+
+    console.log(this.xpdlJson);
     
     // PAINT
     for(var i=0; i<this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess.length; i++){
@@ -129,15 +132,17 @@ net.BpmnJS.prototype = {
     //   }
     // });
 
-    // MAKE ELEMENTS (NOT LINES) DRAGGABLE
-    this.paper.forEach(function(el) {
-      // Don't bind move listener on Transitions (connections).
-      if(el.shapeType !== undefined && el.shapeType !== 'Transition'){ 
-        this.moveElement(el);
-      }
-      // Bind contextmenu to all elements, to enable options such as removing.
-      this.enableContextMenu(el);
-    }, this);
+    if (!this.isStatic) {
+      // MAKE ELEMENTS (NOT LINES) DRAGGABLE
+      this.paper.forEach(function(el) {
+        // Don't bind move listener on Transitions (connections).
+        if(el.shapeType !== undefined && el.shapeType !== 'Transition'){ 
+          this.moveElement(el);
+        }
+        // Bind contextmenu to all elements, to enable options such as removing.
+        this.enableContextMenu(el);
+      }, this);
+    }
   },
 
   clear: function() {
@@ -335,6 +340,7 @@ net.BpmnJS.prototype = {
 
     for(var activityProperty in xpdlActivity)
     {
+      console.log(activityProperty);
       
       switch(activityProperty){
         

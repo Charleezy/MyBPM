@@ -56,8 +56,8 @@
         type: "POST",
         success: function(data) {
           if(!alreadyLoaded){
-            var bpmn = new net.BpmnJS($('#canvas')[0], []);
-            bpmn.plot(jsonObject);
+            var bpmn = new net.BpmnJS(jsonObject, $('#canvas')[0], false);
+            bpmn.plot();
             alreadyLoaded = true;
           }
         }
