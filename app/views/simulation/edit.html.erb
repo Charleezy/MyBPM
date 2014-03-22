@@ -1,46 +1,68 @@
 <script type="text/javascript">
-	$(document).ready(function(){
-		
+	$(function(){
+		var mockdata = {};
+	
 		var client = new XMLHttpRequest();
 
 		// GET JSON FILE
 		client.open('GET', 'https://dl.dropboxusercontent.com/s/yyimks43gemdazq/jsonFile.json?dl=1&token_hash=AAEwKPu9isScXrMb-m9dVvUkYjxLiZTsM2DcEiIvPbXFnQ',false);
 		client.send();
 		var jsonText = client.responseText;
-		
+    
 		// GET XPDL FILE
 		client.open('GET', 'https://dl.dropboxusercontent.com/s/j1w6mr83r8ug0om/simpleWorkflow.xpdl?dl=1&token_hash=AAH7PHIpUBmIim-BUM6uC7WC8lAqG-36HYOqxJHkbm2WzA',false);
 		client.send();
 		var XPDLText = client.responseText;
-		
+
+		// GET BPMN FILE
+		client.open('GET', 'https://dl.dropboxusercontent.com/s/8gmm8lss2j88i1b/testFile.bpmn?dl=1&token_hash=AAGfdvQIrgIaaLbx4cpJLbFEF9izHR-iuzOhMy5esvnV1w',false);
+		client.send();
+		var bpmnText = client.responseText;
+
 		// CREATE THE JAVASCRIPT OBJECT BASED ON THE JSON FILE
 		var jsonObject = JSON.parse(jsonText);
-	
+    
 		var alreadyLoaded = false;
-	
-		$.ajax({
-			beforeSend: function(req) {
-				req.setRequestHeader("Accept", "application/json");
-			},
-			url: "/workflow/xpdltojson", 
-			type: "POST",
-			success: function(data) {
-				if(!alreadyLoaded){
-					var bpmn = new net.BpmnJS($('#canvas')[0], []);
-					bpmn.plot(jsonObject);
-					alreadyLoaded = true;
-				}
+
+		if(!alreadyLoaded){
+			var bpmn = new net.BpmnJS(jsonObject,$('#static_canvas')[0]);
+			bpmn.plot();
+			alreadyLoaded = true;
+		}
+	  
+		$('#static_canvas').on( "click", "circle", function() {
+			$('#addData').modal('show');
+		});
+		
+		$('#static_canvas').on( "click", "rect", function() {
+			$('#addData').modal('show');
+		});
+		
+		$('#addData').on('hidden.bs.modal', function () {
+			$('#key').val("");
+			$('#value').val("");
+			$('#add_data_err').hide();
+		});
+		
+		$('#add').click(function() {
+			var key = $('#key').val();
+			var value = $('#value').val();
+			
+			if (key == "" || value == "") {
+				$('#add_data_err').show();
+			}
+			else {
+				mockdata[key] = value;
+				$('#addData').modal('hide');
 			}
 		});
 		
-		$('#canvas').on( "click", "circle", function() {
-			$('#addData').modal('show');
+		$('#clear_mockdata').click(function() {
+			var answer = confirm('Are you sure you want to delete all your mock data?');
+			if(answer == true) {
+				mockdata = { };
+			}
 		});
-		
-		$('#canvas').on( "click", "rect", function() {
-			$('#addData').modal('show');
-		});
-		
 	});
 </script>
 
@@ -48,14 +70,23 @@
 
 <hr>
 
-<div class="row">
-	<div id="canvas" style="border:1px solid lightgrey; margin:5px;"></div>
+<div class="row" id="sim_titles">
+	<div class="col-md-7 heading"><b>Workflow:</b></div>
+	<div class="col-md-1"></div>
+	<div class="col-md-4 heading"><b>Simulation Results:</b></div>
 </div>
 
-<button type="button" class="btn btn-primary">Save Simulation</button>
-<button type="button" class="btn btn-primary">Run</button>
+<div class="row" id="sim_container">
+	<div class="col-md-7" id="static_canvas"></div>
+	<div class="col-md-1"></div>
+	<div class="col-md-4" id="sim_results"></div>
+</div>
 
-<div class="modal fade" id="addData" role="dialog" aria-labelledby="addDataModalLabel" aria-hidden="true" style="display:none">
+<button type="button" class="btn btn-primary" id="save_mockdata">Save Simulation</button>
+<button type="button" class="btn btn-primary" id="clear_mockdata">Clear Mock Data</button>
+<button type="button" class="btn btn-primary" id="run_sim"><span class="glyphicon glyphicon-play"></span></button>
+
+<div class="modal fade" id="addData" role="dialog" aria-labelledby="addDataModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
 
@@ -65,31 +96,25 @@
             </div>
 
             <div class="modal-body">
-                <div class="form-container">
-                    <div class="key_val row">
-						<div class="col-md-5">
+                <div class="form-container row">
+					<div id="add_data_err" class="alert alert-danger">
+						<strong>Error:</strong> Key and value cannot be blank!
+					</div>
+                    <div class="keyval_row row">
+						<div class="col-md-6">
 							<div class="formLabel">
 								<label for="key">Key</label>
 							</div>
 							<div class="formField">
-								<input name="key" type="text" class="form-control" />
+								<input id="key" name="key" type="text" class="form-control" />
 							</div>
 						</div>
-						<div class="col-md-5">
+						<div class="col-md-6">
 							<div class="formLabel">
 								<label for="value">Value</label>
 							</div>
 							<div class="formField">
-								<input name="value" type="text" class="form-control" />
-							</div>
-						</div>
-						<div class="col-md-2">
-							<div class="formLabel">
-								<label for="buttons"></label>
-							</div>
-							<div class="btn-group">
-								<button class="btn btn-success add_data">+</button>
-								<button class="btn btn-danger remove_data">-</button>
+								<input id="value" name="value" type="text" class="form-control" />
 							</div>
 						</div>
                     </div>
@@ -97,7 +122,7 @@
             </div>
 
             <div class="modal-footer">
-                <button id="save" type="button" class="btn btn-primary">Save</button>
+                <button id="add" type="button" class="btn btn-primary">Add</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             </div>
 

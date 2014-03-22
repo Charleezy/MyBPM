@@ -40,23 +40,10 @@ class SimulationController < ApplicationController
   end
   
   def edit
-<<<<<<< HEAD
-  @simulation = MockData.find(params[:id])
-  @workflow = Workflow.find(@simulation.workflow_id)
-=======
 	@simulation = MockData.find(params[:id])
 	@workflow = Workflow.find(@simulation.workflow_id)
->>>>>>> 8a5750449aa3bc4124dde2897f15fc8ba13fff02
   end
 
-  def setup_side_nav_links
-    super
-    @subnav_links = [
-      {:text => "View all simulations", :url => simulation_index_path},
-      {:text => "Create a simulation", :url => new_simulation_path}
-    ]
-  end
-  
   def simulation_params
     params.require(:mockdata).permit(:name, :workflow_id, :mockdata)
   end
