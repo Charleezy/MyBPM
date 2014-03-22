@@ -8,36 +8,6 @@
 <%= javascript_include_tag 'workflow/graffle.js' %>
 <script type="text/javascript">
   $(function(){
-    var client = new XMLHttpRequest();
-
-    // GET JSON FILE
-    client.open('GET', 'https://dl.dropboxusercontent.com/s/yyimks43gemdazq/jsonFile.json?dl=1&token_hash=AAEwKPu9isScXrMb-m9dVvUkYjxLiZTsM2DcEiIvPbXFnQ',false);
-    client.send();
-    var jsonText = client.responseText;
-    
-    // GET XPDL FILE
-    client.open('GET', 'https://dl.dropboxusercontent.com/s/j1w6mr83r8ug0om/simpleWorkflow.xpdl?dl=1&token_hash=AAH7PHIpUBmIim-BUM6uC7WC8lAqG-36HYOqxJHkbm2WzA',false);
-    client.send();
-    var XPDLText = client.responseText;
-
-    // GET BPMN FILE
-    client.open('GET', 'https://dl.dropboxusercontent.com/s/8gmm8lss2j88i1b/testFile.bpmn?dl=1&token_hash=AAGfdvQIrgIaaLbx4cpJLbFEF9izHR-iuzOhMy5esvnV1w',false);
-    client.send();
-    var bpmnText = client.responseText;
-
-    // CONVERT JSON TO XPDL (NOT WORKING)
-    var x2js = new X2JS();
-    var newXPDLText = x2js.json2xml_str(jsonText);
-    
-    // CREATE THE JAVASCRIPT OBJECT BASED ON THE JSON FILE
-    var jsonObject = JSON.parse(jsonText);
-    
-
-    // FILL THE HTML ELEMENTS WITH TEXT
-    $('#json').html(jsonText);
-    $('#XPDL').html(XPDLText);
-    $('#bpmn').html(bpmnText);
-    $('#newXPDL').html(newXPDLText);
 
     // Workflow editor instructions.
     $('#help').click(function() {
@@ -46,8 +16,13 @@
     });
 
     var alreadyLoaded = false;
+    var jsonObject = null;
+    
 
-    $("#convert").click(function() {
+    // WHEN YOU CLICK THE IMPORT BUTTON
+    $('#MyButton').click(function(){
+
+
       $.ajax({
         beforeSend: function(req) {
           req.setRequestHeader("Accept", "application/json");
@@ -56,16 +31,14 @@
         type: "POST",
         success: function(data) {
           if(!alreadyLoaded){
-            var bpmn = new net.BpmnJS($('#canvas')[0], []);
-            bpmn.plot(jsonObject);
+            jsonObject = data;
+            var bpmn = new net.BpmnJS(jsonObject, $('#canvas')[0]);
+            bpmn.plot(data);
             alreadyLoaded = true;
           }
         }
       });
-    });
 
-    // WHEN YOU CLICK THE IMPORT BUTTON
-    $('#MyButton').click(function(){
       if(!alreadyLoaded){
           $('#toolbox').removeClass('hide');
           var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
@@ -222,11 +195,11 @@
 </div>
 <%# This will get removed just keeping for testing %>
 <br><br>
-XPDL
-<textarea id="XPDL" style="width:100%;height:200px;"></textarea>
+<!-- XPDL
+<textarea id="XPDL" style="width:100%;height:200px;"></textarea> -->
 json
 <textarea id="json" style="width:100%;height:200px;"></textarea>
-bpmn
+<!-- bpmn
 <textarea id="bpmn" style="width:100%;height:200px;"></textarea>
 newXPDL
-<textarea id="newXPDL" style="width:100%;height:200px;"></textarea>
+<textarea id="newXPDL" style="width:100%;height:200px;"></textarea> -->
