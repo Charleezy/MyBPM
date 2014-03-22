@@ -50,8 +50,25 @@ class WorkflowController < ApplicationController
   end
 end 
   
+  #Should just use create as it does the same thing
   def import
-    
+    params[:workflow][:xpdl] = json_to_xpdl(params[:workflow][:json])
+    #Writes to database for [currentUserID][]
+    if( current_user.workflows.create( workflow_params) )
+      render :text => "success"
+      #redirect_to :action => 'index', :notice => 'Workflow was created.'
+    else
+    render :new, :notice => 'failed to import workflow.'
+    end 
+  end
+
+  #given an ID of a workflow for the current user, returns the workflow as a json
+  def export
+    myXPDL = @workflow.find(params[:id]);
+    myJSON = myXPDL.to_json;
+    respond_to do |format| 
+      format.json { render :json => myJSON}
+    end
   end
   
   def xpdltojson 
@@ -59,7 +76,7 @@ end
     myJSON = myXML.to_json;
     
     respond_to do |format| 
-      format.json { render :json => myJSON}
+      format.json { render :json => myJSON};
     end
   end
   

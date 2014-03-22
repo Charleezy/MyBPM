@@ -11,6 +11,9 @@
     <tr>
   </thead>
   <tbody>
+
+          <button id="export">export</button>
+
     <% if(@workflows.count == 0) %>
       <tr>
         <td colspan="3">You have no workflows</td>
@@ -24,6 +27,9 @@
           <td>
             <%= link_to 'Delete', workflow, :method => :delete, :confirm => "Are you sure you want to delete #{workflow.name}?" %>
           </td>
+          <!-- <td>
+            <%= link_to 'export', "/workflow/export/"+workflow.id.to_s , :method => :export %>
+          </td> -->
         </tr>
       <% end %>
     <% end %>
@@ -40,5 +46,14 @@
       data: { workflow: { name: "TestDocument2", json: my_json }}
     })
   });
+
+  $('#export').click(function(){
+    $.ajax({
+      type: "POST",
+      url: "/workflow/export/11",
+      data: { id: 11 }
+    })
+  });
+
 
 </script>
