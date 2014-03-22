@@ -151,13 +151,18 @@ net.BpmnJS.prototype = {
   },
 
   enableContextMenu: function(element) {
-    var contextMenu = $('#editor-contextmenu'),
-        me = this;
-        var canvas = "#canvas"
+    var canvas = "#canvas"
         // These two should be updated every resize. need to fix this!
         var position = $(canvas).position();
         var offset = $(canvas).offset();
         $( "#log-form" ).text("positionX:" + position.left + ", Y: " + position.top + ". offsetX:"+ offset.left +", offsetY:" + offset.top);
+    $( window ).resize(function() {
+        position = $(canvas).position();
+        offset = $(canvas).offset();
+        $( "#log-form" ).text("positionX:" + position.left + ", Y: " + position.top + ". offsetX:"+ offset.left +", offsetY:" + offset.top);
+    });
+    var contextMenu = $('#editor-contextmenu'),
+        me = this;
         $( document ).on( "mousemove", function( event ) {
         	var canvasX = parseInt(event.pageX - offset.left - 1)
         	var canvasY = parseInt(event.pageY - offset.top - 22)
