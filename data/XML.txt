@@ -121,7 +121,7 @@
           <Route ></Route>
           <Documentation ></Documentation>
           <NodeGraphicsInfos>
-            <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="40" Width="40" BorderColor="-5855715" FillColor="-52">
+            <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="40" Width="40" BorderColor="-5855715" FillColor="yellow">
               <Coordinates XCoordinate="417" YCoordinate="168" ></Coordinates>
             </NodeGraphicsInfo>
           </NodeGraphicsInfos>
