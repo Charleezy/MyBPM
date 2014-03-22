@@ -153,10 +153,14 @@ net.BpmnJS.prototype = {
   enableContextMenu: function(element) {
     var contextMenu = $('#editor-contextmenu'),
         me = this;
-        var position = $("#canvas").offset();
+        var canvas = "#canvas"
+        // These two should be updated every resize. need to fix this!
+        var position = $(canvas).position();
+        var offset = $(canvas).offset();
+        $( "#log-form" ).text("positionX:" + position.left + ", Y: " + position.top + ". offsetX:"+ offset.left +", offsetY:" + offset.top);
         $( document ).on( "mousemove", function( event ) {
-        	var canvasX = parseInt(event.pageX - position.left - 1)
-        	var canvasY = parseInt(event.pageY - position.top - 22)
+        	var canvasX = parseInt(event.pageX - offset.left - 1)
+        	var canvasY = parseInt(event.pageY - offset.top - 22)
         	if (canvasX < 0 || canvasY < 0) {
         		canvasX = NaN;
         		canvasY = NaN;
@@ -164,11 +168,10 @@ net.BpmnJS.prototype = {
         	$( "#log" ).text("X: " + event.pageX + ", Y: " + event.pageY + ". Canvas X:"+ canvasX +", canvas Y:" + canvasY);
         });
     $(element[0]).on('contextmenu', function(e) {
-      var position = $("#canvas").offset();
       contextMenu.css({
         display: "block",
-        left: (e.pageX-23),
-        top: (e.pageY-position.left-23)
+        left: (event.pageX+position.left-offset.left),
+        top: (event.pageY-offset.top+position.top)
       });
       // FIXME why is this called twice per element?
       contextMenu.on('click', 'a#remove-element', function() {
