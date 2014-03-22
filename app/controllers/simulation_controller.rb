@@ -4,12 +4,7 @@ class SimulationController < ApplicationController
     @workflows = current_user.workflows
     @workflow_ids = current_user.workflows.select("id")
     @mockdata = MockData.where(workflow_id: @workflow_ids)
-  end
-
-  def historical
-    @workflow_ids = current_user.workflows.select("id")
-    @simulation_results = SimulationResult.where(workflow_id: @workflow_ids)
-    render 'historical'
+    @simulation_results = SimulationResult.all
   end
   
   def new
@@ -45,20 +40,20 @@ class SimulationController < ApplicationController
   end
   
   def edit
-    @simulation = MockData.find(params[:id])
-    @workflow = Workflow.find(@simulation.workflow_id)
+	@simulation = MockData.find(params[:id])
+	@workflow = Workflow.find(@simulation.workflow_id)
   end
 
+  def setup_side_nav_links
+    super
+    @subnav_links = [
+      {:text => "View all simulations", :url => simulation_index_path},
+      {:text => "Create a simulation", :url => new_simulation_path}
+    ]
+  end
+  
   def simulation_params
     params.require(:mockdata).permit(:name, :workflow_id, :mockdata)
   end
   
-  def setup_side_nav_links
-    super
-    @subnav_links = [
-      {:text => "View all Simulations", :url => simulation_index_path},
-      {:text => "View Simulation results", :url => '/simulation/historical'}
-    ]
-  end
-
 end
