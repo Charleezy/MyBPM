@@ -173,6 +173,7 @@ net.BpmnJS.prototype = {
         left: (event.pageX+position.left-offset.left),
         top: (event.pageY-offset.top+position.top)
       });
+
       // FIXME why is this called twice per element?
       contextMenu.on('click', 'a#remove-element', function() {
         // Remove transitions.
@@ -264,6 +265,23 @@ net.BpmnJS.prototype = {
     this.connections.push(connection);
     element1.connections.push(connection);
     element2.connections.push(connection);
+
+    //If gateway element, ask for condition(s)
+    if (element1.shapeType == 'Route'){
+      var textToAdd = prompt('Condition:');
+
+      //If null, path is always travelled -> parallel
+      if (textToAdd == null || textToAdd.trim() == '') return;
+      
+      //Need to determine correct x & y 
+      var x = 0, y =0;
+      var text = this.paper.text(x, y, textToAdd);
+      text.shapeType = 'Condition';
+
+      // PAIRING SHAPE AND TEXT
+      connection.pair = text;
+      text.pair = connection;
+    }
   },
 
   removeConnection: function(element, connectionToRemove) {
@@ -311,7 +329,9 @@ net.BpmnJS.prototype = {
         up = function () {
           this.animate({"fill-opacity": 1}, 500);
         };
-    element.drag(move, dragger, up);  
+    if (element.shapeType != "Condition"){
+      element.drag(move, dragger, up);  
+    }
   },
 
   getById : function(id) {
