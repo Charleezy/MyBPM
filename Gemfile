@@ -62,5 +62,5 @@ gem 'active_link_to'
 
 # Using Phusion Passenger to power the server application.
 # This is recommended by Ruby on Rails Deployment
-gem 'passenger' '~> 4.0.40'
+gem 'passenger', '~> 4.0.40'
 
