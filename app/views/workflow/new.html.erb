@@ -9,6 +9,8 @@
 <script type="text/javascript">
 $(function(){
 
+  var alreadyLoaded = false;
+
   // Workflow editor instructions.
   $('#help').click(function() {
     $(this).toggleClass('active');
@@ -19,66 +21,70 @@ $(function(){
 
   // WHEN YOU CLICK THE IMPORT BUTTON, IT LOADS THE JSON FROM THE SERVER
   $('#MyButton').click(function(){
-    $.ajax({
-      beforeSend: function(req) {
-        req.setRequestHeader("Accept", "application/json");
-      },
-      url: "/workflow/xpdltojson", 
-      type: "POST",
-      success: function(data) {
-        jsonObject = data;
-        $('#toolbox').removeClass('hide');
 
-        // PLOTS THE WORKFLOW
-        var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
-        bpmn.plot(jsonObject);
+    if(!alreadyLoaded){
+        $.ajax({
+            beforeSend: function(req) {
+              req.setRequestHeader("Accept", "application/json");
+            },
+            url: "/workflow/xpdltojson", 
+            type: "POST",
+            success: function(data) {
+              alreadyLoaded = true;
+              jsonObject = data;
+              $('#toolbox').removeClass('hide');
 
-        // Toolbox listeners
-        $('#toolbox > .tb-item').click(function(){
-          var el = $(this);
-          // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
-          var x = 10, y= 10;
-           // var shape = null;
-           switch (el.attr('id')) {
-            case 'tb-startevent':
-            bpmn.initStartEvent(x, y);
-            break;
-            case 'tb-intermediateevent':
-            bpmn.initIntermediateEvent(x, y);
-            break;
-            case 'tb-endevent':
-            bpmn.initEndEvent(x, y);
-            break;
-            case 'tb-gateway':
-            bpmn.initGateway(x, y);
-            break;
-            case 'tb-task':
-            bpmn.initTask(x, y);
-            break;
-            case 'tb-clearcanvas':
-            if (confirm('Are you sure you want to clear the workflow?')) {
-              bpmn.clear();
-            }
-            break;
-            case 'tb-sequenceflow':
-            el.toggleClass('active hover');
-            $('#connect-instructions').toggleClass('hide');
-            bpmn.onConnect(function(e) {
-              if (e === 'success') {
-                    // We have successfully connected two elements.
-                    el.removeClass('active hover');
-                    $('#connect-instructions').addClass('hide');
+              // PLOTS THE WORKFLOW
+              var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
+              bpmn.plot(jsonObject);
+
+              // Toolbox listeners
+              $('#toolbox > .tb-item').click(function(){
+                var el = $(this);
+                // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
+                var x = 10, y= 10;
+                 // var shape = null;
+                 switch (el.attr('id')) {
+                  case 'tb-startevent':
+                  bpmn.initStartEvent(x, y);
+                  break;
+                  case 'tb-intermediateevent':
+                  bpmn.initIntermediateEvent(x, y);
+                  break;
+                  case 'tb-endevent':
+                  bpmn.initEndEvent(x, y);
+                  break;
+                  case 'tb-gateway':
+                  bpmn.initGateway(x, y);
+                  break;
+                  case 'tb-task':
+                  bpmn.initTask(x, y);
+                  break;
+                  case 'tb-clearcanvas':
+                  if (confirm('Are you sure you want to clear the workflow?')) {
+                    bpmn.clear();
                   }
-                });
-            break;
-            default:
-                // Do nothing
-                break;
-              }
-
-            });
-      }
-    });
+                  break;
+                  case 'tb-sequenceflow':
+                  el.toggleClass('active hover');
+                  $('#connect-instructions').toggleClass('hide');
+                  bpmn.onConnect(function(e) {
+                    if (e === 'success') {
+                          // We have successfully connected two elements.
+                          el.removeClass('active hover');
+                          $('#connect-instructions').addClass('hide');
+                        }
+                      });
+                  break;
+                  default:
+                      // Do nothing
+                      break;
+                    }
+              });
+            }
+        });
+    }
+    
 
 
 
