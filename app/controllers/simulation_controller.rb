@@ -1,8 +1,8 @@
 class SimulationController < ApplicationController
     
   def index
-	@workflows = current_user.workflows
-	@workflow_ids = current_user.workflows.select("id")
+    @workflows = current_user.workflows
+    @workflow_ids = current_user.workflows.select("id")
     @mockdata = MockData.where(workflow_id: @workflow_ids)
     @simulation_results = SimulationResult.all
   end

@@ -1,4 +1,5 @@
 <script>
+
 $(document).ready(function() {
 	$('#create_simulation').on('hidden.bs.modal', function () {
 		$('#simName').parent('div').removeClass('has-error');
@@ -72,6 +73,7 @@ $(document).ready(function() {
 		}
 	});
 });
+
 </script>
 
 <h1>My Simulations</h1>
@@ -145,11 +147,11 @@ $(document).ready(function() {
                             <label for="workflow">Workflow</label>
                         </div>
                         <div class="formField">
-							<select id="workflow" name="workflow" class="form-control">
-								<% @workflows.each do |data| %>
-									<option value=<%= data.id %>><%= data.id %> (<%= data.name %>)</option>
-								<% end %>
-							</select>
+              <select id="workflow" name="workflow" class="form-control">
+                <% @workflows.each do |data| %>
+                  <option value=<%= data.id %>><%= data.id %> (<%= data.name %>)</option>
+                <% end %>
+              </select>
                         </div>
                     </div>
                 </div>
