@@ -35,9 +35,10 @@ function assert(condition, message) {
 }
         
 // Constructor
-net.BpmnJS = function(xpdlJson, canvas){
+net.BpmnJS = function(xpdlJson, canvas, isStatic){
 
   this.xpdlJson = xpdlJson;
+  this.isStatic = isStatic;
 
   // Paint canvas
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
@@ -128,9 +129,10 @@ net.BpmnJS.prototype = {
 
     //   }
     // });
-
-    // MAKE ELEMENTS (NOT LINES) DRAGGABLE
-    this.paper.forEach(function(el) {
+	
+	if (!this.isStatic) {
+	  // MAKE ELEMENTS (NOT LINES) DRAGGABLE
+	  this.paper.forEach(function(el) {
       // Don't bind move listener on Transitions (connections).
       if(el.shapeType !== undefined && el.shapeType !== 'Transition'){ 
         this.moveElement(el);
@@ -138,6 +140,9 @@ net.BpmnJS.prototype = {
       // Bind contextmenu to all elements, to enable options such as removing.
       this.enableContextMenu(el);
     }, this);
+	}
+	
+    
   },
 
   clear: function() {

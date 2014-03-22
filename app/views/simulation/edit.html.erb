@@ -1,5 +1,5 @@
 <script type="text/javascript">
-	$(function(){
+	$(document).ready(function() {
 		var mockdata = {};
 	
 		var client = new XMLHttpRequest();
@@ -25,7 +25,7 @@
 		var alreadyLoaded = false;
 
 		if(!alreadyLoaded){
-			var bpmn = new net.BpmnJS(jsonObject,$('#static_canvas')[0]);
+			var bpmn = new net.BpmnJS(jsonObject, $('#static_canvas')[0], true);
 			bpmn.plot();
 			alreadyLoaded = true;
 		}
@@ -55,6 +55,21 @@
 				mockdata[key] = value;
 				$('#addData').modal('hide');
 			}
+			console.log(mockdata);
+		});
+		
+		$('#save_mockdata').click(function() {
+			var sim_id = $('#sim_id').text();
+			var workflow_id = $('#workflow_id').text();
+			
+			$.ajax({
+				beforeSend: function(req) {
+					req.setRequestHeader("Accept", "application/json");
+				},
+				url: "/simulation/" + sim_id,
+				type: "PUT",
+				data: { mockdata : { "workflow_id" : workflow_id, "mockdata" : JSON.stringify(mockdata) } }
+			});
 		});
 		
 		$('#clear_mockdata').click(function() {
@@ -65,6 +80,9 @@
 		});
 	});
 </script>
+
+<span id="sim_id" style="display:none"><%= @simulation.id %></span>
+<span id="workflow_id" style="display:none"><%= @workflow.id %></span>
 
 <h1><%= @simulation.name %></h1>
 
