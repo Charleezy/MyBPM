@@ -20,6 +20,7 @@ class WorkflowController < ApplicationController
 
   def create
     params[:workflow][:xpdl] = json_to_xpdl(params[:workflow][:json])
+    #Writes to database for [currentUserID][]
     if( current_user.workflows.create( workflow_params) )
       render :text => "success"
       #redirect_to :action => 'index', :notice => 'Workflow was created.'
@@ -32,7 +33,6 @@ class WorkflowController < ApplicationController
     @workflow.find(params[:id])
     @workflow.json = xpdl_to_json(@workflow.xpdl)
   end
-end 
 
   def update
     params[:workflow][:xpdl] = json_to_xpdl(params[:workflow][:json])
@@ -48,9 +48,10 @@ end
     flash[:notice] = 'Workflow was deleted.'
     redirect_to :controller => 'workflow', :action => 'index'
   end
+end 
   
   def import
-  
+    
   end
   
   def xpdltojson 
@@ -84,4 +85,3 @@ end
     def workflow_params
       params.require(:workflow).permit(:name, :xpdl)
     end
-end
