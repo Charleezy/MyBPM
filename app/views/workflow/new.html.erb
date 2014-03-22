@@ -1,5 +1,5 @@
 <%#= form_for :bpmn do |f| %>
-<%#= f.file_field :bpmn %>
+  <%#= f.file_field :bpmn %>
 <%# end %>
 <%= stylesheet_link_tag 'workflow' %>
 <%= javascript_include_tag 'ext_lib/xml2json.min.js' %>
@@ -7,117 +7,149 @@
 <%= javascript_include_tag 'workflow/bpmn.js' %>
 <%= javascript_include_tag 'workflow/graffle.js' %>
 <script type="text/javascript">
-$(function(){
+  $(function(){
+    var client = new XMLHttpRequest();
 
-  var alreadyLoaded = false;
+    // GET JSON FILE
+    client.open('GET', 'https://dl.dropboxusercontent.com/s/yyimks43gemdazq/jsonFile.json?dl=1&token_hash=AAEwKPu9isScXrMb-m9dVvUkYjxLiZTsM2DcEiIvPbXFnQ',false);
+    client.send();
+    var jsonText = client.responseText;
+    
+    // GET XPDL FILE
+    client.open('GET', 'https://dl.dropboxusercontent.com/s/j1w6mr83r8ug0om/simpleWorkflow.xpdl?dl=1&token_hash=AAH7PHIpUBmIim-BUM6uC7WC8lAqG-36HYOqxJHkbm2WzA',false);
+    client.send();
+    var XPDLText = client.responseText;
 
-  // Workflow editor instructions.
-  $('#help').click(function() {
-    $(this).toggleClass('active');
-    $('#instructions').toggleClass('hide');
-  });
+    // GET BPMN FILE
+    client.open('GET', 'https://dl.dropboxusercontent.com/s/8gmm8lss2j88i1b/testFile.bpmn?dl=1&token_hash=AAGfdvQIrgIaaLbx4cpJLbFEF9izHR-iuzOhMy5esvnV1w',false);
+    client.send();
+    var bpmnText = client.responseText;
 
-  var jsonObject = null;
+    // CONVERT JSON TO XPDL (NOT WORKING)
+    var x2js = new X2JS();
+    var newXPDLText = x2js.json2xml_str(jsonText);
+    
+    // CREATE THE JAVASCRIPT OBJECT BASED ON THE JSON FILE
+    var jsonObject = JSON.parse(jsonText);
+    
 
-  // WHEN YOU CLICK THE IMPORT BUTTON, IT LOADS THE JSON FROM THE SERVER
-  $('#MyButton').click(function(){
+    // FILL THE HTML ELEMENTS WITH TEXT
+    $('#json').html(jsonText);
+    $('#XPDL').html(XPDLText);
+    $('#bpmn').html(bpmnText);
+    $('#newXPDL').html(newXPDLText);
 
-    if(!alreadyLoaded){
-        $.ajax({
-            beforeSend: function(req) {
-              req.setRequestHeader("Accept", "application/json");
-            },
-            url: "/workflow/xpdltojson", 
-            type: "POST",
-            success: function(data) {
-              alreadyLoaded = true;
-              jsonObject = data;
-              $('#toolbox').removeClass('hide');
+    // Workflow editor instructions.
+    $('#help').click(function() {
+      $(this).toggleClass('active');
+      $('#instructions').toggleClass('hide');
+    });
 
-              // PLOTS THE WORKFLOW
-              var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
-              bpmn.plot(jsonObject);
+    var alreadyLoaded = false;
 
-              // Toolbox listeners
-              $('#toolbox > .tb-item').click(function(){
-                var el = $(this);
-                // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
-                var x = 10, y= 10;
-                 // var shape = null;
-                 switch (el.attr('id')) {
-                  case 'tb-startevent':
+    $("#convert").click(function() {
+      $.ajax({
+        beforeSend: function(req) {
+          req.setRequestHeader("Accept", "application/json");
+        },
+        url: "/workflow/xpdltojson", 
+        type: "POST",
+        success: function(data) {
+          if(!alreadyLoaded){
+            var bpmn = new net.BpmnJS($('#canvas')[0], []);
+            bpmn.plot(jsonObject);
+            alreadyLoaded = true;
+          }
+        }
+      });
+    });
+
+    // WHEN YOU CLICK THE IMPORT BUTTON
+    $('#MyButton').click(function(){
+      if(!alreadyLoaded){
+          $('#toolbox').removeClass('hide');
+          var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
+          bpmn.plot();
+
+          // Toolbox listeners
+          $('#toolbox > .tb-item').click(function(){
+            var el = $(this);
+            // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
+             var x = 10, y= 10;
+             // var shape = null;
+              switch (el.attr('id')) {
+                case 'tb-startevent':
                   bpmn.initStartEvent(x, y);
                   break;
-                  case 'tb-intermediateevent':
+                case 'tb-intermediateevent':
                   bpmn.initIntermediateEvent(x, y);
                   break;
-                  case 'tb-endevent':
+                case 'tb-endevent':
                   bpmn.initEndEvent(x, y);
                   break;
-                  case 'tb-gateway':
+                case 'tb-gateway':
                   bpmn.initGateway(x, y);
                   break;
-                  case 'tb-task':
+                case 'tb-task':
                   bpmn.initTask(x, y);
                   break;
-                  case 'tb-clearcanvas':
+                case 'tb-clearcanvas':
                   if (confirm('Are you sure you want to clear the workflow?')) {
                     bpmn.clear();
                   }
                   break;
-                  case 'tb-sequenceflow':
+                case 'tb-sequenceflow':
                   el.toggleClass('active hover');
                   $('#connect-instructions').toggleClass('hide');
                   bpmn.onConnect(function(e) {
                     if (e === 'success') {
-                          // We have successfully connected two elements.
-                          el.removeClass('active hover');
-                          $('#connect-instructions').addClass('hide');
-                        }
-                      });
-                  break;
-                  default:
-                      // Do nothing
-                      break;
+                      // We have successfully connected two elements.
+                      el.removeClass('active hover');
+                      $('#connect-instructions').addClass('hide');
                     }
-              });
-            }
-        });
-    }
-    
+                  });
+                  break;
+                default:
+                  // Do nothing
+                  break;
+              }
 
+          });
 
+          alreadyLoaded = true;
+      }
 
-    // Let's use a context menu (on right-click), but happy to reconsider. :)
-    // DELETE FUNCTION 
-    // $(document).keyup(function(e) {
-    //     switch(e.which){
-    //       // DELETE WHEN "DELETE" (46) OR "BACKSPACE" (8) IS PRESSED
-    //       case 46:
-    //       case 8:
-    //         // IT'S NOT REALLY DELETING RIGHT NOW, IT'S JUST HIDING
-    //         bpmn.selectedShape.glowEffect.remove();
-    //         bpmn.selectedShape.hide();
-    //         if(bpmn.selectedShape.hasOwnProperty('pair')){
-    //           bpmn.selectedShape.pair.hide();
-    //         }
-    //         break;
-    //     }       
-    // });
-
+      // Let's use a context menu (on right-click), but happy to reconsider. :)
+      // DELETE FUNCTION 
+      // $(document).keyup(function(e) {
+      //     switch(e.which){
+      //       // DELETE WHEN "DELETE" (46) OR "BACKSPACE" (8) IS PRESSED
+      //       case 46:
+      //       case 8:
+      //         // IT'S NOT REALLY DELETING RIGHT NOW, IT'S JUST HIDING
+      //         bpmn.selectedShape.glowEffect.remove();
+      //         bpmn.selectedShape.hide();
+      //         if(bpmn.selectedShape.hasOwnProperty('pair')){
+      //           bpmn.selectedShape.pair.hide();
+      //         }
+      //         break;
+      //     }       
+      // });
+  
   });
-});
+ 
+  });
 </script>
 
 <div id="file_input">
   <p>Select a workflow file to import.</p>
   <div class="well">
     <%= form_for :workflow, :url => {:action => "import"} do |f| %>
-    <p>
-      <%= f.file_field :workflow %>
-    </p>
-    <br />
-    <%= f.submit %>
+      <p>
+        <%= f.file_field :workflow %>
+      </p>
+      <br />
+      <%= f.submit %>
     <% end %>
   </div>
 </div>
@@ -144,28 +176,28 @@ $(function(){
   </div>
 </div>
 <div class="btn-group hide" id="toolbox">
-  <!-- The buttons with dark borders have been currently implemented (have an associated action). -->
-  <button type="button" class="btn btn-default tb-item" id="tb-startevent" style="border:2px solid #333"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-intermediateevent" style="border:2px solid #333"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-endevent" style="border:2px solid #333"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-task" style="border:2px solid #333"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-transaction"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-subprocess"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-callactivity"></button>
-  <!-- <button type="button" class="btn btn-default tb-item" id="tb-implementation"></button> -->
-  <!-- <button type="button" class="btn btn-default tb-item" id="tb-edge"></button> -->
-  <button type="button" class="btn btn-default tb-item" id="tb-gateway" style="border:2px solid #333"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-datastore"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-participant"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-lane"></button>
-  <!-- <button type="button" class="btn btn-default tb-item" id="tb-boundaryevent"></button> -->
-  <!-- <button type="button" class="btn btn-default tb-item" id="tb-receivetask"></button> -->
-  <!-- <button type="button" class="btn btn-default tb-item" id="tb-sendtask"></button> -->
-  <button type="button" class="btn btn-default tb-item" id="tb-sequenceflow" style="border:2px solid #333"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-messageflow"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-association"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-annotation"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-clearcanvas" style="border:2px solid #333"></button>
+    <!-- The buttons with dark borders have been currently implemented (have an associated action). -->
+    <button type="button" class="btn btn-default tb-item" id="tb-startevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-intermediateevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-endevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-task" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-transaction"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-subprocess"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-callactivity"></button>
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-implementation"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-edge"></button> -->
+    <button type="button" class="btn btn-default tb-item" id="tb-gateway" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-datastore"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-participant"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-lane"></button>
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-boundaryevent"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-receivetask"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-sendtask"></button> -->
+    <button type="button" class="btn btn-default tb-item" id="tb-sequenceflow" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-messageflow"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-association"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-annotation"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-clearcanvas" style="border:2px solid #333"></button>
 </div>
 <div id="canvas"></div>
 <div id="editor-contextmenu" class="dropdown clearfix">
@@ -188,3 +220,13 @@ $(function(){
     </ul>
   </div>
 </div>
+<%# This will get removed just keeping for testing %>
+<br><br>
+XPDL
+<textarea id="XPDL" style="width:100%;height:200px;"></textarea>
+json
+<textarea id="json" style="width:100%;height:200px;"></textarea>
+bpmn
+<textarea id="bpmn" style="width:100%;height:200px;"></textarea>
+newXPDL
+<textarea id="newXPDL" style="width:100%;height:200px;"></textarea>
