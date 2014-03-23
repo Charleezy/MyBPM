@@ -20,10 +20,6 @@
 // MLXJS   - http://xmljs.sourceforge.net/
 // Raphael - http://raphaeljs.com/
 
-
-// I modified some of this to make it work better, feel free to keep doing the same.
-
-
 // Namespace
 var net = net || {};
 net = {};
@@ -232,8 +228,8 @@ net.BpmnJS.prototype = {
         //if (textToAdd == null || textToAdd.trim() == '') return;
         var x = 10, y = 10;
         if (totalLanes > 0){
-          //FIXME: get pool title
-          var poolTitle = element.pair.text;
+          //get current pool title
+          var poolTitle = element.pair[0].textContent;
 
           //remove old pool & title elements
           element.pair.remove();
@@ -517,6 +513,7 @@ net.BpmnJS.prototype = {
         width = this.paper.canvas.offsetWidth,
         height = 350*lanes,
         y1 = y+offset*4;
+
     var pool = this.paper.rect(x,y1,width,height).attr({fill: fillColor, border: borderColor});
     pool.associatedXPDL = xpdlRoute;
     pool.shapeType = 'Pool';
@@ -533,14 +530,15 @@ net.BpmnJS.prototype = {
     return pool;
   },
   paintLane: function(xpdlRoute, x, y, laneTitleText, poolTitle, fillColor, borderColor){
-
     //New Lane, increment total number of lanes
     totalLanes += 1;
+
     var offset = 10,
         x1 = x+offset*2,
         y1 = y+40+((totalLanes-1)*350),
         width = this.paper.canvas.offsetWidth - x1,
         height = 350;
+
     var poolLane = this.paper.rect(x1,y1,width,height).attr({fill: fillColor, border: borderColor});
     poolLane.associatedXPDL = xpdlRoute;
     poolLane.shapeType = 'PoolLane';
@@ -618,8 +616,6 @@ net.BpmnJS.prototype = {
   },
 
   initLane: function(x,y, laneTitle, poolTitle){
-    //dummy value, until fixed 
-    poolTitle = 'poolTitle';
     this.initActivity(this.paintLane('lane', x, y, laneTitle, poolTitle, 'purple', 'black'));
   }
 };      
