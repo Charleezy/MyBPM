@@ -49,8 +49,7 @@ net.BpmnJS = function(xpdlJson, canvas, isStatic){
 net.BpmnJS.prototype = {
 
   plot: function(){
-
-    console.log(this.xpdlJson);
+    console.log(XpdlJsonGenerator.getNewWorkflowJson('test'));
     
     // PAINT
     for(var i=0; i<this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess.length; i++){
@@ -190,11 +189,11 @@ net.BpmnJS.prototype = {
           // Remove element paired to this item (should be text).
           element.pair.remove();
         }
-        var activity = element.associatedXPDL,
-            x = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate),
-            y = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate),
-            height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height),
-            width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
+        var xpdl = element.associatedXPDL,
+            x = parseInt(xpdl.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate),
+            y = parseInt(xpdl.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate),
+            height = parseInt(xpdl.NodeGraphicsInfos.NodeGraphicsInfo.Height),
+            width = parseInt(xpdl.NodeGraphicsInfos.NodeGraphicsInfo.Width);
 
         var text = me.paper.text(x+width/2, y+height/2, textToAdd);
         text.shapeType = 'Text';
@@ -340,7 +339,6 @@ net.BpmnJS.prototype = {
 
     for(var activityProperty in xpdlActivity)
     {
-      console.log(activityProperty);
       
       switch(activityProperty){
         

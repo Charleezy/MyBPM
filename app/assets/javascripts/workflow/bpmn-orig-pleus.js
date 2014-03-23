@@ -1,5 +1,5 @@
 
-// USE THIS FILE AS A REFERENCE.
+// Use this file as a reference!
 // Taken from: http://www.pleus.net/blog/?p=2142
 
 // +--------------------------------------------------------------------+ \\
