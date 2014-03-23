@@ -27,7 +27,7 @@
 // Namespace
 var net = net || {};
 net = {};
-
+var totalLanes = 0;
 function assert(condition, message) {
   if (!condition) {
       throw message || "Assertion failed";
@@ -176,6 +176,7 @@ net.BpmnJS.prototype = {
 
       // FIXME why is this called twice per element?
       contextMenu.on('click', 'a#remove-element', function() {
+        console.log('remove');
         // Remove transitions.
         element.connections.forEach(function(connection) {
           if (connection.from === element) {
@@ -198,7 +199,9 @@ net.BpmnJS.prototype = {
       // Listener for adding annotations
       // TODO support editing/deleting annotation
       // FIXME doesn't work for transitions
+      //FIXME: Need to fix location for pool & lane annotations
       contextMenu.on('click', 'a#add-annotation', function() {
+        console.log('add annotation');
         var textToAdd = prompt('Annotation:');
         if (textToAdd == null || textToAdd.trim() == '') return;
         if (element.pair !== undefined) {
@@ -220,10 +223,30 @@ net.BpmnJS.prototype = {
         contextMenu.hide();
       });
 
+      //FIXME: only show for pool elements
+      contextMenu.on('click', 'a#add-pool', function() {
+        console.log('add pool');
+        var laneTitle = prompt('Please enter title of lane:');
+        //if (textToAdd == null || textToAdd.trim() == '') return;
+        var x = 10, y = 10;
+        if (totalLanes > 0){
+          //FIXME: get pool title
+          var poolTitle = element.pair.text;
+
+          //remove old pool & title elements
+          element.pair.remove();
+          $(element[0]).remove();
+        }
+
+        me.initLane(x,y+10, laneTitle, poolTitle);  
+        contextMenu.hide();
+      });
+
       // Hide menu when click elsewhere.
       $('body:not(#editor-contextmenu)').click(function() {
         contextMenu.off('click', 'a#remove-element');
         contextMenu.off('click', 'a#add-annotation');
+        contextMenu.off('click', 'a#add-pool');
         contextMenu.hide();
       });
       return false;
@@ -315,7 +338,12 @@ net.BpmnJS.prototype = {
           this.translate(dx - this.odx, dy - this.ody);
           
           if (this.pair) {
-            this.pair.translate(dx - this.odx, dy - this.ody);
+            if (this.pair.shapeType  == 'RotatedText' ){
+              this.pair.translate(-(dy - this.ody), dx - this.odx);
+            }
+            else{
+              this.pair.translate(dx - this.odx, dy - this.ody);  
+            }
             this.pair.odx = this.pair.attr("dx");
             this.pair.ody = this.pair.attr("dy");
           }
@@ -472,7 +500,73 @@ net.BpmnJS.prototype = {
     return shape;
     
   },
+  paintPool: function(xpdlRoute, x, y, poolTitleText, fillColor, borderColor){
+    var lanes = totalLanes;
+    if (lanes == 0) {lanes = 1;}
+    var offset = 10,
+        width = this.paper.canvas.offsetWidth-2*offset,
+        height = (y+350+ offset)*lanes;
+        x1 = x+2*offset;
 
+    var pool = this.paper.path("M "+x+" "+y+" L"+ width +"  "+y+" L"+ width +"  "+height+" L"+ x +"  "+height+"Z").attr({fill: fillColor, border: borderColor});
+    pool.associatedXPDL = xpdlRoute;
+    pool.shapeType = 'Pool';
+    var poolTitle = this.paper.text(x+offset, y+height/2, poolTitleText).attr({transform: "r" + 270});
+    
+    //Pair pool title with pool 
+    pool.pair = poolTitle;
+    poolTitle.pair = pool;
+    poolTitle.shapeType = 'RotatedText';
+
+    //Ordering of elements - put pool behind everything
+    pool.toBack();
+  
+    return pool;
+  },
+  paintLane: function(xpdlRoute, x, y, laneTitleText, poolTitle, fillColor, borderColor){
+
+    //New Lane, increment total number of lanes
+    totalLanes += 1;
+
+    var offset = 10,
+        height = (y+350)*totalLanes,
+        x1 = x+3*offset,
+        y1 = ((totalLanes-1)*height/totalLanes)+3*offset,
+        width1 = this.paper.canvas.offsetWidth - x1 - 3*offset,
+        height1 = (height-2*offset)/totalLanes - offset;
+
+    var poolLane = this.paper.rect(x1,y1,width1,height1).attr({fill: fillColor, border: borderColor});
+    poolLane.associatedXPDL = xpdlRoute;
+    poolLane.shapeType = 'PoolLane';
+    var laneTitle = this.paper.text(x1+offset, y1+height1/2, laneTitleText).attr({transform: "r" + 270});
+    
+    //Pair lane title with pool lane
+    poolLane.pair = laneTitle;
+    laneTitle.pair = poolLane;
+    laneTitle.shapeType = 'RotatedText';  
+
+    if (totalLanes > 1){
+      //Redraw expanded pool if greater than 1 lane
+      this.initPool(x,y, poolTitle);
+    }
+    
+      //Ordering of elements - put pool behind everything
+      var front = this.paper.set();
+      var mid = this.paper.set();
+      this.paper.forEach(function(el) {
+        if (el.shapeType == 'Pool'){
+          //do nothing
+        }
+        else if (el.shapeType == 'PoolLane'){
+          mid.push(el);
+        }
+        else{
+          front.push(el);
+        }
+      });
+      mid.insertBefore(front);
+    return poolLane;
+  },
   getCss: function(bpmnElement, cssClass){
     for(i in this.highlighted){
       if(this.highlighted[i] == bpmnElement){
@@ -513,4 +607,14 @@ net.BpmnJS.prototype = {
     this.initActivity(this.paintImplementation('task', x, y, 90, 60, '', 'blue', 'black'));
   },
   
+  initPool: function(x,y, poolTitle){
+    this.initActivity(this.paintPool('pool', x, y, poolTitle, 'cornflowerblue', 'black'));
+  },
+
+  initLane: function(x,y, laneTitle, poolTitle){
+    console.log('poolTitle = '+poolTitle);
+    //dummy value, until fixed 
+    poolTitle = 'poolTitle';
+    this.initActivity(this.paintLane('lane', x, y, laneTitle, poolTitle, 'purple', 'black'));
+  }
 };      

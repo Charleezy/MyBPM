@@ -109,6 +109,14 @@
                     }
                   });
                   break;
+                case 'tb-participant':
+                  var poolTitle = prompt('Please enter title of pool:');
+                  bpmn.initPool(x,y+10, poolTitle); 
+                  break;
+                case 'tb-lane': 
+                  alert('Please right-click on a drawn pool and select add lane.');
+                  //bpmn.initLane(x,y+10, laneTitle, 'poolTitle');   
+                  break;
                 default:
                   // Do nothing
                   break;
@@ -188,8 +196,8 @@
     <!-- <button type="button" class="btn btn-default tb-item" id="tb-edge"></button> -->
     <button type="button" class="btn btn-default tb-item" id="tb-gateway" style="border:2px solid #333"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-datastore"></button>
-    <button type="button" class="btn btn-default tb-item" id="tb-participant"></button>
-    <button type="button" class="btn btn-default tb-item" id="tb-lane"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-participant" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-lane" style="border:2px solid #333"></button>
     <!-- <button type="button" class="btn btn-default tb-item" id="tb-boundaryevent"></button> -->
     <!-- <button type="button" class="btn btn-default tb-item" id="tb-receivetask"></button> -->
     <!-- <button type="button" class="btn btn-default tb-item" id="tb-sendtask"></button> -->
@@ -205,6 +213,8 @@
     <li><a id="add-annotation">Add Annotation...</a></li>
     <li class="divider"></li>
     <li><a id="remove-element">Remove</a></li>
+    <li class="divider"></li>
+    <li><a id="add-pool">Add Pool Lane</a></li>
   </ul>
 </div>
 <div id="bottom-toolbar">
