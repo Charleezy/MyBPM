@@ -176,7 +176,6 @@ net.BpmnJS.prototype = {
 
       // FIXME why is this called twice per element?
       contextMenu.on('click', 'a#remove-element', function() {
-        console.log('remove');
         // Remove transitions.
         element.connections.forEach(function(connection) {
           if (connection.from === element) {
@@ -201,7 +200,6 @@ net.BpmnJS.prototype = {
       // FIXME doesn't work for transitions
       //FIXME: Need to fix location for pool & lane annotations
       contextMenu.on('click', 'a#add-annotation', function() {
-        console.log('add annotation');
         var textToAdd = prompt('Annotation:');
         if (textToAdd == null || textToAdd.trim() == '') return;
         if (element.pair !== undefined) {
@@ -225,7 +223,11 @@ net.BpmnJS.prototype = {
 
       //FIXME: only show for pool elements
       contextMenu.on('click', 'a#add-pool', function() {
-        console.log('add pool');
+        if (element.shapeType != 'Pool'){
+          alert('Can only add lanes to pools');
+          contextMenu.hide(); 
+          return;
+        }
         var laneTitle = prompt('Please enter title of lane:');
         //if (textToAdd == null || textToAdd.trim() == '') return;
         var x = 10, y = 10;
@@ -238,7 +240,7 @@ net.BpmnJS.prototype = {
           $(element[0]).remove();
         }
 
-        me.initLane(x,y+10, laneTitle, poolTitle);  
+        me.initLane(x,y, laneTitle, poolTitle);  
         contextMenu.hide();
       });
 
@@ -335,11 +337,18 @@ net.BpmnJS.prototype = {
           this.animate({"fill-opacity": .2}, 500);
         },
         move = function(dx, dy) {
-          this.translate(dx - this.odx, dy - this.ody);
+          //Only allow vertical movement for pools & pool lanes
+          if (this.shapeType == 'Pool' || this.shapeType == 'PoolLane'){
+            this.translate(0, dy - this.ody);
+          }
+          else{
+            this.translate(dx - this.odx, dy - this.ody);
+          }
           
           if (this.pair) {
+            //Only allow vertical movement for pools & pool lanes titles
             if (this.pair.shapeType  == 'RotatedText' ){
-              this.pair.translate(-(dy - this.ody), dx - this.odx);
+              this.pair.translate(-(dy - this.ody), 0);
             }
             else{
               this.pair.translate(dx - this.odx, dy - this.ody);  
@@ -503,15 +512,15 @@ net.BpmnJS.prototype = {
   paintPool: function(xpdlRoute, x, y, poolTitleText, fillColor, borderColor){
     var lanes = totalLanes;
     if (lanes == 0) {lanes = 1;}
+    x = 0;
     var offset = 10,
-        width = this.paper.canvas.offsetWidth-2*offset,
-        height = (y+350+ offset)*lanes;
-        x1 = x+2*offset;
-
-    var pool = this.paper.path("M "+x+" "+y+" L"+ width +"  "+y+" L"+ width +"  "+height+" L"+ x +"  "+height+"Z").attr({fill: fillColor, border: borderColor});
+        width = this.paper.canvas.offsetWidth,
+        height = 350*lanes,
+        y1 = y+offset*4;
+    var pool = this.paper.rect(x,y1,width,height).attr({fill: fillColor, border: borderColor});
     pool.associatedXPDL = xpdlRoute;
     pool.shapeType = 'Pool';
-    var poolTitle = this.paper.text(x+offset, y+height/2, poolTitleText).attr({transform: "r" + 270});
+    var poolTitle = this.paper.text(x+offset, y1+height/2, poolTitleText).attr({transform: "r" + 270});
     
     //Pair pool title with pool 
     pool.pair = poolTitle;
@@ -527,18 +536,15 @@ net.BpmnJS.prototype = {
 
     //New Lane, increment total number of lanes
     totalLanes += 1;
-
     var offset = 10,
-        height = (y+350)*totalLanes,
-        x1 = x+3*offset,
-        y1 = ((totalLanes-1)*height/totalLanes)+3*offset,
-        width1 = this.paper.canvas.offsetWidth - x1 - 3*offset,
-        height1 = (height-2*offset)/totalLanes - offset;
-
-    var poolLane = this.paper.rect(x1,y1,width1,height1).attr({fill: fillColor, border: borderColor});
+        x1 = x+offset*2,
+        y1 = y+40+((totalLanes-1)*350),
+        width = this.paper.canvas.offsetWidth - x1,
+        height = 350;
+    var poolLane = this.paper.rect(x1,y1,width,height).attr({fill: fillColor, border: borderColor});
     poolLane.associatedXPDL = xpdlRoute;
     poolLane.shapeType = 'PoolLane';
-    var laneTitle = this.paper.text(x1+offset, y1+height1/2, laneTitleText).attr({transform: "r" + 270});
+    var laneTitle = this.paper.text(x1+offset, y1+height/2, laneTitleText).attr({transform: "r" + 270});
     
     //Pair lane title with pool lane
     poolLane.pair = laneTitle;
@@ -612,7 +618,6 @@ net.BpmnJS.prototype = {
   },
 
   initLane: function(x,y, laneTitle, poolTitle){
-    console.log('poolTitle = '+poolTitle);
     //dummy value, until fixed 
     poolTitle = 'poolTitle';
     this.initActivity(this.paintLane('lane', x, y, laneTitle, poolTitle, 'purple', 'black'));
