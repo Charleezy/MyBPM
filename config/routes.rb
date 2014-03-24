@@ -7,6 +7,8 @@ Mybpm::Application.routes.draw do
   # You can have the root of your site routed with "root"
   root :to => "home#index"
 
+  get '/simulation/historical', :controller => 'simulation', :action => 'historical'
+
   resources :workflow
   resources :simulation
 

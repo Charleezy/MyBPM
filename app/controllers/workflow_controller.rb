@@ -5,7 +5,8 @@ class WorkflowController < ApplicationController
   around_filter :exception_handler
 
   def index
-    @workflows = current_user.workflows
+    @workflows = 
+      current_user.workflows.collect { |w| { :user => current_user.email, :workflow => w } }
   end
 
   def show
