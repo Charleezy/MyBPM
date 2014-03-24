@@ -23,7 +23,6 @@
 
 // I modified some of this to make it work better, feel free to keep doing the same.
 
-
 // Namespace
 var net = net || {};
 net = {};
@@ -39,13 +38,40 @@ net.BpmnJS = function(xpdlJson, canvas){
 
   this.xpdlJson = xpdlJson;
 
-  // Paint canvas
+  // CREATING RAPHAEL CANVAS
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
   this.connections = [];
+  this.currentId = 0;
 };
 
 // Shared functions
 net.BpmnJS.prototype = {
+  replaceProperty: function(object, property, oldValue, newValue){
+
+    // IF WE FOUND IT, JUST REPLACE
+    if(object.hasOwnProperty(property) && object[property] === oldValue){
+      object[property] = newValue;
+      console.log('replaced');
+    }
+
+    // IF NOT, SEARCH ON THE OBJECTS INSIDE
+    else{
+      for(i in object){
+
+        // IF THE PROPERTY IS AN OBJECT, SEARCH INSIDE IT
+        if(object[i] instanceof Object){
+          this.replaceProperty(object[i], property, oldValue, newValue);
+        }
+
+        // IF IT'S AN ARRAY, LOOP THROUGH IT'S ELEMENTS
+        else if(object[i] instanceof Array){
+          for(j in object[i]){
+            this.replaceProperty(object[i][j], property, oldValue, newValue);
+          }
+        }
+      }
+    }
+  },
 
   plot: function(){
     
@@ -57,6 +83,12 @@ net.BpmnJS.prototype = {
         var activities = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Activities.Activity;
         for(var j=0; j<activities.length; j++){
           var activity = activities[j];
+          var temporaryId = activity.Id;
+          this.replaceProperty(this.xpdlJson, 'Id', temporaryId, String(this.currentId));
+          this.replaceProperty(this.xpdlJson, 'From', temporaryId, String(this.currentId));
+          this.replaceProperty(this.xpdlJson, 'To', temporaryId, String(this.currentId));
+          this.currentId++;
+          console.log('newId: ' + activity.Id);
           var xCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate);
           var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
           var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
@@ -67,12 +99,19 @@ net.BpmnJS.prototype = {
           this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
         }
       }
+    }
 
+    // PAINT
+    for(var i=0; i<this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess.length; i++){
+      
       // TRANSITIONS
       if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
         var transitions = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition,
             me = this;
         transitions.forEach(function(transition) {
+
+          me.replaceProperty(me.xpdlJson, 'Id', transition.Id, String(me.currentId));
+          me.currentId++;
           // Reference the activities we're transitioning to/from.
           var element1 = me.getById(transition.From);
           var element2 = me.getById(transition.To);
@@ -82,7 +121,6 @@ net.BpmnJS.prototype = {
 
           // element1.outgoing.push(element2);
           // element2.incoming.push(element1);
-
           me.connectElements(element1, element2);
         });
       }
@@ -459,7 +497,7 @@ net.BpmnJS.prototype = {
   },
 
   initIntermediateEvent: function(x, y) {
-    this.initActivity(this.paintEvent('intermediateevent', x, y, 30, 30, '', 'gray', 'black'));
+    this.initActivity(this.paintEvent('intermediateevent', x, y, 30, 30, '', 'yellow', 'black'));
   },
 
   initEndEvent: function(x, y) {
