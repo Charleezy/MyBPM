@@ -1,6 +1,3 @@
-require 'rubygems'
-require 'json'
-
 class XpdlObject 
 
   # Instance variables
@@ -18,11 +15,9 @@ class XpdlObject
   # @power (string) can only have 2 values: 'ON', 'OFF'
   # 'ON' -> simulation in progress, 'OFF' -> simulation not
   # in progress (all state vars are garbage)
-  attr_accessor :currActID, :timer, :power, :mockDataJSON
+  attr_accessor :currActID, :timer, :power   
   # @simulationLog holds the up-to-date log of the simulation
   attr_accessor :simulationLog 
-
-  #######################################################################################################################
 
   # Constructor Method
   # User must pass in XPDL file and Schema when instantiating a new object
@@ -30,6 +25,7 @@ class XpdlObject
 
     @file = file
     @xsd = xsd        
+
     # mockDataFile can be 'nil' or a string
     # If it is nil, then the simulation does not use any
     # mock data for the simulation. Otherwise it uses it,
@@ -41,11 +37,9 @@ class XpdlObject
     @power = 'OFF'
     @currActID = ''
     @timer = -1
-    @mockDataJSON = nil
 
   end
 
-  #######################################################################################################################
   
   # Validator Method
   # This method verifies the xml syntax of the XPDL file
@@ -87,12 +81,9 @@ class XpdlObject
     # FUTURE-EXTENSION: TO ADD MORE STRICT VALIDATION RULES
     # ADD THEM HERE....
 
-    # Parse the mockDataFile and populate mockDataHash accordingly
-    if (@mockDataFile != nil) # Currently only supporting 'STRING' dataTypes
-      mock = JSON.parse(@mockDataFile)
-      #mock.each do |item|
-      #end
-      @mockDataJSON = mock
+    # Validate @mockDataFile Format Here
+    if (@mockDataFile != nil)
+      # Validate Mock Data File Format
     end
 
 
@@ -112,7 +103,6 @@ class XpdlObject
 
   end
   
-  #######################################################################################################################
   
   # getAllActivities Method
   # This method returns the set of <Activities> in the @file (XPDL)
@@ -132,7 +122,6 @@ class XpdlObject
 
   end
 
-  #######################################################################################################################
 
   # Start Method
   # This method will 
@@ -190,7 +179,6 @@ class XpdlObject
 
   end
 
-  #######################################################################################################################
 
   # Next-Step Method
   # This method is called whenever DataField(s) values
@@ -202,87 +190,15 @@ class XpdlObject
   def nextStep()
 
     @simulationLog = @simulationLog + "Entering XpdlObject.nextStep() ... \n"
-
-    # Set of transitions found for this transition (If found more than 1,
-    # then need to check the dataField var in MockData File)
-    transFound = [] 
-
+  
     # Find the Transitions tag
     transitions = @dom.find('//xpdl:Transition')
     transitions.each do |transition|
       if (transition.attributes['From'] == @currActID)
-        #@currActID = transition.attributes['To']
-        transFound.push(transition)
+        @currActID = transition.attributes['To']
+        break
       end
     end
-    
-
-    # Check Size of transFound[]
-    if transFound.length > 0
-      otherwiseTrans = nil 
-      conditionTrans = []
-      normalTrans = nil # a transition without any <Condition tag
-
-      # Parse through all transition objects, if one of them has an 'OTHERWISE' 
-      # condition, then set it to 'otherwiseTrans' var, and pop it out of array
-      transFound.each do |transition|
-        conds = transition.find(".//xpdl:Condition")
-        if conds.length != 0 # if a condition tag is found
-          if conds[0].attributes['Type'] == "OTHERWISE"
-            otherwiseTrans = transition
-          elsif conds[0].attributes['Type'] == "CONDITION"
-            puts "found a condition..."
-            conditionTrans.push(transition)
-          end
-        else # No Condition for this transition (a normal transition)
-          # Perform transition
-          #performTrans(transition)
-          normalTrans = transition
-        end
-      end # transFound.each
-
-      # Perform transition now (parse through conditionTrans[], then do otherwiseTrans if necessary)
-
-      if normalTrans != nil # if this is just a normal transition
-        performTrans(normalTrans)
-      else # if this transition has conditions
-        transPerformed = 0 # Flag to determine if transition has been performed or not
-        conditionTrans.each do |con|
-          if evalCondition(con)
-            performTrans(con) 
-            transPerformed = 1
-            break
-          else
-            if @power == "OFF"
-              return "ERROR"
-            end
-          end
-        end
-        # Now check to see if a valid condition was found or not
-        if transPerformed == 0 and otherwiseTrans != nil
-          performTrans(otherwiseTrans)
-          @simulationLog = @simulationLog + "NO CONDITION MATCHED: " + "Transitioning to 'OTHERWISE' Transition\n"
-        elsif transPerformed == 0 and otherwiseTrans == nil
-          @simulationLog = @simulationLog + "FATAL ERROR: Unable to find a valid Condition for transition for Activity ID: " + @currActID + "\n"
-          puts "FATAL ERROR: Unable to find a valid Condition for transition for Activity ID: " + @currActID + "\n"
-          self.terminate()  
-          return "ERROR"
-        end
-      end # normalTrans != nil
-
-    else # transFound.length > 0
-      @simulationLog = @simulationLog + "FATAL ERROR: Unable to find a transition for Activity ID: " + @currActID + "\n"
-      puts "FATAL ERROR: Unable to find a transition for Activity ID: " + @currActID + "\n"
-      self.terminate()  
-      return "ERROR"
-    end 
-
-
-    
-
-
-    #############################################
-    
     
     @simulationLog = @simulationLog + "Successfully Moved to the Next Step... \n"
     @simulationLog = @simulationLog + "@currActID is: " + @currActID + "\n"
@@ -290,7 +206,6 @@ class XpdlObject
     if self.isLastActivity(@currActID)
       @simulationLog = @simulationLog + "This is the Last Activity, The Simulation is Now Over :( ... POWERING OFF ... GoodBye  ^_^ \n"
       self.terminate()
-      return "ERROR"
     end
 
   # Return the Current Active ID: @currActID
@@ -298,51 +213,6 @@ class XpdlObject
 
   end
 
-  #######################################################################################################################
-
-  # This method evaluates a given Condition
-  # Param: cond -> a condition tag object
-  # Returns: 'true' if condition is satisfied,
-  # 'false' otherwise
-  def evalCondition(cond)
-    conds = cond.find(".//xpdl:Condition")
-    if conds.length != 0 # if a condition tag is found
-      logic = conds[0].content  
-      arr = logic.split("==")
-      dataVar = arr[0]
-      data = arr[1]
-      data.gsub! /"/, '' # remove double quotes from value
-      puts "dataVar is " + dataVar + " and data is " + data
-
-      # Now check the @mockDataJSON for validation
-
-      if @mockDataJSON.has_key?(dataVar)
-        if @mockDataJSON[dataVar] == data
-          @simulationLog = @simulationLog + "CONDITION MATCHED: " + logic + "\n"
-          return true
-        else
-          return false
-        end
-      else # the mockDataFile does not have the required variable
-        @simulationLog = @simulationLog + "FATAL ERROR: Mock Data File does not have the required variable: " + dataVar + " ...\n"
-        self.terminate()
-        return false
-      end
-
-    end
-  end
-
-  #######################################################################################################################
-  #
-  # This method performs a transition
-  # Param: trans -> a transition tag object
-  # The method sets the @currActID accordingly
-  def performTrans(trans)
-    @currActID = trans.attributes['To']
-  end
-
-  #######################################################################################################################
-  
   # Helper Method for nextStep()
   # Param: Takes as input an Activity ID
   # Returns 'true' if this ID is the last Activity,
@@ -364,7 +234,6 @@ class XpdlObject
 
   end
 
-  #######################################################################################################################
 
   # Terminate Method
   # This method is called when the simulation reaches the end 
@@ -377,9 +246,7 @@ class XpdlObject
   
     # Setting @power to 'OFF'
     @power = 'OFF'
-    puts "Terminating the simulation ..."
-    @simulationLog = @simulationLog + "Terminating the simulation ...\n"
-  
+
     # Gracefully clean up any open/allocated resources....
 
   end
@@ -389,14 +256,10 @@ class XpdlObject
 
   # Worker can poll @currActID Getter and @timer Getter
 
-  #######################################################################################################################
-
   # getDataFields Method
   # This method returns the current values of all of the
   # DataFields defined in the XPDL File/Model and mockDataFile
-  # It returns a JSON parsed object (parsed from the @mockDataFile)
   def getDataFields()
-    return @mockDataJSON
   end
 
 end

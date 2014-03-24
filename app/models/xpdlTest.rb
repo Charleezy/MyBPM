@@ -2,15 +2,34 @@ require './xpdl_object'
 
 # THIS FILE WILL TURN INTO THE 'WORKER' PRETTY SOON :)
 
-file = File.open("/Users/abdulhaseeb/Google Drive/Projects/RailsWorkSpace/MyBPM/app/models/workflow_pattern_simple.xml", "rb")
+## DEMO: This is a simple XPDL Model, without any decisions/gateways
+#file = File.open("/Users/abdulhaseeb/Google Drive/Projects/RailsWorkSpace/MyBPM/app/models/workflow_pattern_simple.xml", "rb")
+
+## DEMO: This XPDL Model, has one Exclusive Gateway (ID=2)
+file = File.open("/Users/abdulhaseeb/Google Drive/Projects/RailsWorkSpace/MyBPM/app/models/Exclusive_choice_transition.xml", "rb")
+
 contents = file.read
 
 schema = File.open("/Users/abdulhaseeb/Google Drive/Projects/RailsWorkSpace/MyBPM/app/models/bpmnxpdl_31.xml", "rb")
 contentsSchema = schema.read
 
+## DEMO: This MOCK DATA file is for file (ID=2)
+mockFile = File.open("/Users/abdulhaseeb/Google Drive/Projects/RailsWorkSpace/MyBPM/app/models/Exclusive_choice_transition_MOCK_DATA.json", "rb")
+mockDataContents = mockFile.read
 
-sim = XpdlObject.new(contents, contentsSchema, nil)
+sim = XpdlObject.new(contents, contentsSchema, mockDataContents)
+#sim = XpdlObject.new(contents, contentsSchema, nil) # If no mock data file is passed in
 
+sim.validate()
+
+#puts sim.mockDataJSON
+#if   sim.mockDataJSON.has_key?('whereToGo')
+#  puts "it has key "
+#end
+#sim.mockDataJSON.each do |item|
+#  #puts item
+#  puts sim.mockDataJSON['whereToGo']
+#end
 
 rt = sim.start()
 puts "\nStart Activity is: " + rt
@@ -25,7 +44,6 @@ end
 
 puts "\n-----------------------------------------\nSIMULATION LOG\n-----------------------------------------\n"
 puts sim.simulationLog
-
 
 
 
