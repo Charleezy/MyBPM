@@ -7,69 +7,38 @@
 <%= javascript_include_tag 'workflow/bpmn.js' %>
 <%= javascript_include_tag 'workflow/graffle.js' %>
 <script type="text/javascript">
-  $(function(){
-    var client = new XMLHttpRequest();
 
-    // GET JSON FILE
-    client.open('GET', 'https://dl.dropboxusercontent.com/s/yyimks43gemdazq/jsonFile.json?dl=1&token_hash=AAEwKPu9isScXrMb-m9dVvUkYjxLiZTsM2DcEiIvPbXFnQ',false);
-    client.send();
-    var jsonText = client.responseText;
-    
-    // GET XPDL FILE
-    client.open('GET', 'https://dl.dropboxusercontent.com/s/j1w6mr83r8ug0om/simpleWorkflow.xpdl?dl=1&token_hash=AAH7PHIpUBmIim-BUM6uC7WC8lAqG-36HYOqxJHkbm2WzA',false);
-    client.send();
-    var XPDLText = client.responseText;
+var alreadyLoaded = false;
 
-    // GET BPMN FILE
-    client.open('GET', 'https://dl.dropboxusercontent.com/s/8gmm8lss2j88i1b/testFile.bpmn?dl=1&token_hash=AAGfdvQIrgIaaLbx4cpJLbFEF9izHR-iuzOhMy5esvnV1w',false);
-    client.send();
-    var bpmnText = client.responseText;
+$(function(){
 
-    // CONVERT JSON TO XPDL (NOT WORKING)
-    var x2js = new X2JS();
-    var newXPDLText = x2js.json2xml_str(jsonText);
-    
-    // CREATE THE JAVASCRIPT OBJECT BASED ON THE JSON FILE
-    var jsonObject = JSON.parse(jsonText);
-    
+  // Workflow editor instructions.
+  $('#help').click(function() {
+    $(this).toggleClass('active');
+    $('#instructions').toggleClass('hide');
+  });
 
-    // FILL THE HTML ELEMENTS WITH TEXT
-    $('#json').html(jsonText);
-    $('#XPDL').html(XPDLText);
-    $('#bpmn').html(bpmnText);
-    $('#newXPDL').html(newXPDLText);
+  // WHEN YOU CLICK THE 'LOAD DEFAULT WORKFLOW' BUTTON
+  $("#import").click(function() {
 
-    // Workflow editor instructions.
-    $('#help').click(function() {
-      $(this).toggleClass('active');
-      $('#instructions').toggleClass('hide');
-    });
-
-    var alreadyLoaded = false;
-
-    $("#convert").click(function() {
+    // IF IT'S NOT ALREADY LOADED, MAKES AN AJAX CALL TO THE SERVER REQUESTING THE JSON AND DRAWS THE WORKFLOW WHEN THE DATA IS RETRIEVED
+    if(!alreadyLoaded){
+      
       $.ajax({
         beforeSend: function(req) {
           req.setRequestHeader("Accept", "application/json");
         },
         url: "/workflow/xpdltojson", 
         type: "POST",
-        success: function(data) {
-          if(!alreadyLoaded){
-            var bpmn = new net.BpmnJS($('#canvas')[0], []);
-            bpmn.plot(jsonObject);
-            alreadyLoaded = true;
-          }
-        }
-      });
-    });
-
-    // WHEN YOU CLICK THE IMPORT BUTTON
-    $('#MyButton').click(function(){
-      if(!alreadyLoaded){
+        success: function(jsonObject) {
           $('#toolbox').removeClass('hide');
           var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
           bpmn.plot();
+
+          $('#convert').click(function(){
+              $('#jsonText').removeClass('hide');
+              $('#jsonText').html(JSON.stringify(jsonObject));
+          });
 
           // Toolbox listeners
           $('#toolbox > .tb-item').click(function(){
@@ -109,39 +78,29 @@
                     }
                   });
                   break;
+                case 'tb-participant':
+                  var poolTitle = prompt('Please enter title of pool:');
+                  bpmn.initPool(x,y, poolTitle); 
+                  break;
+                case 'tb-lane': 
+                  alert('Please right-click on a drawn pool and select add lane.');
+                  //bpmn.initLane(x,y+10, laneTitle, 'poolTitle');   
+                  break;
                 default:
                   // Do nothing
                   break;
               }
 
           });
-
           alreadyLoaded = true;
-      }
-
-      // Let's use a context menu (on right-click), but happy to reconsider. :)
-      // DELETE FUNCTION 
-      // $(document).keyup(function(e) {
-      //     switch(e.which){
-      //       // DELETE WHEN "DELETE" (46) OR "BACKSPACE" (8) IS PRESSED
-      //       case 46:
-      //       case 8:
-      //         // IT'S NOT REALLY DELETING RIGHT NOW, IT'S JUST HIDING
-      //         bpmn.selectedShape.glowEffect.remove();
-      //         bpmn.selectedShape.hide();
-      //         if(bpmn.selectedShape.hasOwnProperty('pair')){
-      //           bpmn.selectedShape.pair.hide();
-      //         }
-      //         break;
-      //     }       
-      // });
-  
+        }
+      });
+    }
   });
- 
-  });
+});
 </script>
 
-<div id="file_input">
+<!-- <div id="file_input">
   <p>Select a workflow file to import.</p>
   <div class="well">
     <%= form_for :workflow, :url => {:action => "import"} do |f| %>
@@ -153,10 +112,23 @@
     <% end %>
   </div>
 </div>
-<input type="button" value="Import" id="MyButton"></input>
-<br>
+ -->
+
+<!-- IMPORT BUTTONS -->
+<form>
+  <table>
+    <tr>
+      <td> <input type="file" name="XPDL"> </td>
+      <td> <input type="submit"> </td>
+      <td> <input type="button" value="Load Default Workflow" id="import"></input> </td>
+    </tr> 
+  </table>
+</form>
+
+<br/>
+
 <div id="workflow-info" class="row">
-  <div class="col-md-11"><h3 id="workflow-name">My Workflow</h3></div>
+  <div class="col-md-11"><h3 id="workflow-name">My Workflow</h3><div id="log-form"></div><div id="log"></div></div>
   <div class="col-md-1"><button type="button" class="btn btn-default glyphicon glyphicon-question-sign" id="help"></button></div>
 </div>
 <div id="instructions" class="panel panel-info hide">
@@ -188,8 +160,8 @@
     <!-- <button type="button" class="btn btn-default tb-item" id="tb-edge"></button> -->
     <button type="button" class="btn btn-default tb-item" id="tb-gateway" style="border:2px solid #333"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-datastore"></button>
-    <button type="button" class="btn btn-default tb-item" id="tb-participant"></button>
-    <button type="button" class="btn btn-default tb-item" id="tb-lane"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-participant" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-lane" style="border:2px solid #333"></button>
     <!-- <button type="button" class="btn btn-default tb-item" id="tb-boundaryevent"></button> -->
     <!-- <button type="button" class="btn btn-default tb-item" id="tb-receivetask"></button> -->
     <!-- <button type="button" class="btn btn-default tb-item" id="tb-sendtask"></button> -->
@@ -205,6 +177,8 @@
     <li><a id="add-annotation">Add Annotation...</a></li>
     <li class="divider"></li>
     <li><a id="remove-element">Remove</a></li>
+    <li class="divider"></li>
+    <li><a id="add-pool">Add Pool Lane</a></li>
   </ul>
 </div>
 <div id="bottom-toolbar">
@@ -220,13 +194,12 @@
     </ul>
   </div>
 </div>
-<%# This will get removed just keeping for testing %>
-<br><br>
-XPDL
-<textarea id="XPDL" style="width:100%;height:200px;"></textarea>
-json
-<textarea id="json" style="width:100%;height:200px;"></textarea>
-bpmn
-<textarea id="bpmn" style="width:100%;height:200px;"></textarea>
-newXPDL
-<textarea id="newXPDL" style="width:100%;height:200px;"></textarea>
+
+<br/>
+<br/>
+<br/>
+<textarea class='hide' id='jsonText'> test</textarea>
+<br/>
+<br/>
+<br/>
+<br/>
