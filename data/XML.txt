@@ -18,7 +18,7 @@
     <Pool Id="519e79d7-b709-44bf-8d6a-f8c8704b6b1e" Name="Main Process" Process="63081326-d2c3-4bee-9156-93ad0c73ba96" BoundaryVisible="false">
       <Lanes ></Lanes>
       <NodeGraphicsInfos>
-        <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="0" Width="0" BorderColor="-16777216" FillColor="-1">
+        <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="0" Width="0" BorderColor="-16777216" FillColor="white">
           <Coordinates XCoordinate="0" YCoordinate="0" ></Coordinates>
         </NodeGraphicsInfo>
       </NodeGraphicsInfos>
@@ -26,7 +26,7 @@
     <Pool Id="bcc86ce6-7139-4afc-a293-400d5a43d002" Name="Process 1" Process="bcb151a7-2710-46a8-9a48-d4a9ade4302c" BoundaryVisible="true">
       <Lanes ></Lanes>
       <NodeGraphicsInfos>
-        <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="350" Width="700" BorderColor="-16777216" FillColor="-1">
+        <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="350" Width="700" BorderColor="-16777216" FillColor="white">
           <Coordinates XCoordinate="30" YCoordinate="30" ></Coordinates>
         </NodeGraphicsInfo>
       </NodeGraphicsInfos>
@@ -105,7 +105,7 @@
           </NodeGraphicsInfos>
           <ExtendedAttributes ></ExtendedAttributes>
         </Activity>
-        <Activity Id="7783f32d-5d7a-4f19-b685-fc124203ae97" Name="">
+        <Activity Id="7783f32d-5d7a-4f19-b685-fc124203ae97" Name="Decision 1">
           <Description ></Description>
           <Route ></Route>
           <Documentation ></Documentation>
@@ -116,12 +116,12 @@
           </NodeGraphicsInfos>
           <ExtendedAttributes ></ExtendedAttributes>
         </Activity>
-        <Activity Id="6fd131d6-238e-4382-ba5f-e4c927b8b1c7" Name="">
+        <Activity Id="6fd131d6-238e-4382-ba5f-e4c927b8b1c7" Name="Decision 2">
           <Description ></Description>
           <Route ></Route>
           <Documentation ></Documentation>
           <NodeGraphicsInfos>
-            <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="40" Width="40" BorderColor="-5855715" FillColor="-52">
+            <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="40" Width="40" BorderColor="-5855715" FillColor="yellow">
               <Coordinates XCoordinate="417" YCoordinate="168" ></Coordinates>
             </NodeGraphicsInfo>
           </NodeGraphicsInfos>
