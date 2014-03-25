@@ -119,55 +119,10 @@ net.BpmnJS.prototype = {
           var element2 = me.getById(transition.To);
 
           // Create link association between the two activities.
-          // TODO changes to associatedXPDL required?
-
-          // element1.outgoing.push(element2);
-          // element2.incoming.push(element1);
           me.connectElements(element1, element2);
         });
       }
     }
-
-    // DEPRECATED. Associate on activities, not connections/transitions.
-    // Instead, for every activity, we maintain a list of "outgoing" paths and "incoming" paths.
-
-    // LINK THE ACTIVITIES TO THE TRANSITIONS
-    // this.paper.forEach(function(el) {
-    //   if(el.shapeType !== undefined && el.shapeType !== 'Transition'){
-
-    //     // LOOK FOR THE ID OF ELEMENTS LINKED TO THAT TRANSITION
-    //     // for(var i in transition.linkedElements){
-
-    //     //   // FIND ELEMENT LINKED FROM AND LINK
-    //     //   globalPaper.forEach(function (el){
-
-    //     //     if(el.hasOwnProperty('associatedXPDL') && transition.associatedXPDL.From === el.associatedXPDL.Id){
-    //     //       transition.linkedFromElement = el;
-    //     //       // LINK THE OTHER WAY AROUND (ELEMENT -> TRANSITIONS)
-    //     //       el.transitionLinkedFrom = transition;
-    //     //       return false;
-
-    //     //     }
-
-    //     //   });
-
-    //     //   // FIND ELEMENT LINKED TO AND LINK
-    //     //   globalPaper.forEach(function (el){
-
-    //     //     if(el.hasOwnProperty('associatedXPDL') && transition.associatedXPDL.To === el.associatedXPDL.Id){
-    //     //       transition.linkedToElement = el;
-    //     //       // LINK THE OTHER WAY AROUND (ELEMENT -> TRANSITIONS)
-    //     //       el.transitionLinkedTo = transition;
-    //     //       return false;
-
-    //     //     }
-
-    //     //   });
-
-    //     // }
-
-    //   }
-    // });
 
     if (!this.isStatic) {
       // MAKE ELEMENTS (NOT LINES) DRAGGABLE
@@ -638,192 +593,49 @@ net.BpmnJS.prototype = {
 
   initStartEvent: function(x, y) {
 
-    // TODO
-    // ADD THIS XPDL TO THE XPDL TREE (this.xpdlJson)
-    var xpdl =  {
-                  Description: null,
-                  Event: {
-                    StartEvent: {
-                      Trigger: "None"
-                    }
-                  },
-                  Documentation: null,
-                  NodeGraphicsInfos: {
-                    NodeGraphicsInfo: {
-                      Coordinates: {
-                        XCoordinate: String(x),
-                        YCoordinate: String(y)
-                      },
-                      ToolId: "ECE450_Workflow_Modeler",
-                      Height: "30",
-                      Width: "30",
-                      BorderColor: "black",
-                      FillColor: "green"
-                    }
-                  },
-                  ExtendedAttributes: null,
-                  Id: String(this.currentId),
-                  Name: "StartEvent"
-                };
-
+    // TODO add to this.xpdlJson
+    var xpdlJson = XpdlJsonGenerator.getNewStartEventJson(this.currentId, x, y);
     this.currentId++;
 
-    var shape = this.initActivity(this.paintEvent(xpdl, x, y, 30, 30, '', 'green', 'black'));
+    // TODO read height/width/color properties for xpdlJson instead b/c this is error-prone.
+    var shape = this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'green', 'black'));
 
     return shape;
   },
 
   initIntermediateEvent: function(x, y) {
-    var xpdl =  {
-                  Description: null,
-                  Event: {
-                    IntermediateEvent: {
-                      Trigger: "None"
-                    }
-                  },
-                  Documentation: null,
-                  NodeGraphicsInfos: {
-                    NodeGraphicsInfo: {
-                      Coordinates: {
-                        XCoordinate: String(x),
-                        YCoordinate: String(y)
-                      },
-                      ToolId: "ECE450_Workflow_Modeler",
-                      Height: "30",
-                      Width: "30",
-                      BorderColor: "black",
-                      FillColor: "yellow"
-                    }
-                  },
-                  ExtendedAttributes: null,
-                  Id: String(this.currentId),
-                  Name: "IntermediateEvent"
-                };
-
+    var xpdlJson = XpdlJsonGenerator.getNewIntermediateEventJson(this.currentId, x, y);
     this.currentId++;
 
-    return this.initActivity(this.paintEvent(xpdl, x, y, 30, 30, '', 'yellow', 'black'));
+    return this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'yellow', 'black'));
   },
 
   initEndEvent: function(x, y) {
-    var xpdl =  {
-                  Description: null,
-                  Event: {
-                    IntermediateEvent: {
-                      Trigger: "None"
-                    }
-                  },
-                  Documentation: null,
-                  NodeGraphicsInfos: {
-                    NodeGraphicsInfo: {
-                      Coordinates: {
-                        XCoordinate: String(x),
-                        YCoordinate: String(y)
-                      },
-                      ToolId: "ECE450_Workflow_Modeler",
-                      Height: "30",
-                      Width: "30",
-                      BorderColor: "black",
-                      FillColor: "yellow"
-                    }
-                  },
-                  ExtendedAttributes: null,
-                  Id: String(this.currentId),
-                  Name: "EndEvent"
-                };
-
+    var xpdlJson = XpdlJsonGenerator.getNewEndEventJson(this.currentId, x, y);
     this.currentId++;
 
-    return this.initActivity(this.paintEvent(xpdl, x, y, 30, 30, '', 'red', 'black'));
+    return this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'red', 'black'));
   },
 
   initGateway: function(x, y) {
-    var xpdl =  {
-                  Description: null,
-                  Route: null,
-                  Documentation: null,
-                  NodeGraphicsInfos: {
-                    NodeGraphicsInfo: {
-                      Coordinates: {
-                        XCoordinate: String(x),
-                        YCoordinate: String(y)
-                      },
-                      ToolId: "ECE450_Workflow_Modeler",
-                      Height: "40",
-                      Width: "40",
-                      BorderColor: "black",
-                      FillColor: "yellow"
-                    }
-                  },
-                  ExtendedAttributes: null,
-                  Id: String(this.currentId),
-                  Name: "Gateway"
-                };
-
+    var xpdlJson = XpdlJsonGenerator.getNewGatewayJson(this.currentId, x, y);
     this.currentId++;
 
-    return this.initActivity(this.paintRoute(xpdl, x, y, 40, 40, '', 'yellow', 'black'));
+    return this.initActivity(this.paintRoute(xpdlJson, x, y, 40, 40, '', 'yellow', 'black'));
   },
   
   initTask: function(x, y) {
-    var xpdl =  {
-                  Description: null,
-                  Implementation: {
-                    Task: null
-                  },
-                  Performers: null,
-                  Documentation: null,
-                  Loop: {
-                    LoopType: "None"
-                  },
-                  NodeGraphicsInfos: {
-                    NodeGraphicsInfo: {
-                      Coordinates: {
-                        XCoordinate: String(x),
-                        YCoordinate: String(y)
-                      },
-                      ToolId: "ECE450_Workflow_Modeler",
-                      Height: "60",
-                      Width: "90",
-                      BorderColor: "black",
-                      FillColor: "blue"
-                    }
-                  },
-                  ExtendedAttributes: null,
-                  Id: String(this.currentId),
-                  Name: "Task"
-                };
-
+    var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.currentId, x, y);
     this.currentId++;
 
-    return this.initActivity(this.paintImplementation(xpdl, x, y, 90, 60, '', 'blue', 'black'));
+    return this.initActivity(this.paintImplementation(xpdlJson, x, y, 90, 60, '', 'blue', 'black'));
   },
   
   initPool: function(x,y, poolTitle){
-    var xpdl =  {
-                  Lanes: null,
-                  NodeGraphicsInfos: {
-                    NodeGraphicsInfo: {
-                      Coordinates: {
-                        XCoordinate: String(x),
-                        YCoordinate: String(y)
-                      },
-                      ToolId: "BizAgi_Process_Modeler",
-                      Height: "0",
-                      Width: "0",
-                      BorderColor: "black",
-                      FillColor: "cornflowerblue"
-                    }
-                  },
-                  Id: String(this.currentId),
-                  Name: poolTitle,
-                  Process: null,
-                  BoundaryVisible: "false"
-                };
-    
+    var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.currentId, poolTitle, x, y);
     this.currentId++;
 
-    return this.initActivity(this.paintPool(xpdl, x, y, poolTitle, 'cornflowerblue', 'black'));
+    return this.initActivity(this.paintPool(xpdlJson, x, y, poolTitle, 'cornflowerblue', 'black'));
   },
 
   initLane: function(x,y, laneTitle, poolTitle){
