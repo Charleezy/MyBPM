@@ -253,7 +253,16 @@ net.BpmnJS.prototype = {
             height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height),
             width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
 
-        var text = me.paper.text(x+width/2, y+height/2, textToAdd);
+        if (element.shapeType == 'Pool' || element.shapeType == 'PoolLane'){
+          var offset = 10; 
+          //FixMe: Need to check if correct location after the x&y are updated
+          var text = me.paper.text(x+offset, y+height/2, textToAdd).attr({transform: "r" + 270});
+          text.shapeType = 'RotatedText';
+        }
+        else {
+          var text = me.paper.text(x+width/2, y+height/2, textToAdd);
+        }
+
         text.toFront();
         text.shapeType = 'Text';
 
