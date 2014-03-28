@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xpdl:Package xmlns:xpdl="http://www.wfmc.org/2008/XPDL2.1" xmlns="http://www.wfmc.org/2008/XPDL2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Id="Process_Repository" Name="Process Repository" xsi:schemaLocation="http://www.wfmc.org/2008/XPDL2.1 http://www.wfmc.org/standards/docs/bpmnxpdl_31.xsd">
+    <xpdl:PackageHeader>
+        <xpdl:XPDLVersion>2.1</xpdl:XPDLVersion>
+        <xpdl:Vendor>(c) Together Teamsolutions Co., Ltd.</xpdl:Vendor>
+        <xpdl:Created>22-Mar-2003</xpdl:Created>
+    </xpdl:PackageHeader>
+    <xpdl:RedefinableHeader PublicationStatus="UNDER_TEST"/>
+    <xpdl:ConformanceClass GraphConformance="NON_BLOCKED"/>
+    <xpdl:Script Type="text/javascript"/>
+    <xpdl:Participants>
+        <xpdl:Participant Id="_visa_services" Name="Visa Services">
+            <xpdl:ParticipantType Type="SYSTEM"/>
+            <xpdl:ExtendedAttributes>
+                <xpdl:ExtendedAttribute Name="JaWE_TYPE" Value="LANE_DEFAULT"/>
+            </xpdl:ExtendedAttributes>
+        </xpdl:Participant>
+        <xpdl:Participant Id="_client" Name="Client">
+            <xpdl:ParticipantType Type="ROLE"/>
+            <xpdl:ExtendedAttributes>
+                <xpdl:ExtendedAttribute Name="JaWE_TYPE" Value="LANE_DEFAULT"/>
+            </xpdl:ExtendedAttributes>
+        </xpdl:Participant>
+    </xpdl:Participants>
+	<xpdl:DataFields>
+        <xpdl:DataField Id="citizenship_status" IsArray="false" Name="Citizenship status">
+            <xpdl:DataType>
+                <xpdl:BasicType Type="STRING"/>
+            </xpdl:DataType>
+            <xpdl:InitialValue>valid</xpdl:InitialValue>
+            <xpdl:Description>The value of this variable determines the process flow.</xpdl:Description>
+        </xpdl:DataField>
+		        <xpdl:DataField Id="criminal_record" IsArray="false" Name="Criminal Record">
+            <xpdl:DataType>
+                <xpdl:BasicType Type="STRING"/>
+            </xpdl:DataType>
+            <xpdl:InitialValue>false</xpdl:InitialValue>
+            <xpdl:Description>The value of this variable determines the process flow.</xpdl:Description>
+        </xpdl:DataField>
+		</xpdl:DataField>
+		        <xpdl:DataField Id="visa_status" IsArray="false" Name="Visa status">
+            <xpdl:DataType>
+                <xpdl:BasicType Type="STRING"/>
+            </xpdl:DataType>
+            <xpdl:InitialValue>rejected</xpdl:InitialValue>
+            <xpdl:Description>The value of this variable determines the process flow.</xpdl:Description>
+        </xpdl:DataField>
+		</xpdl:DataField>
+		        <xpdl:DataField Id="success" IsArray="false" Name="Success">
+            <xpdl:DataType>
+                <xpdl:BasicType Type="STRING"/>
+            </xpdl:DataType>
+            <xpdl:InitialValue>success</xpdl:InitialValue>
+            <xpdl:Description>The value of this variable determines the process flow.</xpdl:Description>
+        </xpdl:DataField>
+    </xpdl:DataFields>
+    <xpdl:Pools>
+        <xpdl:Pool BoundaryVisible="true" Id="Process_Repository_pool1" MainPool="true" Name="Visa Application Workflow" Orientation="HORIZONTAL" Process="_visa_app_workflow">
+            <xpdl:Lanes>
+                <xpdl:Lane Id="Process_Repository_pool1_lan2" Name="Visa Services">
+                    <xpdl:Performers>
+                        <xpdl:Performer>_visa_services</xpdl:Performer>
+                    </xpdl:Performers>
+                </xpdl:Lane>
+                <xpdl:Lane Id="Process_Repository_pool1_lan1" Name="Client">
+                    <xpdl:Performers>
+                        <xpdl:Performer>_client</xpdl:Performer>
+                    </xpdl:Performers>
+                </xpdl:Lane>
+            </xpdl:Lanes>
+        </xpdl:Pool>
+    </xpdl:Pools>
+    <xpdl:WorkflowProcesses>
+        <xpdl:WorkflowProcess AccessLevel="PUBLIC" Id="_visa_app_workflow" Name="Visa Application Workflow">
+            <xpdl:ProcessHeader DurationUnit="D">
+                <xpdl:Created>13-03-2003</xpdl:Created>
+                <xpdl:Description>Notifies customer that some or all of the ordered items are beeing shiped to him.</xpdl:Description>
+            </xpdl:ProcessHeader>
+            <xpdl:RedefinableHeader PublicationStatus="UNDER_TEST"/>
+            <xpdl:Activities>
+                <xpdl:Activity Id="_service_act1" Name="Create Client's Profile">
+                    <xpdl:Implementation>
+                        <xpdl:No/>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>_visa_services</xpdl:Performer>
+                    </xpdl:Performers>
+                </xpdl:Activity>
+                <xpdl:Activity Id="_service_act2" Name="Check citizenship status">
+                    <xpdl:Implementation>
+                        <xpdl:No/>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>_visa_services</xpdl:Performer>
+                    </xpdl:Performers>
+					<xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="VariableToProcess_UPDATE" Value="citizenship_status"/>
+                        <xpdl:ExtendedAttribute Name="VariableToProcess_UPDATE" Value="visa_status"/>
+                    </xpdl:ExtendedAttributes>
+                </xpdl:Activity>
+                <xpdl:Activity Id="_service_act4" Name="Verify Education">
+                    <xpdl:Implementation>
+                        <xpdl:No/>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>_visa_services</xpdl:Performer>
+                    </xpdl:Performers>
+					<xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="VariableToProcess_UPDATE" Value="visa_status"/>
+                    </xpdl:ExtendedAttributes>
+                </xpdl:Activity>
+                <xpdl:Activity Id="_service_act3" Name="Check Criminal status">
+                    <xpdl:Implementation>
+                        <xpdl:No/>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>_visa_services</xpdl:Performer>
+                    </xpdl:Performers>
+					<xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="VariableToProcess_UPDATE" Value="criminal_record"/>
+						<xpdl:ExtendedAttribute Name="VariableToProcess_UPDATE" Value="visa_status"/>
+                    </xpdl:ExtendedAttributes>
+                </xpdl:Activity>
+                <xpdl:Activity Id="_gate2">
+                    <xpdl:Route GatewayType="Exclusive"/>
+                    <xpdl:TransitionRestrictions>
+                        <xpdl:TransitionRestriction>
+                            <xpdl:Split Type="Exclusive">
+                                <xpdl:TransitionRefs>
+                                    <xpdl:TransitionRef Id="_tra_gate2_client_act2"/>
+                                    <xpdl:TransitionRef Id="_tra_gate2_service_act4"/>
+                                </xpdl:TransitionRefs>
+                            </xpdl:Split>
+                        </xpdl:TransitionRestriction>
+                    </xpdl:TransitionRestrictions>
+                </xpdl:Activity>
+                <xpdl:Activity Id="_gate1">
+                    <xpdl:Route GatewayType="Exclusive"/>
+                    <xpdl:TransitionRestrictions>
+                        <xpdl:TransitionRestriction>
+                            <xpdl:Split Type="Exclusive">
+                                <xpdl:TransitionRefs>
+                                    <xpdl:TransitionRef Id="_tra_gate1_client_act2"/>
+                                    <xpdl:TransitionRef Id="_tra_gate1_service_act3"/>
+                                </xpdl:TransitionRefs>
+                            </xpdl:Split>
+                        </xpdl:TransitionRestriction>
+                    </xpdl:TransitionRestrictions>
+                </xpdl:Activity>
+                <xpdl:Activity Id="_client_act1" Name="Submit Visa Application">
+                    <xpdl:Implementation>
+                        <xpdl:No/>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>_client</xpdl:Performer>
+                    </xpdl:Performers>
+                </xpdl:Activity>
+                <xpdl:Activity Id="_client_act2" Name="Receive Response">
+                    <xpdl:Implementation>
+                        <xpdl:No/>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>_client</xpdl:Performer>
+                    </xpdl:Performers>
+                    <xpdl:TransitionRestrictions>
+                        <xpdl:TransitionRestriction>
+                            <xpdl:Join Type="Exclusive"/>
+                        </xpdl:TransitionRestriction>
+                    </xpdl:TransitionRestrictions>
+					<xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="VariableToProcess_READ" Value="visa_status"/>
+                        <xpdl:ExtendedAttribute Name="VariableToProcess_UPDATE" Value="success"/>
+                    </xpdl:ExtendedAttributes>
+                </xpdl:Activity>
+                <xpdl:Activity Id="_finish">
+                    <xpdl:Event>
+                        <xpdl:EndEvent Result="None"/>
+                    </xpdl:Event>
+                </xpdl:Activity>
+                <xpdl:Activity Id="_start">
+                    <xpdl:Event>
+                        <xpdl:StartEvent Trigger="None"/>
+                    </xpdl:Event>
+                </xpdl:Activity>
+            </xpdl:Activities>
+            <xpdl:Transitions>
+                <xpdl:Transition From="_service_act1" Id="_tra_service_act1_service_act2" To="_service_act2">
+                </xpdl:Transition>
+                <xpdl:Transition From="_service_act3" Id="_tra_service_act3_gate2" To="_gate2">
+                </xpdl:Transition>
+                <xpdl:Transition From="_service_act2" Id="_tra_service_act2_gate1" To="_gate1">
+                </xpdl:Transition>
+                <xpdl:Transition From="_gate1" Id="_tra_gate1_service_act3" To="_service_act3">
+                    <xpdl:Condition Type="CONDITION">citizenship_status=="valid"</xpdl:Condition>
+                </xpdl:Transition>
+                <xpdl:Transition From="_gate2" Id="_tra_gate2_service_act4" To="_service_act4">
+                    <xpdl:Condition Type="CONDITION">criminal_record="false"</xpdl:Condition>
+                </xpdl:Transition>
+                <xpdl:Transition From="_client_act1" Id="_tra_client_act1_service_act1" To="_service_act1">
+                </xpdl:Transition>
+                <xpdl:Transition From="_gate1" Id="_tra_gate1_client_act2" To="_client_act2">
+                    <xpdl:Condition Type="OTHERWISE"/>
+                </xpdl:Transition>
+                <xpdl:Transition From="_gate2" Id="_tra_gate2_client_act2" To="_client_act2">
+                    <xpdl:Condition Type="OTHERWISE"/>
+                </xpdl:Transition>
+                <xpdl:Transition From="_service_act4" Id="_tra_service_act4_client_act2" To="_client_act2">
+                </xpdl:Transition>
+                <xpdl:Transition From="_start" Id="_tra_start_client_act1" To="_client_act1">
+                </xpdl:Transition>
+                <xpdl:Transition From="_client_act2" Id="_tra_client_act2_finish" To="_finish">
+                </xpdl:Transition>
+            </xpdl:Transitions>
+        </xpdl:WorkflowProcess>
+    </xpdl:WorkflowProcesses>
+</xpdl:Package>
