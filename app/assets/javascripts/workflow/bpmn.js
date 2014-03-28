@@ -161,8 +161,8 @@ net.BpmnJS.prototype = {
         	var canvasX = parseInt(event.pageX - offset.left - 1)
         	var canvasY = parseInt(event.pageY - offset.top - 22)
         	if (canvasX < 0 || canvasY < 0) {
-        		canvasX = NaN;
-        		canvasY = NaN;
+        		canvasX = "out of range";
+        		canvasY = "out of range";
         	};
           // DEBUG
         	$( "#log" ).text("X: " + event.pageX + ", Y: " + event.pageY + ". Canvas X:"+ canvasX +", canvas Y:" + canvasY);
