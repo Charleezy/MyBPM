@@ -148,12 +148,12 @@ net.BpmnJS.prototype = {
         var position = $(canvas).position();
         var offset = $(canvas).offset();
         // DEBUG
-        // $( "#log-form" ).text("positionX:" + position.left + ", Y: " + position.top + ". offsetX:"+ offset.left +", offsetY:" + offset.top);
+        $( "#log-form" ).text("positionX:" + position.left + ", Y: " + position.top + ". offsetX:"+ offset.left +", offsetY:" + offset.top);
     $( window ).resize(function() {
         position = $(canvas).position();
         offset = $(canvas).offset();
         // DEBUG
-        // $( "#log-form" ).text("positionX:" + position.left + ", Y: " + position.top + ". offsetX:"+ offset.left +", offsetY:" + offset.top);
+        $( "#log-form" ).text("positionX:" + position.left + ", Y: " + position.top + ". offsetX:"+ offset.left +", offsetY:" + offset.top);
     });
     var contextMenu = $('#editor-contextmenu'),
         me = this;
@@ -165,7 +165,7 @@ net.BpmnJS.prototype = {
         		canvasY = NaN;
         	};
           // DEBUG
-        	// $( "#log" ).text("X: " + event.pageX + ", Y: " + event.pageY + ". Canvas X:"+ canvasX +", canvas Y:" + canvasY);
+        	$( "#log" ).text("X: " + event.pageX + ", Y: " + event.pageY + ". Canvas X:"+ canvasX +", canvas Y:" + canvasY);
         });
     $(element[0]).on('contextmenu', function(e) {
       contextMenu.css({
@@ -202,6 +202,11 @@ net.BpmnJS.prototype = {
       contextMenu.on('click', 'a#add-annotation', function() {
         var textToAdd = prompt('Annotation:');
         if (textToAdd == null || textToAdd.trim() == '') return;
+        if (element.shapeType == 'Text') {
+          var temp = element;
+          element = element.pair;
+          element.pair = temp;
+        }
         if (element.pair !== undefined) {
           // Remove element paired to this item (should be text).
           element.pair.remove();
@@ -438,6 +443,7 @@ net.BpmnJS.prototype = {
     return shape;
   },
 
+  // Task
   paintImplementation : function(xpdlImplementation, x, y, width, height, name, fillColor, borderColor){
     // paint shape
     // var shape = this.paper.rect(x, y, width, height, 5).attr('cursor', 'move');
@@ -470,6 +476,7 @@ net.BpmnJS.prototype = {
     return shape;
   },
 
+  // Gateway
   paintRoute : function(xpdlRoute, x, y, width, height, name, fillColor, borderColor){
     var strPath = "M" + String(x+width/2) + " " + String(y+height) + ",L" + String(x+width) + " " + String(y+height/2) +",L" + String(x+width/2) + " " + String(y) + ",L" + String(x) + " " + String(y+height/2) + "Z";
     
