@@ -3,8 +3,10 @@
 <table class="table table-striped table-hover">
   <thead>
     <tr>
+      <th>ID</th>
       <th>Name</th>
-      <th>Workflow ID</th>
+      <th>Owner</th>
+      <th>Created On</th>
       <th></th>
       <th></th>
     <tr>
@@ -15,13 +17,15 @@
         <td colspan="3">You have no workflows</td>
       </tr>
     <% else %>
-      <% @workflows.each do |workflow| %>
+      <% @workflows.each do |w| %>
         <tr>
-          <td><%= workflow.name %></td>
-          <td><%= workflow.id %></td>
-          <td><a href="<%= workflow_path(workflow.id) %>">View</a></td>
+          <td><%= w[:workflow].id %></td>
+          <td><%= w[:workflow].name %></td>
+          <td><%= w[:user] %></td>
+          <td><%= w[:workflow].created_at %></td>
+          <td><a href="<%= workflow_path(w[:workflow].id) %>">View</a></td>
           <td>
-            <%= link_to 'Delete', workflow, :method => :delete, :confirm => "Are you sure you want to delete #{workflow.name}?" %>
+            <%= link_to 'Delete', w[:workflow], :method => :delete, :confirm => "Are you sure you want to delete #{w[:workflow].name}?" %>
           </td>
         </tr>
       <% end %>
