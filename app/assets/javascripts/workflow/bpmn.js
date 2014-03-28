@@ -201,7 +201,7 @@ net.BpmnJS.prototype = {
       //FIXME: Need to fix location for pool & lane annotations
       contextMenu.on('click', 'a#add-annotation', function() {
         var textToAdd = prompt('Annotation:');
-        if (textToAdd == null || textToAdd.trim() == '') return;
+        if (textToAdd == null) return;
         if (element.shapeType == 'Text') {
           var temp = element;
           element = element.pair;
@@ -244,7 +244,7 @@ net.BpmnJS.prototype = {
           return;
         }
         var laneTitle = prompt('Please enter title of lane:');
-        //if (textToAdd == null || textToAdd.trim() == '') return;
+        if (laneTitle == null) return;
         var x = 10, y = 10;
         if (totalLanes > 0){
           //get current pool title
