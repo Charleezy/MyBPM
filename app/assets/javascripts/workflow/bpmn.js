@@ -687,7 +687,7 @@ net.BpmnJS.prototype = {
     // Add xpdl to tree
     this.activities.push(xpdlJson);
 
-    var shape = this.initActivity(this.paintRoute(xpdlJson, x, y, name, fillColor, borderColor));
+    var shape = this.initActivity(this.paintPool(xpdlJson, x, y, name, fillColor, borderColor));
 
     return shape;
   },
