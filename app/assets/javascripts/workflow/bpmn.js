@@ -145,8 +145,6 @@ net.BpmnJS.prototype = {
     $( window ).resize(function() {
         position = $(canvas).position();
         offset = $(canvas).offset();
-        // DEBUG
-        $( "#log-form" ).text("positionX:" + position.left + ", Y: " + position.top + ". offsetX:"+ offset.left +", offsetY:" + offset.top);
     });
     var contextMenu = $('#editor-contextmenu'),
         me = this;
@@ -646,7 +644,7 @@ net.BpmnJS.prototype = {
         name = xpdlJson.Name,
         width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
         height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
-        fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
+        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
 
 
@@ -654,7 +652,7 @@ net.BpmnJS.prototype = {
     this.activities.push(xpdlJson);
 
     var shape = this.initActivity(this.paintRoute(
-      xpdlJson, x, y, width, height, name, fillColor, borderColor));
+      xpdlJson, x, y, width, height, name, 'white', borderColor));
 
     return shape;
   },
@@ -664,7 +662,7 @@ net.BpmnJS.prototype = {
         name = xpdlJson.Name,
         width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
         height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
-        fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
+        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
 
 
@@ -672,7 +670,7 @@ net.BpmnJS.prototype = {
     this.activities.push(xpdlJson);
 
     var shape = this.initActivity(this.paintImplementation(
-      xpdlJson, x, y, width, height, name, fillColor, borderColor));
+      xpdlJson, x, y, width, height, name, 'lightyellow', borderColor));
 
     return shape;
   },
@@ -680,14 +678,14 @@ net.BpmnJS.prototype = {
   initPool: function(x,y, poolTitle){
     var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewTaskJson(this.generateNewID(), poolTitle, x, y)),
         name = xpdlJson.Name,
-        fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
+        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
 
 
     // Add xpdl to tree
     this.activities.push(xpdlJson);
 
-    var shape = this.initActivity(this.paintPool(xpdlJson, x, y, name, fillColor, borderColor));
+    var shape = this.initActivity(this.paintPool(xpdlJson, x, y, name, 'lightblue', borderColor));
 
     return shape;
   },
@@ -696,7 +694,7 @@ net.BpmnJS.prototype = {
     // TODO
     // FIND OUT THE FORMAT OF THE LANE
     var xpdl = 'xpdlLane';
-    return this.initActivity(this.paintLane(xpdl, x, y, laneTitle, poolTitle, '#F0F0F0', 'black'));
+    return this.initActivity(this.paintLane(xpdl, x, y, laneTitle, poolTitle, 'whitesmoke', 'black'));
   },
 
   // CALLED WHEN THE USER CLICKS THE SAVE BUTTON
