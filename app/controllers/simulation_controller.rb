@@ -52,7 +52,6 @@ class SimulationController < ApplicationController
   
   def run
 	@simulation = MockData.find(params[:id])
-	@
 	respond_to do |format| 
       format.json { render :json => @simulation.id }
     end
