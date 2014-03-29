@@ -1,7 +1,17 @@
 <script type="text/javascript">
 	$(document).ready(function() {
-		var mockdata = {};
-	
+		var mockdata_text = $('#mockdata').text();
+		var mockdata;
+		
+		// If this is the first time opening this simulation, initialize mock data structure
+		if (mockdata_text == "" || mockdata_text == null) {
+			mockdata = { "stages" : [] };
+		}
+		// Convert string to JSON
+		else {
+			mockdata = jQuery.parseJSON($('#mockdata').text());
+		}
+		
 		var client = new XMLHttpRequest();
 
 		// GET JSON FILE
@@ -9,16 +19,6 @@
 		client.send();
 		var jsonText = client.responseText;
     
-		// GET XPDL FILE
-		client.open('GET', 'https://dl.dropboxusercontent.com/s/j1w6mr83r8ug0om/simpleWorkflow.xpdl?dl=1&token_hash=AAH7PHIpUBmIim-BUM6uC7WC8lAqG-36HYOqxJHkbm2WzA',false);
-		client.send();
-		var XPDLText = client.responseText;
-
-		// GET BPMN FILE
-		client.open('GET', 'https://dl.dropboxusercontent.com/s/8gmm8lss2j88i1b/testFile.bpmn?dl=1&token_hash=AAGfdvQIrgIaaLbx4cpJLbFEF9izHR-iuzOhMy5esvnV1w',false);
-		client.send();
-		var bpmnText = client.responseText;
-
 		// CREATE THE JAVASCRIPT OBJECT BASED ON THE JSON FILE
 		var jsonObject = JSON.parse(jsonText);
     
@@ -45,17 +45,39 @@
 		});
 		
 		$('#add').click(function() {
+			// ID of the clicked element
+			var stage_id = $(this).id;
+			
+			var i = 0;
+			var flag = 0;
+			
+			// Get key value pair that the user entered
 			var key = $('#key').val();
 			var value = $('#value').val();
 			
+			// Validation check on key/value pair
 			if (key == "" || value == "") {
 				$('#add_data_err').show();
 			}
 			else {
-				mockdata[key] = value;
+				for(i = 0; i < mockdata.stages.length; i++) {
+					// If data already exists for this stage, append data
+					if (mockdata.stages[i]['stage_id'] == stage_id) {
+						mockdata.stages[i].stage_data.push(new stage_data(key, value));
+						flag = 1;
+						break;
+					}
+				}
+				
+				// If stage_id was not found, create a new stage and append data
+				if (flag == 0) {
+					mockdata.stages.push(new stage(stage_id));
+					var result = $.grep(mockdata.stages, function(e){ return e.stage_id == stage_id; });
+					result[0].stage_data.push(new stage_data(key, value));
+				}
+				
 				$('#addData').modal('hide');
 			}
-			console.log(mockdata);
 		});
 		
 		$('#save_mockdata').click(function() {
@@ -75,33 +97,63 @@
 		$('#clear_mockdata').click(function() {
 			var answer = confirm('Are you sure you want to delete all your mock data?');
 			if(answer == true) {
-				mockdata = { };
+				mockdata = { "stages" : [] };
 			}
+			console.log(mockdata);
 		});
 	});
+	
+	// Stage object
+	function stage(stage_id)
+	{
+		this.stage_id = stage_id;
+		this.stage_data = new Array();
+	}
+	
+	// Key/value pair mock data object
+	function stage_data(key, value)
+	{
+		this.name = key;
+		this.value = value;
+	}
+	
 </script>
 
 <span id="sim_id" style="display:none"><%= @simulation.id %></span>
 <span id="workflow_id" style="display:none"><%= @workflow.id %></span>
+<span id="mockdata" style="display:none"><%= @simulation.mockdata %></span>
 
-<h1><%= @simulation.name %></h1>
-
-
-<div class="row" id="sim_titles">
-	<div class="col-md-7 heading"><b>Workflow:</b></div>
-	<div class="col-md-1"></div>
-	<div class="col-md-4 heading"><b>Simulation Results:</b></div>
-</div>
+<h1 class="sim_title"><%= @simulation.name %></h1>
 
 <div class="row" id="sim_container">
-	<div class="col-md-7" id="static_canvas"></div>
-	<div class="col-md-1"></div>
-	<div class="col-md-4" id="sim_results"></div>
+	<div class="col-md-8">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Workflow</h3>
+			</div>
+			<div class="panel-body">
+				<div id="static_canvas"></div>
+			</div>
+		</div>
+		
+		<div class="btn-group">
+			<button type="button" class="btn btn-primary sim_button" id="save_mockdata">Save Changes</button>
+			<button type="button" class="btn btn-primary sim_button" id="clear_mockdata">Clear Mock Data</button>
+		</div>
+	</div>
+	<div class="col-md-4">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">Simulation Results</h3>
+		</div>
+		<div class="panel-body">
+			<div id="sim_results"></div>
+		</div>
+	</div>
+	<div class="btn-group">
+		<button type="button" class="btn btn-primary sim_button" id="run_sim">Run Simulation</button>
+	</div>
 </div>
-
-<button type="button" class="btn btn-primary" id="save_mockdata">Save Simulation</button>
-<button type="button" class="btn btn-primary" id="clear_mockdata">Clear Mock Data</button>
-<button type="button" class="btn btn-primary" id="run_sim"><span class="glyphicon glyphicon-play"></span></button>
 
 <div class="modal fade" id="addData" role="dialog" aria-labelledby="addDataModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -118,7 +170,7 @@
 						<strong>Error:</strong> Key and value cannot be blank!
 					</div>
                     <div class="keyval_row row">
-						<div class="col-md-6">
+						<div class="col-md-5">
 							<div class="formLabel">
 								<label for="key">Key</label>
 							</div>
@@ -126,12 +178,18 @@
 								<input id="key" name="key" type="text" class="form-control" />
 							</div>
 						</div>
-						<div class="col-md-6">
+						<div class="col-md-5">
 							<div class="formLabel">
 								<label for="value">Value</label>
 							</div>
 							<div class="formField">
 								<input id="value" name="value" type="text" class="form-control" />
+							</div>
+						</div>
+						<div class="col-md-2 add_remove_buttons">
+							<div class="btn-group">
+								<button class="btn btn-success">+</button>
+								<button class="btn btn-danger">-</button>
 							</div>
 						</div>
                     </div>

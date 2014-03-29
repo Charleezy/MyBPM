@@ -6,6 +6,12 @@
 	display:none;
 }
 
+.add_remove_buttons {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+}
+
 #addData {
 	display:none;
 }
@@ -34,8 +40,14 @@
 }
 
 .keyval_row {
-	width:80%;
+	width:100%;
 	margin:0 auto;
+	position:relative;
+}
+
+.sim_button {
+	margin-top:5px;
+	margin-bottom:5px;
 }
 
 #sim_container {
@@ -43,7 +55,6 @@
 }
 
 #sim_results {
-	border:1px solid #bbb;
 	height:600px;
 }
 
@@ -56,7 +67,10 @@
 	color:red;
 }
 
+.sim_title {
+	padding-left:15px;
+}
+
 #static_canvas {
-	border:1px solid #bbb;
 	height:600px;
 }

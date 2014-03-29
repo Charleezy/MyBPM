@@ -76,7 +76,7 @@ $(document).ready(function() {
 	<thead>
 		  <tr>
 			<th class="col-md-1">ID</th>
-			<th class="col-md-4">Name</th>
+			<th class="col-md-4">mockdata</th>
 			<th class="col-md-4">Workflow ID</th>
 			<th class="col-md-3"></th>
 		  </tr>
@@ -90,7 +90,7 @@ $(document).ready(function() {
 			<% @mockdata.each do |data| %>
 				  <tr>
 					<td class="sim_id" data-id=<%= data.id %>><%= data.id %></td>
-					<td><%= data.name %></td>
+					<td><%= data.mockdata %></td>
 					<td><%= data.workflow_id %></td>
 					<td class="actions">
 						<a href="<%= edit_simulation_path(data.id) %>">Edit</a>
