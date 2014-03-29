@@ -23,6 +23,8 @@
 
 // Namespace
 var net = net || {};
+// Adding an undo/redo stack
+var undostack = new UndoStack(null);
 net = {};
 var totalLanes = 0;
 function assert(condition, message) {
@@ -30,7 +32,22 @@ function assert(condition, message) {
       throw message || "Assertion failed";
   }
 }
-        
+
+function UndoItem (perform, data) {
+  this.perform = perform;
+  this.data = data;
+}
+
+/*
+ * UndoStack: easy undo-redo in Raphael.js
+ * */
+
+function UndoStack(self) {
+  this.stack = [];
+  this.current = -1;
+  this.self = self;
+}
+
 // Constructor
 net.BpmnJS = function(xpdlJson, canvas, isStatic){
 
@@ -137,9 +154,46 @@ net.BpmnJS.prototype = {
     }
   },
 
-  clear: function() {
+  push: function (perform, data) {
+    this.current++;
+    // invalidate all undo items after this new one
+    // or people are going to be confused.
+    this.stack.splice(this.current);
+    this.stack.push(new UndoItem(perform,data));
+  },
+
+  undo: function ( ) {
+    var item;
+    if (this.current >= 0) {
+      item = this.stack[this.current];
+      item.perform.call(this.self,false,item.data);
+      this.current--;
+    }
+    else {
+      throw new Error("already at the oldest change!");
+    }
+  },
+
+  redo: function ( ) {
+    var item;
+    item = this.stack[this.current + 1];
+    if(item) {
+      item.perform.call(this.self, true, item.data);
+      this.current++;
+    }
+    else {
+      throw new Error("already at the latest change!");
+    }
+  },
+
+  clear: function( ) {
     this.paper.clear();
     this.connections.length = 0;
+  },
+
+  invalidateAllActions: function ( ) {
+    this.stack = [];
+    this.current = -1;
   },
 
   enableContextMenu: function(element) {
@@ -679,4 +733,6 @@ net.BpmnJS.prototype = {
       }
     });
   },
-};      
+};
+
+
