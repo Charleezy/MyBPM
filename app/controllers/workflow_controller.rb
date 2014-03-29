@@ -3,7 +3,6 @@ require 'json'
 
 class WorkflowController < ApplicationController
   around_filter :exception_handler
-  include WorkflowHelper
 
   def index
     @workflows = current_user.workflows
@@ -11,7 +10,6 @@ class WorkflowController < ApplicationController
 
   def show
     @workflow = Workflow.find(params[:id])
-    @workflow.json = xpdl_to_json(@workflow.xpdl)
   end
 
   def new
@@ -19,26 +17,19 @@ class WorkflowController < ApplicationController
   end
 
   def create
-    params[:workflow][:xpdl] = json_to_xpdl(params[:workflow][:json])
     if( current_user.workflows.create( workflow_params) )
-      render :text => "success"
-      #redirect_to :action => 'index', :notice => 'Workflow was created.'
+      redirect_to :action => 'index', :notice => 'Workflow was created.'
     else 
-      render :new, :notice => 'failed to create site.'
+      render :new, :notice => 'failed to create workflow.'
     end
   end
 
   def edit
-    @workflow.find(params[:id])
-    @workflow.json = xpdl_to_json(@workflow.xpdl)
+    @workflow = Workflow.find(params[:id])
   end
-end 
 
   def update
-    params[:workflow][:xpdl] = json_to_xpdl(params[:workflow][:json])
     @workflow = Workflow.find(params[:id])
-    #TODO redirect to another page in the future
-    redirect_to :back, :notice => 'error editing workflow' if @site.nil?
     @workflow.update_attributes(workflow_params)
   end
 
