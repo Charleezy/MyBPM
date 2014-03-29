@@ -152,8 +152,6 @@ net.BpmnJS.prototype = {
     $( window ).resize(function() {
         position = $(canvas).position();
         offset = $(canvas).offset();
-        // DEBUG
-        $( "#log-form" ).text("positionX:" + position.left + ", Y: " + position.top + ". offsetX:"+ offset.left +", offsetY:" + offset.top);
     });
     var contextMenu = $('#editor-contextmenu'),
         me = this;
@@ -308,14 +306,14 @@ net.BpmnJS.prototype = {
 
     //If gateway element, ask for condition(s)
     if (element1.shapeType == 'Route'){
-      var textToAdd = prompt('Condition:');
+      var textToAdd = prompt('Condition lol');
 
       //If null, path is always travelled -> parallel
       if (textToAdd == null || textToAdd.trim() == '') return;
       
       //Need to determine correct x & y 
       var x = 0, y =0;
-      var text = this.paper.text(x, y, textToAdd);
+      var text = this.paper.text(x, y, textToAdd).attr("font-size",16);
       text.shapeType = 'Condition';
 
       // PAIRING SHAPE AND TEXT
@@ -677,6 +675,4 @@ net.BpmnJS.prototype = {
       else{
         console.log('This shape (' + shape + 'doesn\'t have a type');
       }
-    });
-  },
-};      
+ 
