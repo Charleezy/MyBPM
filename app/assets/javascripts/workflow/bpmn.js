@@ -590,67 +590,114 @@ net.BpmnJS.prototype = {
   },
 
   initStartEvent: function(x, y) {
+    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewStartEventJson(this.currentId, x, y)),
+        name = xpdlJson.Name,
+        width = parseInt(xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.Width),
+        height = parseInt(xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.Height),
+        fillColor = xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.FillColor,
+        borderColor = xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
 
-    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewStartEventJson(this.currentId, x, y));
     this.currentId++;
     
     // Add xpdl to tree
     this.activities.push(xpdlJson);
-    
-    // TODO read height/width/color properties for xpdlJson instead b/c this is error-prone.
-    var shape = this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'green', 'black'));
+
+    var shape = this.initActivity(this.paintEvent(
+      xpdlJson, x, y, width, height, name, fillColor, borderColor));
 
     return shape;
   },
 
   initIntermediateEvent: function(x, y) {
-    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewIntermediateEventJson(this.currentId, x, y));
+    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewIntermediateEventJson(this.currentId, x, y)),
+        name = xpdlJson.Name,
+        width = parseInt(xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.Width),
+        height = parseInt(xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.Height),
+        fillColor = xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.FillColor,
+        borderColor = xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
+
     this.currentId++;
 
     // Add xpdl to tree
     this.activities.push(xpdlJson);
 
-    return this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'yellow', 'black'));
+    var shape = this.initActivity(this.paintEvent(
+      xpdlJson, x, y, width, height, name, fillColor, borderColor));
+
+    return shape;
   },
 
   initEndEvent: function(x, y) {
-    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewEndEventJson(this.currentId, x, y));
+    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewEndEventJson(this.currentId, x, y)),
+        name = xpdlJson.Name,
+        width = parseInt(xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.Width),
+        height = parseInt(xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.Height),
+        fillColor = xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.FillColor,
+        borderColor = xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
+
     this.currentId++;
 
     // Add xpdl to tree
     this.activities.push(xpdlJson);
 
-    return this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'red', 'black'));
+    var shape = this.initActivity(this.paintEvent(
+      xpdlJson, x, y, width, height, name, fillColor, borderColor));
+
+    return shape;
   },
 
   initGateway: function(x, y) {
-    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewGatewayJson(this.currentId, x, y));
+    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewGatewayJson(this.currentId, x, y)),
+        name = xpdlJson.Name,
+        width = parseInt(xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.Width),
+        height = parseInt(xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.Height),
+        fillColor = xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.FillColor,
+        borderColor = xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
+
     this.currentId++;
 
     // Add xpdl to tree
     this.activities.push(xpdlJson);
 
-    return this.initActivity(this.paintRoute(xpdlJson, x, y, 40, 40, '', 'yellow', 'black'));
+    var shape = this.initActivity(this.paintRoute(
+      xpdlJson, x, y, width, height, name, fillColor, borderColor));
+
+    return shape;
   },
   
   initTask: function(x, y) {
-    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewTaskJson(this.currentId, x, y));
+    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewTaskJson(this.currentId, x, y)),
+        name = xpdlJson.Name,
+        width = parseInt(xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.Width),
+        height = parseInt(xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.Height),
+        fillColor = xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.FillColor,
+        borderColor = xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
+
     this.currentId++;
 
     // Add xpdl to tree
     this.activities.push(xpdlJson);
 
-    return this.initActivity(this.paintImplementation(xpdlJson, x, y, 90, 60, '', '#0066CC', 'black'));
+    var shape = this.initActivity(this.paintImplementation(
+      xpdlJson, x, y, width, height, name, fillColor, borderColor));
+
+    return shape;
   },
   
   initPool: function(x,y, poolTitle){
-    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewTaskJson(this.currentId, poolTitle, x, y));
+    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewTaskJson(this.currentId, poolTitle, x, y)),
+        name = xpdlJson.Name,
+        fillColor = xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.FillColor,
+        borderColor = xpdlJson.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
+
     this.currentId++;
 
     // Add xpdl to tree
     this.activities.push(xpdlJson);
 
-    return this.initActivity(this.paintPool(xpdlJson, x, y, poolTitle, 'cornflowerblue', 'black'));
+    var shape = this.initActivity(this.paintRoute(xpdlJson, x, y, name, fillColor, borderColor));
+
+    return shape;
   },
 
   initLane: function(x,y, laneTitle, poolTitle){
