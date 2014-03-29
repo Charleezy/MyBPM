@@ -75,48 +75,53 @@ net.BpmnJS.prototype = {
   },
 
   plot: function(){
-    // Assume we are only handling a single workflow process, but since our 
-    // default demo process has 2 and we're only handling the last one, read 
-    // WorkflowProcesses.last()
-
-    // Last process
-    var process = $(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess).get(-1),
-        me = this;
+    console.log(XpdlJsonGenerator.getNewWorkflowJson('test'));
     
-    // Parse through processes' activities
-    if (process.hasOwnProperty('Activities')) {
-      var activities = process.Activities.Activity;
-      activities.forEach(function(activity) {
-        var temporaryId = activity.Id;
-        me.replaceProperty(me.xpdlJson, 'Id', temporaryId, String(me.currentId));
-        me.replaceProperty(me.xpdlJson, 'From', temporaryId, String(me.currentId));
-        me.replaceProperty(me.xpdlJson, 'To', temporaryId, String(me.currentId));
-        me.currentId++;
-        // console.log('newId: ' + activity.Id);
-        var xCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate);
-        var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
-        var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
-        var width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
-        var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
-        var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
-        var name = activity.Name;
-        me.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
-      });
+    // PAINT
+    for(var i=0; i<this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess.length; i++){
+
+      // ACTIVITIES
+      if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Activities')){
+        var activities = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Activities.Activity;
+        for(var j=0; j<activities.length; j++){
+          var activity = activities[j];
+          var temporaryId = activity.Id;
+          this.replaceProperty(this.xpdlJson, 'Id', temporaryId, String(this.currentId));
+          this.replaceProperty(this.xpdlJson, 'From', temporaryId, String(this.currentId));
+          this.replaceProperty(this.xpdlJson, 'To', temporaryId, String(this.currentId));
+          this.currentId++;
+          console.log('newId: ' + activity.Id);
+          var xCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate);
+          var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
+          var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
+          var width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
+          var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
+          var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
+          var name = activity.Name;
+          this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
+        }
+      }
     }
 
-    // Parse through processes' transitions
-    if (process.hasOwnProperty('Transitions')) {
-      var transitions = process.Transitions.Transition;
-      transitions.forEach(function(transition) {
-        me.replaceProperty(me.xpdlJson, 'Id', transition.Id, String(me.currentId));
-        me.currentId++;
-        // Reference the activities we're transitioning to/from.
-        var element1 = me.getById(transition.From);
-        var element2 = me.getById(transition.To);
+    // PAINT
+    for(var i=0; i<this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess.length; i++){
+      
+      // TRANSITIONS
+      if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
+        var transitions = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition,
+            me = this;
+        transitions.forEach(function(transition) {
 
-        // Create link association between the two activities.
-        me.connectElements(element1, element2);
-      });
+          me.replaceProperty(me.xpdlJson, 'Id', transition.Id, String(me.currentId));
+          me.currentId++;
+          // Reference the activities we're transitioning to/from.
+          var element1 = me.getById(transition.From);
+          var element2 = me.getById(transition.To);
+
+          // Create link association between the two activities.
+          me.connectElements(element1, element2);
+        });
+      }
     }
 
     if (!this.isStatic) {
