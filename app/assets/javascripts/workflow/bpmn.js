@@ -657,7 +657,7 @@ net.BpmnJS.prototype = {
     this.currentId++;
 
     // TODO read height/width/color properties for xpdlJson instead b/c this is error-prone.
-    var shape = this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'green', 'black'));
+    var shape = this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'grey', 'black'));
 
     return shape;
   },
@@ -666,42 +666,42 @@ net.BpmnJS.prototype = {
     var xpdlJson = XpdlJsonGenerator.getNewIntermediateEventJson(this.currentId, x, y);
     this.currentId++;
 
-    return this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'yellow', 'black'));
+    return this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'loghtyellow', 'black'));
   },
 
   initEndEvent: function(x, y) {
     var xpdlJson = XpdlJsonGenerator.getNewEndEventJson(this.currentId, x, y);
     this.currentId++;
 
-    return this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'red', 'black'));
+    return this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'white', 'black'));
   },
 
   initGateway: function(x, y) {
     var xpdlJson = XpdlJsonGenerator.getNewGatewayJson(this.currentId, x, y);
     this.currentId++;
 
-    return this.initActivity(this.paintRoute(xpdlJson, x, y, 40, 40, '', 'yellow', 'black'));
+    return this.initActivity(this.paintRoute(xpdlJson, x, y, 40, 40, '', 'lightyellow', 'black'));
   },
   
   initTask: function(x, y) {
     var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.currentId, x, y);
     this.currentId++;
 
-    return this.initActivity(this.paintImplementation(xpdlJson, x, y, 90, 60, '', '#0066CC', 'black'));
+    return this.initActivity(this.paintImplementation(xpdlJson, x, y, 90, 60, '', 'lightyellow', 'black'));
   },
   
   initPool: function(x,y, poolTitle){
     var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.currentId, poolTitle, x, y);
     this.currentId++;
 
-    return this.initActivity(this.paintPool(xpdlJson, x, y, poolTitle, 'cornflowerblue', 'black'));
+    return this.initActivity(this.paintPool(xpdlJson, x, y, poolTitle, 'lightblue', 'black'));
   },
 
   initLane: function(x,y, laneTitle, poolTitle){
     // TODO
     // FIND OUT THE FORMAT OF THE LANE
     var xpdl = 'xpdlLane';
-    return this.initActivity(this.paintLane(xpdl, x, y, laneTitle, poolTitle, '#F0F0F0', 'black'));
+    return this.initActivity(this.paintLane(xpdl, x, y, laneTitle, poolTitle, 'whitesmoke', 'black'));
   },
 
   // CALLED WHEN THE USER CLICKS THE SAVE BUTTON
