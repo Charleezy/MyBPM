@@ -14,7 +14,7 @@ schema = File.open("/Users/abdulhaseeb/Google Drive/Projects/RailsWorkSpace/MyBP
 contentsSchema = schema.read
 
 ## DEMO: This MOCK DATA file is for file (ID=2)
-mockFile = File.open("/Users/abdulhaseeb/Google Drive/Projects/RailsWorkSpace/MyBPM/app/models/Exclusive_choice_transition_MOCK_DATA.json", "rb")
+mockFile = File.open("/Users/abdulhaseeb/Google Drive/Projects/RailsWorkSpace/MyBPM/app/models/mock1.json", "rb")
 mockDataContents = mockFile.read
 
 sim = XpdlObject.new(contents, contentsSchema, mockDataContents)
@@ -45,6 +45,11 @@ end
 puts "\n-----------------------------------------\nSIMULATION LOG\n-----------------------------------------\n"
 puts sim.simulationLog
 
+puts ''
+sim.resultJSON.each do |v|
+  puts v
+  puts ''
+end
 
 
 #obj.validate # Worker does not call validate, all validation takes place in .start()

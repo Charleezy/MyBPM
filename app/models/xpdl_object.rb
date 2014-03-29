@@ -18,7 +18,11 @@ class XpdlObject
   # @power (string) can only have 2 values: 'ON', 'OFF'
   # 'ON' -> simulation in progress, 'OFF' -> simulation not
   # in progress (all state vars are garbage)
-  attr_accessor :currActID, :timer, :power, :mockDataJSON
+  # @mockDataHash -> holds the current set of updated data fields
+  # to be written to resultJSON, at end of every step
+  # @resultJSON -> holds the result simulation log in json format
+  # to be returned to client after simulation is finished
+  attr_accessor :currActID, :power, :mockDataJSON, :mockDataHash, :resultJSON
   # @simulationLog holds the up-to-date log of the simulation
   attr_accessor :simulationLog 
 
@@ -42,7 +46,8 @@ class XpdlObject
     @currActID = ''
     @timer = -1
     @mockDataJSON = nil
-
+    @mockDataHash = {}
+    @resultJSON = {}
   end
 
   #######################################################################################################################
@@ -90,9 +95,14 @@ class XpdlObject
     # Parse the mockDataFile and populate mockDataHash accordingly
     if (@mockDataFile != nil) # Currently only supporting 'STRING' dataTypes
       mock = JSON.parse(@mockDataFile)
+      #mock = @mockDataFile
       #mock.each do |item|
       #end
-      @mockDataJSON = mock
+      @mockDataJSON = {}
+      #puts "mock before: " + mock
+      mock['stages'].each{ |e| @mockDataJSON[e['stage_id']] = e['stage_data'] }
+      p @mockDataJSON.inspect    
+  
     end
 
 
@@ -184,6 +194,10 @@ class XpdlObject
     
     @simulationLog = @simulationLog + "Simulation Started Successfully :) ... \n"
     @simulationLog = @simulationLog + "@currActID is: " + @currActID + "\n"
+
+    # Update @mockDataHash and @resultJSON
+    update_resultJSON(@currActID)
+    update_mockDataHash(@currActID)
 
     # Return the Current Active ID: @currActID
     return @currActID
@@ -289,9 +303,16 @@ class XpdlObject
 
     if self.isLastActivity(@currActID)
       @simulationLog = @simulationLog + "This is the Last Activity, The Simulation is Now Over :( ... POWERING OFF ... GoodBye  ^_^ \n"
+      # Update @mockDataHash and @resultJSON
+      update_resultJSON(@currActID)
+      update_mockDataHash(@currActID)
       self.terminate()
       return "ERROR"
     end
+
+  # Update @mockDataHash and @resultJSON
+  update_resultJSON(@currActID)
+  update_mockDataHash(@currActID)
 
   # Return the Current Active ID: @currActID
   return @currActID
@@ -316,8 +337,8 @@ class XpdlObject
 
       # Now check the @mockDataJSON for validation
 
-      if @mockDataJSON.has_key?(dataVar)
-        if @mockDataJSON[dataVar] == data
+      if @mockDataHash.has_key?(dataVar)
+        if @mockDataHash[dataVar] == data
           @simulationLog = @simulationLog + "CONDITION MATCHED: " + logic + "\n"
           return true
         else
@@ -397,6 +418,40 @@ class XpdlObject
   # It returns a JSON parsed object (parsed from the @mockDataFile)
   def getDataFields()
     return @mockDataJSON
+  end
+
+  #######################################################################################################################
+
+  # This method reads @mockDataJSON for the provided 'activity_id' 
+  # parameter, and consolidates the new variables with the 
+  # existing ones into the @mockDataHash. 
+  # All the new vars are added to @mockDataHash, and repeated
+  # ones have their values updated
+  def update_mockDataHash(activity_id)
+
+  if @mockDataJSON.has_key?(activity_id)
+    puts "inside update_mockDataHash, has activity_id: " + activity_id
+    @mockDataJSON[activity_id].each do |v|
+      @mockDataHash[v["name"]] = v["value"]  
+    end
+  end
+
+  end
+
+  #######################################################################################################################
+
+  # This method generates a new key/value in the @resultJSON
+  # JSON object. It copies the up-to-date @simulationLog and 
+  # @mockDataHash into the new key/value pair
+  def update_resultJSON(activity_id)
+  
+    @resultJSON[activity_id] = {}
+    @resultJSON[activity_id][:log] = @simulationLog
+    #@simulationLog = ""
+    
+  
+    @resultJSON[activity_id][:stage_data] = @mockDataHash
+    
   end
 
 end
