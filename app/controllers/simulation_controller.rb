@@ -51,9 +51,10 @@ class SimulationController < ApplicationController
   end
   
   def run
-	@simulation = MockData.find(params[:id])
+	@data = MockData.find(params[:id])
+	Worker.run(@data)
 	respond_to do |format| 
-      format.json { render :json => @simulation.id }
+      format.json { render :json => @data.id }
     end
   end
 
