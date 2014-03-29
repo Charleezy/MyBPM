@@ -1,17 +1,15 @@
 require 'crack'
-require 'active_support/core_ext/hash/conversions'
+require 'json'
 
 class WorkflowController < ApplicationController
   around_filter :exception_handler
 
   def index
-    @workflows = 
-      current_user.workflows.collect { |w| { :user => current_user.email, :workflow => w } }
+    @workflows = current_user.workflows
   end
 
   def show
     @workflow = Workflow.find(params[:id])
-    @workflow.json = Crack::XML.parse(@workflow.xpdl)
   end
 
   def new
@@ -19,26 +17,20 @@ class WorkflowController < ApplicationController
   end
 
   def create
-    params[:workflow][:xpdl] = params[:workflow][:json].to_xml
     if( current_user.workflows.create( workflow_params) )
-      render :nothing => true, :status => :created
+      redirect_to :action => 'index', :notice => 'Workflow was created.'
     else 
-      render :nothing => true, :status => :bad_request
+      render :new, :notice => 'failed to create workflow.'
     end
   end
 
   def edit
-    @workflow.find(params[:id])
-    @workflow.json = Crack::XML.parse(@workflow.xpdl)
+    @workflow = Workflow.find(params[:id])
   end
 
   def update
-    params[:workflow][:xpdl] = params[:workflow][:json].to_xml
     @workflow = Workflow.find(params[:id])
-    render :nothing => true, :status => :bad_request if @workflow.nil?
-
     @workflow.update_attributes(workflow_params)
-    render :nothing => true, :status => :created
   end
 
   def destroy
@@ -47,13 +39,18 @@ class WorkflowController < ApplicationController
     flash[:notice] = 'Workflow was deleted.'
     redirect_to :controller => 'workflow', :action => 'index'
   end
-
+  
   def import
-    if( current_user.workflows.create( workflow_params) )
-      render :json =>  Crack::XML.parse(params[:workflow][:xpdl]), :status => :created
-    else
-      render :nothing => true, :status => :bad_request
-    end 
+  
+  end
+  
+  def xpdltojson 
+    myXML = Crack::XML.parse(File.read("data/XML.txt"));
+    myJSON = myXML.to_json;
+    
+    respond_to do |format| 
+      format.json { render :json => myJSON}
+    end
   end
   
   def setup_side_nav_links
