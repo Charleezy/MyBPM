@@ -352,18 +352,16 @@ net.BpmnJS.prototype = {
           this.animate({"fill-opacity": .2}, 500);
         },
         move = function(dx, dy) {
-          //Only allow vertical movement for pools & pool lanes
           if (this.shapeType == 'Pool' || this.shapeType == 'PoolLane'){
-            this.translate(0, dy - this.ody);
+            //Don't allow movement for pools & pool lanes
           }
           else{
             this.translate(dx - this.odx, dy - this.ody);
           }
           
           if (this.pair) {
-            //Only allow vertical movement for pools & pool lanes titles
             if (this.pair.shapeType  == 'RotatedText' ){
-              this.pair.translate(-(dy - this.ody), 0);
+              //Don't allow movement for pools & pool lanes titles
             }
             else{
               this.pair.translate(dx - this.odx, dy - this.ody);  
@@ -635,7 +633,7 @@ net.BpmnJS.prototype = {
     var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.currentId, x, y);
     this.currentId++;
 
-    return this.initActivity(this.paintImplementation(xpdlJson, x, y, 90, 60, '', 'blue', 'black'));
+    return this.initActivity(this.paintImplementation(xpdlJson, x, y, 90, 60, '', '#0066CC', 'black'));
   },
   
   initPool: function(x,y, poolTitle){
@@ -649,7 +647,7 @@ net.BpmnJS.prototype = {
     // TODO
     // FIND OUT THE FORMAT OF THE LANE
     var xpdl = 'xpdlLane';
-    return this.initActivity(this.paintLane(xpdl, x, y, laneTitle, poolTitle, 'purple', 'black'));
+    return this.initActivity(this.paintLane(xpdl, x, y, laneTitle, poolTitle, '#F0F0F0', 'black'));
   },
 
   // CALLED WHEN THE USER CLICKS THE SAVE BUTTON
