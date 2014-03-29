@@ -11,24 +11,16 @@
 		else {
 			mockdata = jQuery.parseJSON($('#mockdata').text());
 		}
+/*
+		var workflow_json = <%= @workflow.json.to_json.html_safe %>;
 		
-		var client = new XMLHttpRequest();
-
-		// GET JSON FILE
-		client.open('GET', 'https://dl.dropboxusercontent.com/s/yyimks43gemdazq/jsonFile.json?dl=1&token_hash=AAEwKPu9isScXrMb-m9dVvUkYjxLiZTsM2DcEiIvPbXFnQ',false);
-		client.send();
-		var jsonText = client.responseText;
-    
-		// CREATE THE JAVASCRIPT OBJECT BASED ON THE JSON FILE
-		var jsonObject = JSON.parse(jsonText);
-    
 		var alreadyLoaded = false;
 
 		if(!alreadyLoaded){
-			var bpmn = new net.BpmnJS(jsonObject, $('#static_canvas')[0], true);
+			var bpmn = new net.BpmnJS(workflow_json, $('#static_canvas')[0], true);
 			bpmn.plot();
 			alreadyLoaded = true;
-		}
+		}*/
 	  
 		$('#static_canvas').on( "click", "circle", function() {
 			$('#addData').modal('show');
@@ -42,6 +34,21 @@
 			$('#key').val("");
 			$('#value').val("");
 			$('#add_data_err').hide();
+		});
+		
+		$('#run_sim').click(function() {
+			var sim_id = $('#sim_id').text();
+			
+			$.ajax({
+				beforeSend: function(req) {
+					req.setRequestHeader("Accept", "application/json");
+				},
+				url: "/simulation/run",
+				data: { id : sim_id },
+				success: function(data) {
+					alert(data);
+				}
+			});
 		});
 		
 		$('#add').click(function() {
@@ -122,6 +129,7 @@
 <span id="sim_id" style="display:none"><%= @simulation.id %></span>
 <span id="workflow_id" style="display:none"><%= @workflow.id %></span>
 <span id="mockdata" style="display:none"><%= @simulation.mockdata %></span>
+<span id="workflow_json" style="display:none"><%= @workflow.json %></span>
 
 <h1 class="sim_title"><%= @simulation.name %></h1>
 

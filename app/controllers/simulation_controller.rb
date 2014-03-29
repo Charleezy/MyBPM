@@ -40,13 +40,22 @@ class SimulationController < ApplicationController
     @data = MockData.find(params[:id])
     @data.destroy
     respond_to do |format| 
-      format.json { render :json => @data.id}
+      format.json { render :json => @data.id }
     end
   end
   
   def edit
     @simulation = MockData.find(params[:id])
     @workflow = Workflow.find(@simulation.workflow_id)
+	@workflow.json = Crack::XML.parse(@workflow.xpdl)
+  end
+  
+  def run
+	@simulation = MockData.find(params[:id])
+	@
+	respond_to do |format| 
+      format.json { render :json => @simulation.id }
+    end
   end
 
   def simulation_params

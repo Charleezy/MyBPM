@@ -8,6 +8,7 @@ Mybpm::Application.routes.draw do
   root :to => "home#index"
 
   get '/simulation/historical', :controller => 'simulation', :action => 'historical'
+  get '/simulation/run', :controller => 'simulation', :action => 'run'
 
   resources :workflow
   resources :simulation
