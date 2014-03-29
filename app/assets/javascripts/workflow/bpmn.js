@@ -154,7 +154,7 @@ net.BpmnJS.prototype = {
     }
   },
 
-  push: function (perform, data) {
+  pushAction: function (perform, data) {
     this.current++;
     // invalidate all undo items after this new one
     // or people are going to be confused.
