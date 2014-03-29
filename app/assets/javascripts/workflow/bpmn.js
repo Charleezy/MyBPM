@@ -52,7 +52,6 @@ net.BpmnJS.prototype = {
     // IF WE FOUND IT, JUST REPLACE
     if(object.hasOwnProperty(property) && object[property] === oldValue){
       object[property] = newValue;
-      console.log('replaced');
     }
 
     // IF NOT, SEARCH ON THE OBJECTS INSIDE
@@ -80,13 +79,13 @@ net.BpmnJS.prototype = {
     // WorkflowProcesses.last()
 
     // Last process
-    var process = $(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess).get(-1),
+    this.process = $(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess).get(-1),
         me = this;
     
     // Parse through processes' activities
-    if (process.hasOwnProperty('Activities')) {
-      var activities = process.Activities.Activity;
-      activities.forEach(function(activity) {
+    if (this.process.hasOwnProperty('Activities')) {
+      this.activities = this.process.Activities.Activity;
+      this.activities.forEach(function(activity) {
         var temporaryId = activity.Id;
         me.replaceProperty(me.xpdlJson, 'Id', temporaryId, String(me.currentId));
         me.replaceProperty(me.xpdlJson, 'From', temporaryId, String(me.currentId));
@@ -105,9 +104,9 @@ net.BpmnJS.prototype = {
     }
 
     // Parse through processes' transitions
-    if (process.hasOwnProperty('Transitions')) {
-      var transitions = process.Transitions.Transition;
-      transitions.forEach(function(transition) {
+    if (this.process.hasOwnProperty('Transitions')) {
+      this.transitions = this.process.Transitions.Transition;
+      this.transitions.forEach(function(transition) {
         me.replaceProperty(me.xpdlJson, 'Id', transition.Id, String(me.currentId));
         me.currentId++;
         // Reference the activities we're transitioning to/from.
@@ -587,16 +586,17 @@ net.BpmnJS.prototype = {
     this.enableContextMenu(activity);
     activity.associatedXPDL.Id = String(this.currentId);
     this.currentId++;
-    console.log('id =' + activity.associatedXPDL.Id);
     return activity;
   },
 
   initStartEvent: function(x, y) {
 
-    // TODO add to this.xpdlJson
-    var xpdlJson = XpdlJsonGenerator.getNewStartEventJson(this.currentId, x, y);
+    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewStartEventJson(this.currentId, x, y));
     this.currentId++;
-
+    
+    // Add xpdl to tree
+    this.activities.push(xpdlJson);
+    
     // TODO read height/width/color properties for xpdlJson instead b/c this is error-prone.
     var shape = this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'green', 'black'));
 
@@ -604,36 +604,51 @@ net.BpmnJS.prototype = {
   },
 
   initIntermediateEvent: function(x, y) {
-    var xpdlJson = XpdlJsonGenerator.getNewIntermediateEventJson(this.currentId, x, y);
+    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewIntermediateEventJson(this.currentId, x, y));
     this.currentId++;
+
+    // Add xpdl to tree
+    this.activities.push(xpdlJson);
 
     return this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'yellow', 'black'));
   },
 
   initEndEvent: function(x, y) {
-    var xpdlJson = XpdlJsonGenerator.getNewEndEventJson(this.currentId, x, y);
+    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewEndEventJson(this.currentId, x, y));
     this.currentId++;
+
+    // Add xpdl to tree
+    this.activities.push(xpdlJson);
 
     return this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'red', 'black'));
   },
 
   initGateway: function(x, y) {
-    var xpdlJson = XpdlJsonGenerator.getNewGatewayJson(this.currentId, x, y);
+    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewGatewayJson(this.currentId, x, y));
     this.currentId++;
+
+    // Add xpdl to tree
+    this.activities.push(xpdlJson);
 
     return this.initActivity(this.paintRoute(xpdlJson, x, y, 40, 40, '', 'yellow', 'black'));
   },
   
   initTask: function(x, y) {
-    var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.currentId, x, y);
+    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewTaskJson(this.currentId, x, y));
     this.currentId++;
+
+    // Add xpdl to tree
+    this.activities.push(xpdlJson);
 
     return this.initActivity(this.paintImplementation(xpdlJson, x, y, 90, 60, '', '#0066CC', 'black'));
   },
   
   initPool: function(x,y, poolTitle){
-    var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.currentId, poolTitle, x, y);
+    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewTaskJson(this.currentId, poolTitle, x, y));
     this.currentId++;
+
+    // Add xpdl to tree
+    this.activities.push(xpdlJson);
 
     return this.initActivity(this.paintPool(xpdlJson, x, y, poolTitle, 'cornflowerblue', 'black'));
   },
