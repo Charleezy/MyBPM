@@ -1,5 +1,5 @@
 require 'crack'
-require 'json'
+require 'active_support/core_ext/hash/conversions'
 
 class WorkflowController < ApplicationController
   around_filter :exception_handler
@@ -11,6 +11,7 @@ class WorkflowController < ApplicationController
 
   def show
     @workflow = Workflow.find(params[:id])
+    @workflow.json = Crack::XML.parse(@workflow.xpdl)
   end
 
   def new
@@ -18,20 +19,26 @@ class WorkflowController < ApplicationController
   end
 
   def create
+    params[:workflow][:xpdl] = params[:workflow][:json].to_xml
     if( current_user.workflows.create( workflow_params) )
-      redirect_to :action => 'index', :notice => 'Workflow was created.'
+      render :nothing => true, :status => :created
     else 
-      render :new, :notice => 'failed to create workflow.'
+      render :nothing => true, :status => :bad_request
     end
   end
 
   def edit
-    @workflow = Workflow.find(params[:id])
+    @workflow.find(params[:id])
+    @workflow.json = Crack::XML.parse(@workflow.xpdl)
   end
 
   def update
+    params[:workflow][:xpdl] = params[:workflow][:json].to_xml
     @workflow = Workflow.find(params[:id])
+    render :nothing => true, :status => :bad_request if @workflow.nil?
+
     @workflow.update_attributes(workflow_params)
+    render :nothing => true, :status => :created
   end
 
   def destroy
@@ -40,18 +47,13 @@ class WorkflowController < ApplicationController
     flash[:notice] = 'Workflow was deleted.'
     redirect_to :controller => 'workflow', :action => 'index'
   end
-  
+
   def import
-  
-  end
-  
-  def xpdltojson 
-    myXML = Crack::XML.parse(File.read("data/XML.txt"));
-    myJSON = myXML.to_json;
-    
-    respond_to do |format| 
-      format.json { render :json => myJSON}
-    end
+    if( current_user.workflows.create( workflow_params) )
+      render :json =>  Crack::XML.parse(params[:workflow][:xpdl]), :status => :created
+    else
+      render :nothing => true, :status => :bad_request
+    end 
   end
   
   def setup_side_nav_links
