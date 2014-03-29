@@ -40,7 +40,7 @@ net.BpmnJS = function(xpdlJson, canvas, isStatic){
   // CREATING RAPHAEL CANVAS
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
   this.connections = [];
-  this.currentId = 0;
+  this.idList = [];
 };
 
 // Shared functions
@@ -75,48 +75,49 @@ net.BpmnJS.prototype = {
   },
 
   plot: function(){
-    console.log(XpdlJsonGenerator.getNewWorkflowJson('test'));
-    
-    // PAINT
-    for(var i=0; i<this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess.length; i++){
+    // console.log(XpdlJsonGenerator.getNewWorkflowJson('test'));
 
-      // ACTIVITIES
-      if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Activities')){
-        var activities = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Activities.Activity;
-        for(var j=0; j<activities.length; j++){
-          var activity = activities[j];
-          var temporaryId = activity.Id;
-          this.replaceProperty(this.xpdlJson, 'Id', temporaryId, String(this.currentId));
-          this.replaceProperty(this.xpdlJson, 'From', temporaryId, String(this.currentId));
-          this.replaceProperty(this.xpdlJson, 'To', temporaryId, String(this.currentId));
-          this.currentId++;
-          console.log('newId: ' + activity.Id);
-          var xCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate);
-          var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
-          var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
-          var width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
-          var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
-          var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
-          var name = activity.Name;
-          this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
-        }
+    console.log('painting activities');
+    console.log(this.xpdlJson["xpdl:Package"]["xpdl:WorkflowProcesses"]["xpdl:WorkflowProcess"]);
+
+    // PAINT
+    // ACTIVITIES
+    if(this.xpdlJson["xpdl:Package"]["xpdl:WorkflowProcesses"]["xpdl:WorkflowProcess"].hasOwnProperty('xpdl:Activities')){
+      var activities = this.xpdlJson["xpdl:Package"]["xpdl:WorkflowProcesses"]["xpdl:WorkflowProcess"]["xpdl:Activities"]["xpdl:Activity"];
+      for(var j=0; j<activities.length; j++){
+        console.log('painting activity:');
+        console.log(activity);
+        var activity = activities[j];
+        var temporaryId = activity["Id"];
+        var newId = this.generateNewID();
+        this.replaceProperty(this.xpdlJson, 'Id', temporaryId, newId);
+        this.replaceProperty(this.xpdlJson, 'From', temporaryId, newId);
+        this.replaceProperty(this.xpdlJson, 'To', temporaryId, newId);
+        console.log('newId: ' + activity["Id"]);
+        var xCoordinate = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"]["xpdl:XCoordinate"]);
+        var yCoordinate = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"]["xpdl:YCoordinate"]);
+        var height = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Height"]);
+        var width = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Width"]);
+        var borderColor = activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:BorderColor"];
+        var fillColor = activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:FillColor"];
+        var name = activity["xpdl:Name"];
+        this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
       }
     }
 
     // PAINT
-    for(var i=0; i<this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess.length; i++){
+    for(var i=0; i<this.xpdlJson["xpdl:Package"]["xpdl:WorkflowProcesses"]["xpdl:WorkflowProcess"].length; i++){
       
       // TRANSITIONS
-      if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
-        var transitions = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition,
+      if(this.xpdlJson["xpdl:Package"]["xpdl:WorkflowProcesses"]["xpdl:WorkflowProcess"][i].hasOwnProperty('xpdl:Transitions')){
+        var transitions = this.xpdlJson["xpdl:Package"]["xpdl:WorkflowProcesses"]["xpdl:WorkflowProcess"][i]["xpdl:Transitions"]["xpdl:Transition"],
             me = this;
         transitions.forEach(function(transition) {
 
-          me.replaceProperty(me.xpdlJson, 'Id', transition.Id, String(me.currentId));
-          me.currentId++;
+          me.replaceProperty(me.xpdlJson, 'Id', transition["Id"], String(me.generateNewID()));
           // Reference the activities we're transitioning to/from.
-          var element1 = me.getById(transition.From);
-          var element2 = me.getById(transition.To);
+          var element1 = me.getById(transition["From"]);
+          var element2 = me.getById(transition["To"]);
 
           // Create link association between the two activities.
           me.connectElements(element1, element2);
@@ -212,10 +213,10 @@ net.BpmnJS.prototype = {
           element.pair.remove();
         }
         var xpdl = element.associatedXPDL,
-            x = parseInt(xpdl.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate),
-            y = parseInt(xpdl.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate),
-            height = parseInt(xpdl.NodeGraphicsInfos.NodeGraphicsInfo.Height),
-            width = parseInt(xpdl.NodeGraphicsInfos.NodeGraphicsInfo.Width);
+            x = parseInt(xpdl["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"]["xpdl:XCoordinate"]),
+            y = parseInt(xpdl["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"]["xpdl:YCoordinate"]),
+            height = parseInt(xpdl["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Height"]),
+            width = parseInt(xpdl["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Width"]);
 
         if (element.shapeType == 'Pool' || element.shapeType == 'PoolLane'){
           var offset = 10; 
@@ -388,7 +389,7 @@ net.BpmnJS.prototype = {
     var element;
     this.paper.forEach(function (el) {
       if (el.hasOwnProperty('associatedXPDL') === true) {
-        if (el.associatedXPDL.Id === id) {
+        if (el.associatedXPDL["Id"] === id) {
           element = el;
           return;
         }
@@ -411,7 +412,7 @@ net.BpmnJS.prototype = {
 
         case 'Implementation':
 
-          if(xpdlActivity.Implementation.hasOwnProperty('Task'))
+          if(xpdlActivity["xpdl:Implementation"].hasOwnProperty('xpdl:Task'))
             shape = this.paintImplementation(xpdlActivity,x,y,width,height, name, fillColor, borderColor);
           
           break;
@@ -590,17 +591,15 @@ net.BpmnJS.prototype = {
   initActivity: function(activity) {
     this.moveElement(activity);
     this.enableContextMenu(activity);
-    activity.associatedXPDL.Id = String(this.currentId);
-    this.currentId++;
-    console.log('id =' + activity.associatedXPDL.Id);
+    activity.associatedXPDL["Id"] = this.generateNewID();
+    console.log('id =' + activity.associatedXPDL["Id"]);
     return activity;
   },
 
   initStartEvent: function(x, y) {
 
     // TODO add to this.xpdlJson
-    var xpdlJson = XpdlJsonGenerator.getNewStartEventJson(this.currentId, x, y);
-    this.currentId++;
+    var xpdlJson = XpdlJsonGenerator.getNewStartEventJson(this.generateNewID(), x, y);
 
     // TODO read height/width/color properties for xpdlJson instead b/c this is error-prone.
     var shape = this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'green', 'black'));
@@ -609,36 +608,31 @@ net.BpmnJS.prototype = {
   },
 
   initIntermediateEvent: function(x, y) {
-    var xpdlJson = XpdlJsonGenerator.getNewIntermediateEventJson(this.currentId, x, y);
-    this.currentId++;
+    var xpdlJson = XpdlJsonGenerator.getNewIntermediateEventJson(this.generateNewID(), x, y);
 
     return this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'yellow', 'black'));
   },
 
   initEndEvent: function(x, y) {
-    var xpdlJson = XpdlJsonGenerator.getNewEndEventJson(this.currentId, x, y);
-    this.currentId++;
+    var xpdlJson = XpdlJsonGenerator.getNewEndEventJson(this.generateNewID(), x, y);
 
     return this.initActivity(this.paintEvent(xpdlJson, x, y, 30, 30, '', 'red', 'black'));
   },
 
   initGateway: function(x, y) {
-    var xpdlJson = XpdlJsonGenerator.getNewGatewayJson(this.currentId, x, y);
-    this.currentId++;
+    var xpdlJson = XpdlJsonGenerator.getNewGatewayJson(this.generateNewID(), x, y);
 
     return this.initActivity(this.paintRoute(xpdlJson, x, y, 40, 40, '', 'yellow', 'black'));
   },
   
   initTask: function(x, y) {
-    var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.currentId, x, y);
-    this.currentId++;
+    var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.generateNewID(), x, y);
 
     return this.initActivity(this.paintImplementation(xpdlJson, x, y, 90, 60, '', '#0066CC', 'black'));
   },
   
   initPool: function(x,y, poolTitle){
-    var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.currentId, poolTitle, x, y);
-    this.currentId++;
+    var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.generateNewID(), poolTitle, x, y);
 
     return this.initActivity(this.paintPool(xpdlJson, x, y, poolTitle, 'cornflowerblue', 'black'));
   },
@@ -678,5 +672,23 @@ net.BpmnJS.prototype = {
         console.log('This shape (' + shape + 'doesn\'t have a type');
       }
     });
+  },
+
+  generateNewID: function(){
+
+    // GUARANTEES THAT THE ID IS UNIQUE
+    do{
+      var newId = UUID.generate();
+      var alreadyTaken = false;
+      for(var i = 0; i<this.idList.length && !alreadyTaken; i++){
+        if(this.idList[i] === newId)
+          alreadyTaken = true;
+      }
+    } while(alreadyTaken);
+
+    this.idList.push(newId);
+    // DEBUG    
+    // console.log('ID: ' + newId);
+    return newId;
   },
 };      

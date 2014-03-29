@@ -30,6 +30,8 @@ $(function(){
 
     // IF IT'S NOT ALREADY LOADED, MAKES AN AJAX CALL TO THE SERVER REQUESTING THE JSON AND DRAWS THE WORKFLOW WHEN THE DATA IS RETRIEVED
     if(!alreadyLoaded){
+
+      console.log('waiting for server');
       
       $.ajax({
         beforeSend: function(req) {
@@ -38,6 +40,8 @@ $(function(){
         url: "/workflow/xpdltojson", 
         type: "POST",
         success: function(jsonObject) {
+          console.log('server responded!');
+          console.log(jsonObject);
           $('#toolbox').removeClass('hide');
           var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0],false);
           bpmn.plot();
