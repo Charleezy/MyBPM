@@ -18,15 +18,11 @@ class XpdlObject
   # @power (string) can only have 2 values: 'ON', 'OFF'
   # 'ON' -> simulation in progress, 'OFF' -> simulation not
   # in progress (all state vars are garbage)
-<<<<<<< HEAD
   # @mockDataHash -> holds the current set of updated data fields
   # to be written to resultJSON, at end of every step
   # @resultJSON -> holds the result simulation log in json format
   # to be returned to client after simulation is finished
   attr_accessor :currActID, :power, :mockDataJSON, :mockDataHash, :resultJSON
-=======
-  attr_accessor :currActID, :timer, :power, :mockDataJSON
->>>>>>> cd8492e1fbc76e8f6a0a63aacc7717396911bc77
   # @simulationLog holds the up-to-date log of the simulation
   attr_accessor :simulationLog 
 
@@ -50,12 +46,9 @@ class XpdlObject
     @currActID = ''
     @timer = -1
     @mockDataJSON = nil
-<<<<<<< HEAD
     @mockDataHash = {}
     @resultJSON = {}
-=======
 
->>>>>>> cd8492e1fbc76e8f6a0a63aacc7717396911bc77
   end
 
   #######################################################################################################################
@@ -103,7 +96,6 @@ class XpdlObject
     # Parse the mockDataFile and populate mockDataHash accordingly
     if (@mockDataFile != nil) # Currently only supporting 'STRING' dataTypes
       mock = JSON.parse(@mockDataFile)
-<<<<<<< HEAD
       #mock = @mockDataFile
       #mock.each do |item|
       #end
@@ -112,11 +104,6 @@ class XpdlObject
       mock['stages'].each{ |e| @mockDataJSON[e['stage_id']] = e['stage_data'] }
       p @mockDataJSON.inspect    
   
-=======
-      #mock.each do |item|
-      #end
-      @mockDataJSON = mock
->>>>>>> cd8492e1fbc76e8f6a0a63aacc7717396911bc77
     end
 
 
@@ -194,7 +181,6 @@ class XpdlObject
     activities.each do |activity|
       #puts "found an <Activity> ..."
       puts activity.attributes['Id']
-<<<<<<< HEAD
 
       # Find the 'Start' Activity
       start_act = activity.find(".//xpdl:StartEvent")
@@ -213,22 +199,6 @@ class XpdlObject
     # Update @mockDataHash and @resultJSON
     update_resultJSON(@currActID)
     update_mockDataHash(@currActID)
-=======
-
-      # Find the 'Start' Activity
-      start_act = activity.find(".//xpdl:StartEvent")
-      #puts "start_act size is " + start_act.length.to_s
-      if start_act.length != 0
-        #puts "Found StartEvent Activity: " + activity.attributes['Id']
-        startActivity = activity.attributes['Id']
-      end  
-    end
-    
-    @currActID = startActivity
-    
-    @simulationLog = @simulationLog + "Simulation Started Successfully :) ... \n"
-    @simulationLog = @simulationLog + "@currActID is: " + @currActID + "\n"
->>>>>>> cd8492e1fbc76e8f6a0a63aacc7717396911bc77
 
     # Return the Current Active ID: @currActID
     return @currActID
@@ -334,23 +304,17 @@ class XpdlObject
 
     if self.isLastActivity(@currActID)
       @simulationLog = @simulationLog + "This is the Last Activity, The Simulation is Now Over :( ... POWERING OFF ... GoodBye  ^_^ \n"
-<<<<<<< HEAD
       # Update @mockDataHash and @resultJSON
       update_resultJSON(@currActID)
       update_mockDataHash(@currActID)
-=======
->>>>>>> cd8492e1fbc76e8f6a0a63aacc7717396911bc77
       self.terminate()
       return "ERROR"
     end
 
-<<<<<<< HEAD
   # Update @mockDataHash and @resultJSON
   update_resultJSON(@currActID)
   update_mockDataHash(@currActID)
 
-=======
->>>>>>> cd8492e1fbc76e8f6a0a63aacc7717396911bc77
   # Return the Current Active ID: @currActID
   return @currActID
 
@@ -374,13 +338,8 @@ class XpdlObject
 
       # Now check the @mockDataJSON for validation
 
-<<<<<<< HEAD
       if @mockDataHash.has_key?(dataVar)
         if @mockDataHash[dataVar] == data
-=======
-      if @mockDataJSON.has_key?(dataVar)
-        if @mockDataJSON[dataVar] == data
->>>>>>> cd8492e1fbc76e8f6a0a63aacc7717396911bc77
           @simulationLog = @simulationLog + "CONDITION MATCHED: " + logic + "\n"
           return true
         else
@@ -461,7 +420,6 @@ class XpdlObject
   def getDataFields()
     return @mockDataJSON
   end
-<<<<<<< HEAD
 
   #######################################################################################################################
 
@@ -496,8 +454,6 @@ class XpdlObject
     @resultJSON[activity_id][:stage_data] = @mockDataHash
     
   end
-=======
->>>>>>> cd8492e1fbc76e8f6a0a63aacc7717396911bc77
 
 end
 
