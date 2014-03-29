@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
 	"whereToGo": "B",
+=======
+	"whereToGo": "dfd",
+>>>>>>> cd8492e1fbc76e8f6a0a63aacc7717396911bc77
 	"anotherVar": "hello there!"
 	
 }
