@@ -14,7 +14,6 @@
 ActiveRecord::Schema.define(version: 20140310172229) do
 
   create_table "mock_data", force: true do |t|
-    t.string   "name",        null: false
     t.integer  "workflow_id"
     t.text     "mockdata"
     t.datetime "created_at"
