@@ -58,8 +58,28 @@ $(function(){
               $('#jsonText').html(JSON.stringify(jsonObject));
           });
 
+          // FIXME you shouldn't have to import in order to be allowed to save the workflow...
+          // what about workflows started from scratch without importing?
           $("#save").click(function() {
-            workflow.updateXPDL();
+            console.log('saving the workflow...');
+            var xpdlJson = workflow.updateXPDL();
+            $.ajax({
+              beforeSend: function(req) {
+                req.setRequestHeader("Accept", "application/json");
+              },
+              url: "/workflow/create", 
+              type: "POST",
+              data: {
+                workflow: {
+                  name: "test", // TODO read from user
+                  xpdl: xpdlJson
+                }
+              },
+              success: function(jsonObject) {
+                console.log('success');
+                console.log(jsonObject);
+              }
+            });
           });
 
           // Toolbox listeners

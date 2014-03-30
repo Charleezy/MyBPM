@@ -14,6 +14,7 @@ Mybpm::Application.routes.draw do
 
   post '/workflow/import', :controller => 'workflow', :action => 'import'
   post '/workflow/xpdltojson', :controller => 'workflow', :action => 'xpdltojson'
+  post '/workflow/create', :controller => 'workflow', :action => 'create'
 
   match '/about' => 'home#about', :as => :home, :via => :get
 end

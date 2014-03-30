@@ -889,6 +889,7 @@ net.BpmnJS.prototype = {
 
     console.log('updated xpdlJson: ');
     console.log(this.xpdlJson);
+    return this.xpdlJson;
   },
 
   generateNewID: function(){
