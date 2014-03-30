@@ -40,11 +40,25 @@ net.BpmnJS = function(xpdlJson, canvas, isStatic){
   else
     this.xpdlJson = xpdlJson;
 
+  // USED FOR SIMULATION
   this.isStatic = isStatic;
 
-  // CREATING RAPHAEL CANVAS
+  // RAPHAEL CANVAS
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
+  
   this.connections = [];
+  this.allConnections = [];
+  this.newConnections = [];
+  this.oldConnections = [];
+  this.deletedConnectionsIds = [];
+
+  this.activities = [];
+  this.allActivities = [];
+  this.newActivities = [];
+  this.oldActivities = [];
+  this.deletedActivitiesIds = [];
+
+  // ALL ID'S GENERATED FROM THE BEGINNING
   this.idList = [];
 };
 
@@ -88,27 +102,29 @@ net.BpmnJS.prototype = {
     // TODO
     // FINISH IMPORT FOR POOLS
     // WE HAVE A PROBLEM: POOLS MAY NOT HAVE COORDINATES (ACCORDING TO ZARTAB'S EXAMPLE AND XPDL SCHEMA)
-    // // Parse through processes' pools
-    // if (this.process.hasOwnProperty('xpdl:Pools')) {
-    //   this.pools = this.process["xpdl:Pools"]["xpdl:Pool"];
-    //   this.pools.forEach(function(pool) {
-    //     var temporaryId = pool.Id;
-    //     var newId = me.generateNewID();
-    //     me.replaceProperty(me.xpdlJson, 'Id', temporaryId, newId);
-    //     me.replaceProperty(me.xpdlJson, 'From', temporaryId, newId);
-    //     me.replaceProperty(me.xpdlJson, 'To', temporaryId, newId);
-    //     // console.log('newId: ' + pool.Id);
-    //     // The coordinates of the pools
-    //     var xCoordinate = parseInt(pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].XCoordinate);
-    //     var yCoordinate = parseInt(pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].YCoordinate);
-    //     var height = parseInt(pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height);
-    //     var width = parseInt(pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width);
-    //     var borderColor = pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
-    //     var fillColor = pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor;
-    //     var name = pool.Name;
-    //     me.paintActivity(pool, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
-    //   });
-    // }
+    // Parse through processes' pools
+    if (this.xpdlJson["xpdl:Package"].hasOwnProperty('xpdl:Pools')) {
+      console.log('pool');
+      this.pools = this.xpdlJson["xpdl:Package"]["xpdl:Pools"];
+      // FIXIT
+      // WE ARE ASSUMING WE ONLY HAVE ONE POOL TO IMPORT
+      var pool = this.pools["xpdl:Pool"];
+      console.log(pool);
+      var temporaryId = pool.Id;
+      var newId = me.generateNewID();
+      me.replaceProperty(me.xpdlJson, 'Id', temporaryId, newId);
+      me.replaceProperty(me.xpdlJson, 'From', temporaryId, newId);
+      me.replaceProperty(me.xpdlJson, 'To', temporaryId, newId);
+      // console.log('newId: ' + pool.Id);
+      // The coordinates of the pools
+      // FIXIT
+      // borderColor and fillColor are hardcoded here
+      var borderColor = pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+      var fillColor = pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor;
+      var name = pool.Name;
+      this.paintPool(pool, 0, 0, name, 'lightblue', 'black');
+      
+    }
 
     // Parse through processes' activities
     if (this.process.hasOwnProperty('xpdl:Activities')) {
@@ -147,7 +163,7 @@ net.BpmnJS.prototype = {
         }
 
         // Create link association between the two activities.
-        me.connectElements(element1, element2, condition);
+        me.connectElements(element1, element2, condition, 'imported');
       });
     }
 
@@ -166,7 +182,7 @@ net.BpmnJS.prototype = {
 
   clear: function() {
     this.paper.clear();
-    this.connections.length = 0;
+    this.allConnections.length = 0;
   },
 
   enableContextMenu: function(element) {
@@ -201,17 +217,20 @@ net.BpmnJS.prototype = {
 
       // FIXME why is this called twice per element?
       contextMenu.on('click', 'a#remove-element', function() {
-        // Remove transitions.
-        element.connections.forEach(function(connection) {
-          if (connection.from === element) {
-            // Connection is outgoing from me.
-            me.removeConnection(connection.to, connection);
-          } else {
-            // Connnection is incoming to me.
-            me.removeConnection(connection.from, connection);
-          }
-        });
-        element.connections.length = 0;
+        // If the element has connections, remove them.
+        if(element.hasOwnProperty('connections')){
+          element.connections.forEach(function(connection) {
+            if (connection.from === element) {
+              // Connection is outgoing from me.
+              me.removeConnection(connection.to, connection);
+            } else {
+              // Connnection is incoming to me.
+              me.removeConnection(connection.from, connection);
+            }
+          });
+          element.connrctions = [];
+          element.connections.length = 0;
+        }
         if (element.pair !== undefined) {
           // Remove element paired to this item (should be text).
           element.pair.remove();
@@ -226,8 +245,8 @@ net.BpmnJS.prototype = {
       //FIXME: Need to fix location for pool & lane annotations
       contextMenu.on('click', 'a#add-annotation', function() {
         var textToAdd = prompt('Annotation:');
-        if (textToAdd == null) return;
-        if (element.shapeType == 'Text') {
+        if (textToAdd === null) return;
+        if (element.shapeType === 'Text') {
           var temp = element;
           element = element.pair;
           element.pair = temp;
@@ -243,7 +262,7 @@ net.BpmnJS.prototype = {
             height = element.getBBox().height,
             width = element.getBBox().width;
 
-        if (element.shapeType == 'Pool' || element.shapeType == 'PoolLane'){
+        if (element.shapeType === 'Pool' || element.shapeType === 'PoolLane'){
           var offset = 10; 
           //FixMe: Need to check if correct location after the x&y are updated
           var text = me.paper.text(x+offset, y+height/2, textToAdd).attr({transform: "r" + 270});
@@ -270,7 +289,7 @@ net.BpmnJS.prototype = {
           return;
         }
         var laneTitle = prompt('Please enter title of lane:');
-        if (laneTitle == null) return;
+        if (laneTitle === null) return;
         var x = 10, y = 10;
         if (totalLanes > 0){
           //get current pool title
@@ -325,20 +344,28 @@ net.BpmnJS.prototype = {
     });
   },
 
-  connectElements: function(element1, element2, condition) {
+  connectElements: function(element1, element2, condition, newOrImported) {
     var connection = this.paper.connection(element1, element2, "#000");
-    connection.shapeType = 'Transition';
-    this.connections.push(connection);
+    connection.line.shapeType = 'Transition';
+    connection.line.associatedXPDL = XpdlJsonGenerator.getNewTransitionJson(this.generateNewID(), element1.associatedXPDL.Id, element2.associatedXPDL.Id);
+    this.allConnections.push(connection);
     element1.connections.push(connection);
     element2.connections.push(connection);
 
+    if(typeof newOrImported === 'undefined' || newOrImported === 'new'){
+      this.newConnections.push(connection);
+    }
+    else{
+      this.oldConnections.push(connection);
+    }
+
     //If gateway element, ask for condition(s)
-    if (element1.shapeType == 'Route'){
+    if (element1.shapeType === 'Route'){
       //If new element, ask for condition
-      if (condition == null){
+      if (condition === null){
         condition = prompt('Condition:');
         //If null, path is always travelled -> parallel
-        if (condition == null || condition.trim() == '') return;
+        if (condition === null || condition.trim() === '') return;
       }
       
       //Need to determine correct x & y 
@@ -353,6 +380,8 @@ net.BpmnJS.prototype = {
   },
 
   removeConnection: function(element, connectionToRemove) {
+    // TODO
+    // REMOVE FROM ARRAY OF CONNECTIONS
     // Remove 'connectionToRemove' from element's connections.
     element.connections.forEach(function(connection, index) {
       if (connection === connectionToRemove) {
@@ -362,9 +391,21 @@ net.BpmnJS.prototype = {
     });
     // Remove from global connections as well.
     var me = this;
-    me.connections.forEach(function(connection, index) {
+    me.allConnections.forEach(function(connection, index) {
       if (connection === connectionToRemove) {
-        me.connections.splice(index, 1);
+        me.allConnections.splice(index, 1);
+        return;
+      }
+    });
+    me.oldConnections.forEach(function(connection, index) {
+      if (connection === connectionToRemove) {
+        me.oldConnections.splice(index, 1);
+        return;
+      }
+    });
+    me.newConnections.forEach(function(connection, index) {
+      if (connection === connectionToRemove) {
+        me.newConnections.splice(index, 1);
         return;
       }
     });
@@ -373,7 +414,7 @@ net.BpmnJS.prototype = {
   },
 
   moveElement : function(element) {
-    var connections = this.connections,
+    var connections = this.allConnections,
         dragger = function() {
           this.odx = 0;
           this.ody = 0;
@@ -381,7 +422,7 @@ net.BpmnJS.prototype = {
         },
         move = function(dx, dy) {
           //Don't allow movement for pools & pool lanes
-          if (this.shapeType == 'Pool' || this.shapeType == 'PoolLane'){
+          if (this.shapeType === 'Pool' || this.shapeType === 'PoolLane'){
             return;
           }
           
@@ -432,7 +473,15 @@ net.BpmnJS.prototype = {
       switch(activityProperty){
         
         case 'xpdl:Event':
-          shape = this.paintEvent(xpdlActivity,x,y,width, height, name, fillColor, borderColor);
+          if(xpdlActivity['xpdl:Event'].hasOwnProperty('xpdl:StartEvent')){
+            shape = this.paintStartEvent(xpdlActivity,x,y,width, height, name, fillColor, borderColor);
+          }
+          else if(xpdlActivity['xpdl:Event'].hasOwnProperty('xpdl:IntermediateEvent')){
+            shape = this.paintIntermediateEvent(xpdlActivity,x,y,width, height, name, fillColor, borderColor);
+          }
+          else{
+            shape = this.paintEndEvent(xpdlActivity,x,y,width, height, name, fillColor, borderColor);
+          }
           break;
 
         case 'xpdl:Implementation':
@@ -451,7 +500,7 @@ net.BpmnJS.prototype = {
     return shape;
   },
 
-  paintEvent : function(xpdlEvent, x, y, width, height, name, fillColor, borderColor){
+  paintStartEvent : function(xpdlEvent, x, y, width, height, name, fillColor, borderColor){
     // var shape = this.paper.circle(x+width/2, y+height/2, width/2).attr('cursor', 'move');
     var shape = this.paper.circle(x+width/2, y+height/2, width/2);
     shape.associatedXPDL = xpdlEvent;
@@ -459,10 +508,45 @@ net.BpmnJS.prototype = {
     shape.incoming = [];
     shape.connections = [];
 
-    shape.shapeType = 'Event';
+    shape.shapeType = 'StartEvent';
     var cssClass = "";
     $(shape.node).attr("fill",fillColor); 
     $(shape.node).attr("border",borderColor);
+    $(shape.node).attr("class",'startEvent');
+    
+    return shape;
+  },
+
+  paintIntermediateEvent : function(xpdlEvent, x, y, width, height, name, fillColor, borderColor){
+    // var shape = this.paper.circle(x+width/2, y+height/2, width/2).attr('cursor', 'move');
+    var shape = this.paper.circle(x+width/2, y+height/2, width/2);
+    shape.associatedXPDL = xpdlEvent;
+    shape.outgoing = [];
+    shape.incoming = [];
+    shape.connections = [];
+
+    shape.shapeType = 'IntermediateEvent';
+    var cssClass = "";
+    $(shape.node).attr("fill",fillColor); 
+    $(shape.node).attr("border",borderColor);
+    $(shape.node).attr("class",'intermediateEvent');
+    
+    return shape;
+  },
+
+  paintEndEvent : function(xpdlEvent, x, y, width, height, name, fillColor, borderColor){
+    // var shape = this.paper.circle(x+width/2, y+height/2, width/2).attr('cursor', 'move');
+    var shape = this.paper.circle(x+width/2, y+height/2, width/2);
+    shape.associatedXPDL = xpdlEvent;
+    shape.outgoing = [];
+    shape.incoming = [];
+    shape.connections = [];
+
+    shape.shapeType = 'EndEvent';
+    var cssClass = "";
+    $(shape.node).attr("fill",fillColor); 
+    $(shape.node).attr("border",borderColor);
+    $(shape.node).attr("class",'endEvent');
     
     return shape;
   },
@@ -532,7 +616,7 @@ net.BpmnJS.prototype = {
 
   paintPool: function(xpdlRoute, x, y, poolTitleText, fillColor, borderColor){
     var lanes = totalLanes;
-    if (lanes == 0) {lanes = 1;}
+    if (lanes === 0) {lanes = 1;}
     x = 0;
     var offset = 10,
         width = this.paper.canvas.offsetWidth,
@@ -583,10 +667,10 @@ net.BpmnJS.prototype = {
       var front = this.paper.set();
       var mid = this.paper.set();
       this.paper.forEach(function(el) {
-        if (el.shapeType == 'Pool'){
+        if (el.shapeType === 'Pool'){
           //do nothing
         }
-        else if (el.shapeType == 'PoolLane'){
+        else if (el.shapeType === 'PoolLane'){
           mid.push(el);
         }
         else{
@@ -599,7 +683,7 @@ net.BpmnJS.prototype = {
 
   getCss: function(bpmnElement, cssClass){
     for(i in this.highlighted){
-      if(this.highlighted[i] == bpmnElement){
+      if(this.highlighted[i] === bpmnElement){
         cssClass += "-high";
         break;
       }
@@ -631,8 +715,10 @@ net.BpmnJS.prototype = {
     // Add xpdl to tree
     this.activities.push(xpdlJson);
 
-    var shape = this.initActivity(this.paintEvent(
+    var shape = this.initActivity(this.paintStartEvent(
       xpdlJson, x, y, width, height, name, 'white', borderColor));
+
+    shape.shapeType = 'StartEvent';
 
     return shape;
   },
@@ -649,8 +735,10 @@ net.BpmnJS.prototype = {
     // Add xpdl to tree
     this.activities.push(xpdlJson);
 
-    var shape = this.initActivity(this.paintEvent(
+    var shape = this.initActivity(this.paintIntermediateEvent(
       xpdlJson, x, y, width, height, name, 'lightyellow', borderColor));
+
+    shape.shapeType = 'IntermediateEvent';
 
     return shape;
   },
@@ -667,8 +755,10 @@ net.BpmnJS.prototype = {
     // Add xpdl to tree
     this.activities.push(xpdlJson);
 
-    var shape = this.initActivity(this.paintEvent(
+    var shape = this.initActivity(this.paintEndEvent(
       xpdlJson, x, y, width, height, name, 'lightblue', borderColor));
+
+    shape.shapeType = 'EndEvent';
 
     return shape;
   },
@@ -688,6 +778,8 @@ net.BpmnJS.prototype = {
     var shape = this.initActivity(this.paintRoute(
       xpdlJson, x, y, width, height, name, 'white', borderColor));
 
+    shape.shapeType = 'Route';
+
     return shape;
   },
   
@@ -706,6 +798,8 @@ net.BpmnJS.prototype = {
     var shape = this.initActivity(this.paintImplementation(
       xpdlJson, x, y, width, height, name, 'lightyellow', borderColor));
 
+    shape.shapeType = 'Task';
+
     return shape;
   },
   
@@ -721,6 +815,8 @@ net.BpmnJS.prototype = {
 
     var shape = this.initActivity(this.paintPool(xpdlJson, x, y, name, 'lightblue', borderColor));
 
+    shape.shapeType = 'Pool';
+
     return shape;
   },
 
@@ -728,18 +824,26 @@ net.BpmnJS.prototype = {
     // TODO
     // FIND OUT THE FORMAT OF THE LANE
     var xpdl = 'xpdlLane';
-    return this.initActivity(this.paintLane(xpdl, x, y, laneTitle, poolTitle, 'whitesmoke', 'black'));
+    var shape = this.initActivity(this.paintLane(xpdl, x, y, laneTitle, poolTitle, 'whitesmoke', 'black'));
+    shape.shapeType = 'Pool';
+    return shape;
   },
 
   // CALLED WHEN THE USER CLICKS THE SAVE BUTTON
   updateXPDL: function(){
+
+    // UPDATES ASSOCIATED XPDL OF THE SHAPES
     this.paper.forEach(function(shape){
 
       if(shape.hasOwnProperty('shapeType')){
-          if (shape.shapeType != 'Text') {
+
+          // UPDATE COORDINATES
+          if (shape.shapeType != 'Text' && shape.shapeType != 'Transition') {
             shape.associatedXPDL["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].XCoordinate = shape.getBBox().x;
             shape.associatedXPDL["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].YCoordinate= shape.getBBox().y;
           }
+
+          // UPDATE SPECIFIC PROPERTIES
           switch(shape.shapeType){
           case 'Pool':
           break;
@@ -751,7 +855,11 @@ net.BpmnJS.prototype = {
           break;
           case 'Condition':
           break;
-          case 'Event':
+          case 'StartEvent':
+          break;
+          case 'IntermediateEvent':
+          break;
+          case 'EndEvent':
           break;
           case 'Text':
           break;
@@ -760,9 +868,22 @@ net.BpmnJS.prototype = {
         }
       }
       else{
-        console.log('This shape (' + shape + 'doesn\'t have a type');
+        console.log('This shape doesn\'t have a type:');
+        console.log(shape);
       }
     });
+
+    // UPDATES THE XPDL TREE WITH THE NEW ELEMENTS CREATED
+    this.newConnections.forEach(function(connection){
+
+    });
+
+    this.newActivities.forEach(function(connection){
+
+    });
+
+    console.log('updated xpdlJson: ');
+    console.log(this.xpdlJson);
   },
 
   generateNewID: function(){

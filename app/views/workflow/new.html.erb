@@ -10,10 +10,17 @@
 <%= javascript_include_tag 'workflow/graffle.js' %>
 <script type="text/javascript">
 
-var alreadyLoaded = false;
 
 $(function(){
 
+  var alreadyLoaded = false;
+
+  var workflow = null;
+
+  // TODO
+  // MAKE THE CANVAS RESIZABLE
+  // http://jqueryui.com/resizable/
+  
   // Workflow editor instructions.
   $('#help').click(function() {
     $(this).toggleClass('active');
@@ -43,8 +50,8 @@ $(function(){
           console.log('server responded!');
           console.log(jsonObject);
           $('#toolbox').removeClass('hide');
-          var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0],false);
-          bpmn.plot();
+          workflow = new net.BpmnJS(jsonObject,$('#canvas')[0],false);
+          workflow.plot();
 
           $('#convert').click(function(){
               $('#jsonText').removeClass('hide');
@@ -52,7 +59,7 @@ $(function(){
           });
 
           $("#save").click(function() {
-            bpmn.updateXPDL();
+            workflow.updateXPDL();
           });
 
           // Toolbox listeners
@@ -63,29 +70,29 @@ $(function(){
              // var shape = null;
               switch (el.attr('id')) {
                 case 'tb-startevent':
-                  bpmn.initStartEvent(x, y);
+                  workflow.initStartEvent(x, y);
                   break;
                 case 'tb-intermediateevent':
-                  bpmn.initIntermediateEvent(x, y);
+                  workflow.initIntermediateEvent(x, y);
                   break;
                 case 'tb-endevent':
-                  bpmn.initEndEvent(x, y);
+                  workflow.initEndEvent(x, y);
                   break;
                 case 'tb-gateway':
-                  bpmn.initGateway(x, y);
+                  workflow.initGateway(x, y);
                   break;
                 case 'tb-task':
-                  bpmn.initTask(x, y);
+                  workflow.initTask(x, y);
                   break;
                 case 'tb-clearcanvas':
                   if (confirm('Are you sure you want to clear the workflow?')) {
-                    bpmn.clear();
+                    workflow.clear();
                   }
                   break;
                 case 'tb-sequenceflow':
                   el.toggleClass('active hover');
                   $('#connect-instructions').toggleClass('hide');
-                  bpmn.onConnect(function(e) {
+                  workflow.onConnect(function(e) {
                     if (e === 'success') {
                       // We have successfully connected two elements.
                       el.removeClass('active hover');
@@ -95,11 +102,11 @@ $(function(){
                   break;
                 case 'tb-participant':
                   var poolTitle = prompt('Please enter title of pool:');
-                  bpmn.initPool(x,y, poolTitle); 
+                  workflow.initPool(x,y, poolTitle); 
                   break;
                 case 'tb-lane': 
                   alert('Please right-click on a drawn pool and select add lane.');
-                  //bpmn.initLane(x,y+10, laneTitle, 'poolTitle');   
+                  //workflow.initLane(x,y+10, laneTitle, 'poolTitle');   
                   break;
                 default:
                   // Do nothing

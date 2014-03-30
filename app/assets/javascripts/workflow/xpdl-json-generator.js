@@ -219,3 +219,24 @@ XpdlJsonGenerator.getNewPoolJson = function(id, name, x, y) {
           };
 }
 
+//===========================================================================
+//  Transitions
+//===========================================================================
+
+XpdlJsonGenerator.getNewTransitionJson = function(id, name, from, to) {
+  return  {
+            From:from,
+            Id:id,
+            Name:name,
+            To:to,
+            "xpdl:ConnectorGraphicsInfos": {
+              "xpdl:ConnectorGraphicsInfo": {
+                FillColor:"white",
+                IsVisible:"true",
+                Style:"NO_ROUTING_ORTHOGONAL",
+                ToolId:"ECE450_Workflow_Modeler"
+              }
+            }
+          };
+}
+
