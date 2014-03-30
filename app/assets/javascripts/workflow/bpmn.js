@@ -605,7 +605,7 @@ net.BpmnJS.prototype = {
     shape.pair = text;
     text.pair = shape;
 
-    var cssClass = "";
+    var cssClass = "route";
     $(shape.node).attr("class",cssClass);
     $(shape.node).attr("fill",fillColor); 
     $(shape.node).attr("border",borderColor);
@@ -635,6 +635,8 @@ net.BpmnJS.prototype = {
 
     //Ordering of elements - put pool behind everything
     pool.toBack();
+
+    $(pool.node).attr("class", 'pool');
     return pool;
   },
 
@@ -678,6 +680,9 @@ net.BpmnJS.prototype = {
         }
       });
       mid.insertBefore(front);
+
+      $(poolLane.node).attr("class", 'lane');
+
     return poolLane;
   },
 
