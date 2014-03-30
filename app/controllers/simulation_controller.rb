@@ -40,8 +40,8 @@ class SimulationController < ApplicationController
   end
   
   def edit
-	   @simulation = MockData.find(params[:id])
-	   @workflow = Workflow.find(@simulation.workflow_id)
+	@simulation = MockData.find(params[:id])
+	@workflow = Workflow.find(@simulation.workflow_id)
   end
 
   def setup_side_nav_links

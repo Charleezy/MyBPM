@@ -20,6 +20,7 @@
 // MLXJS   - http://xmljs.sourceforge.net/
 // Raphael - http://raphaeljs.com/
 
+
 // Namespace
 var net = net || {};
 net = {};
@@ -33,99 +34,122 @@ function assert(condition, message) {
 // Constructor
 net.BpmnJS = function(xpdlJson, canvas, isStatic){
 
-  this.xpdlJson = xpdlJson;
+  // IF THE JSON OBJECT IS NOT CREATED AT THE BEGINNING
+  if(xpdlJson === null)
+    this.xpdlJson = XpdlJsonGenerator.getNewWorkflowJson();
+  else
+    this.xpdlJson = xpdlJson;
+
   this.isStatic = isStatic;
 
-  // Paint canvas
+  // CREATING RAPHAEL CANVAS
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
   this.connections = [];
+  this.idList = [];
 };
 
 // Shared functions
 net.BpmnJS.prototype = {
 
-  plot: function(){
-    console.log(XpdlJsonGenerator.getNewWorkflowJson('test'));
-    
-    // PAINT
-    for(var i=0; i<this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess.length; i++){
+  // REPLACES A PROPERTY ON A TREE OF JAVASCRIPT OBJECTS
+  replaceProperty: function(object, property, oldValue, newValue){
 
-      // ACTIVITIES
-      if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Activities')){
-        var activities = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Activities.Activity;
-        for(var j=0; j<activities.length; j++){
-          var activity = activities[j];
-          var xCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate);
-          var yCoordinate = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate);
-          var height = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Height);
-          var width = parseInt(activity.NodeGraphicsInfos.NodeGraphicsInfo.Width);
-          var borderColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.BorderColor;
-          var fillColor = activity.NodeGraphicsInfos.NodeGraphicsInfo.FillColor;
-          var name = activity.Name;
-          this.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
-        }
-      }
-
-      // TRANSITIONS
-      if(this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].hasOwnProperty('Transitions')){
-        var transitions = this.xpdlJson.Package.WorkflowProcesses.WorkflowProcess[i].Transitions.Transition,
-            me = this;
-        transitions.forEach(function(transition) {
-          // Reference the activities we're transitioning to/from.
-          var element1 = me.getById(transition.From);
-          var element2 = me.getById(transition.To);
-
-          // Create link association between the two activities.
-          // TODO changes to associatedXPDL required?
-
-          // element1.outgoing.push(element2);
-          // element2.incoming.push(element1);
-
-          me.connectElements(element1, element2);
-        });
-      }
+    // IF WE FOUND IT, JUST REPLACE
+    if(object.hasOwnProperty(property) && object[property] === oldValue){
+      object[property] = newValue;
     }
 
-    // DEPRECATED. Associate on activities, not connections/transitions.
-    // Instead, for every activity, we maintain a list of "outgoing" paths and "incoming" paths.
+    // IF NOT, SEARCH ON THE OBJECTS INSIDE
+    else{
+      for(i in object){
 
-    // LINK THE ACTIVITIES TO THE TRANSITIONS
-    // this.paper.forEach(function(el) {
-    //   if(el.shapeType !== undefined && el.shapeType !== 'Transition'){
+        // IF THE PROPERTY IS AN OBJECT, SEARCH INSIDE IT
+        if(object[i] instanceof Object){
+          this.replaceProperty(object[i], property, oldValue, newValue);
+        }
 
-    //     // LOOK FOR THE ID OF ELEMENTS LINKED TO THAT TRANSITION
-    //     // for(var i in transition.linkedElements){
+        // IF IT'S AN ARRAY, LOOP THROUGH IT'S ELEMENTS
+        else if(object[i] instanceof Array){
+          for(j in object[i]){
+            this.replaceProperty(object[i][j], property, oldValue, newValue);
+          }
+        }
+      }
+    }
+  },
 
-    //     //   // FIND ELEMENT LINKED FROM AND LINK
-    //     //   globalPaper.forEach(function (el){
+  plot: function(){
+    // Assume we are only handling a single workflow process (there's only one WorkflowProcess inside WorkflowProcesses)
+    
+    // Last process
+    this.process = this.xpdlJson["xpdl:Package"]["xpdl:WorkflowProcesses"]["xpdl:WorkflowProcess"],
+        me = this;
+    
+    // TODO
+    // FINISH IMPORT FOR POOLS
+    // WE HAVE A PROBLEM: POOLS MAY NOT HAVE COORDINATES (ACCORDING TO ZARTAB'S EXAMPLE AND XPDL SCHEMA)
+    // // Parse through processes' pools
+    // if (this.process.hasOwnProperty('xpdl:Pools')) {
+    //   this.pools = this.process["xpdl:Pools"]["xpdl:Pool"];
+    //   this.pools.forEach(function(pool) {
+    //     var temporaryId = pool.Id;
+    //     var newId = me.generateNewID();
+    //     me.replaceProperty(me.xpdlJson, 'Id', temporaryId, newId);
+    //     me.replaceProperty(me.xpdlJson, 'From', temporaryId, newId);
+    //     me.replaceProperty(me.xpdlJson, 'To', temporaryId, newId);
+    //     // console.log('newId: ' + pool.Id);
+    //     // The coordinates of the pools
+    //     var xCoordinate = parseInt(pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].XCoordinate);
+    //     var yCoordinate = parseInt(pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].YCoordinate);
+    //     var height = parseInt(pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height);
+    //     var width = parseInt(pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width);
+    //     var borderColor = pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+    //     var fillColor = pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor;
+    //     var name = pool.Name;
+    //     me.paintActivity(pool, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
+    //   });
+    // }
 
-    //     //     if(el.hasOwnProperty('associatedXPDL') && transition.associatedXPDL.From === el.associatedXPDL.Id){
-    //     //       transition.linkedFromElement = el;
-    //     //       // LINK THE OTHER WAY AROUND (ELEMENT -> TRANSITIONS)
-    //     //       el.transitionLinkedFrom = transition;
-    //     //       return false;
+    // Parse through processes' activities
+    if (this.process.hasOwnProperty('xpdl:Activities')) {
+      this.activities = this.process["xpdl:Activities"]["xpdl:Activity"];
+      this.activities.forEach(function(activity) {
+        var temporaryId = activity.Id;
+        var newId = me.generateNewID();
+        me.replaceProperty(me.xpdlJson, 'Id', temporaryId, newId);
+        me.replaceProperty(me.xpdlJson, 'From', temporaryId, newId);
+        me.replaceProperty(me.xpdlJson, 'To', temporaryId, newId);
+        // console.log('newId: ' + activity.Id);
+        var xCoordinate = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].XCoordinate);
+        var yCoordinate = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].YCoordinate);
+        var height = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height);
+        var width = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width);
+        var borderColor = activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+        var fillColor = activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor;
+        var name = activity.Name;
+        me.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
+      });
+    }
 
-    //     //     }
+    // Parse through processes' transitions
+    if (this.process.hasOwnProperty('xpdl:Transitions')) {
+      this.transitions = this.process["xpdl:Transitions"]["xpdl:Transition"];
+      this.transitions.forEach(function(transition) {
+        me.replaceProperty(me.xpdlJson, 'Id', transition.Id, me.generateNewID());
+        // Reference the activities we're transitioning to/from.
+        var element1 = me.getById(transition.From);
+        var element2 = me.getById(transition.To);
+        if (transition.hasOwnProperty('xpdl:Condition')){
+          var condition = transition["xpdl:Condition"];
+        }
+        else {
+          var condition = "";
+        }
 
-    //     //   });
-
-    //     //   // FIND ELEMENT LINKED TO AND LINK
-    //     //   globalPaper.forEach(function (el){
-
-    //     //     if(el.hasOwnProperty('associatedXPDL') && transition.associatedXPDL.To === el.associatedXPDL.Id){
-    //     //       transition.linkedToElement = el;
-    //     //       // LINK THE OTHER WAY AROUND (ELEMENT -> TRANSITIONS)
-    //     //       el.transitionLinkedTo = transition;
-    //     //       return false;
-
-    //     //     }
-
-    //     //   });
-
-    //     // }
-
-    //   }
-    // });
+        // Create link association between the two activities.
+        me.connectElements(element1, element2, condition);
+      });
+    }
 
     if (!this.isStatic) {
       // MAKE ELEMENTS (NOT LINES) DRAGGABLE
@@ -150,22 +174,23 @@ net.BpmnJS.prototype = {
         // These two should be updated every resize. need to fix this!
         var position = $(canvas).position();
         var offset = $(canvas).offset();
+        // DEBUG
         $( "#log-form" ).text("positionX:" + position.left + ", Y: " + position.top + ". offsetX:"+ offset.left +", offsetY:" + offset.top);
     $( window ).resize(function() {
         position = $(canvas).position();
         offset = $(canvas).offset();
-        $( "#log-form" ).text("positionX:" + position.left + ", Y: " + position.top + ". offsetX:"+ offset.left +", offsetY:" + offset.top);
     });
     var contextMenu = $('#editor-contextmenu'),
         me = this;
         $( document ).on( "mousemove", function( event ) {
-        	var canvasX = parseInt(event.pageX - offset.left - 1)
-        	var canvasY = parseInt(event.pageY - offset.top - 22)
-        	if (canvasX < 0 || canvasY < 0) {
-        		canvasX = "out of range";
-        		canvasY = "out of range";
-        	};
-        	$( "#log" ).text("X: " + event.pageX + ", Y: " + event.pageY + ". Canvas X:"+ canvasX +", canvas Y:" + canvasY);
+          var canvasX = parseInt(event.pageX - offset.left - 1)
+          var canvasY = parseInt(event.pageY - offset.top - 22)
+          if (canvasX < 0 || canvasY < 0) {
+            canvasX = "out of range";
+            canvasY = "out of range";
+          };
+          // DEBUG
+          $( "#log" ).text("X: " + event.pageX + ", Y: " + event.pageY + ". Canvas X:"+ canvasX +", canvas Y:" + canvasY);
         });
     $(element[0]).on('contextmenu', function(e) {
       contextMenu.css({
@@ -201,19 +226,35 @@ net.BpmnJS.prototype = {
       //FIXME: Need to fix location for pool & lane annotations
       contextMenu.on('click', 'a#add-annotation', function() {
         var textToAdd = prompt('Annotation:');
-        if (textToAdd == null || textToAdd.trim() == '') return;
+        if (textToAdd == null) return;
+        if (element.shapeType == 'Text') {
+          var temp = element;
+          element = element.pair;
+          element.pair = temp;
+        }
         if (element.pair !== undefined) {
           // Remove element paired to this item (should be text).
           element.pair.remove();
         }
-        var xpdl = element.associatedXPDL,
-            x = parseInt(xpdl.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.XCoordinate),
-            y = parseInt(xpdl.NodeGraphicsInfos.NodeGraphicsInfo.Coordinates.YCoordinate),
-            height = parseInt(xpdl.NodeGraphicsInfos.NodeGraphicsInfo.Height),
-            width = parseInt(xpdl.NodeGraphicsInfos.NodeGraphicsInfo.Width);
 
-        var text = me.paper.text(x+width/2, y+height/2, textToAdd);
-        text.shapeType = 'Text';
+        element.associatedXPDL.Name = textToAdd;
+        var x = element.getBBox().x,
+            y = element.getBBox().y,
+            height = element.getBBox().height,
+            width = element.getBBox().width;
+
+        if (element.shapeType == 'Pool' || element.shapeType == 'PoolLane'){
+          var offset = 10; 
+          //FixMe: Need to check if correct location after the x&y are updated
+          var text = me.paper.text(x+offset, y+height/2, textToAdd).attr({transform: "r" + 270});
+          text.shapeType = 'RotatedText';
+        }
+        else {
+          var text = me.paper.text(x+width/2, y+height/2, textToAdd);
+          text.shapeType = 'Text';
+        }
+
+        text.toFront();
 
         // PAIRING SHAPE AND TEXT
         element.pair = text;
@@ -229,11 +270,11 @@ net.BpmnJS.prototype = {
           return;
         }
         var laneTitle = prompt('Please enter title of lane:');
-        //if (textToAdd == null || textToAdd.trim() == '') return;
+        if (laneTitle == null) return;
         var x = 10, y = 10;
         if (totalLanes > 0){
           //get current pool title
-          var poolTitle = element.pair[0].textContent;
+          var poolTitle = element.associatedXPDL.Name;
 
           //remove old pool & title elements
           element.pair.remove();
@@ -273,7 +314,7 @@ net.BpmnJS.prototype = {
           assert(firstSelected !== undefined && secondSelected !== undefined,
             'Both required elements not selected for a connection.');
           // Both elements now selected; proceed to connect them.
-          me.connectElements(firstSelected, secondSelected);
+          me.connectElements(firstSelected, secondSelected, null);
           // Unbind click listener for all elements.
           me.paper.forEach(function (el) {
             $(el[0]).unbind('click');
@@ -284,7 +325,7 @@ net.BpmnJS.prototype = {
     });
   },
 
-  connectElements: function(element1, element2) {
+  connectElements: function(element1, element2, condition) {
     var connection = this.paper.connection(element1, element2, "#000");
     connection.shapeType = 'Transition';
     this.connections.push(connection);
@@ -293,14 +334,16 @@ net.BpmnJS.prototype = {
 
     //If gateway element, ask for condition(s)
     if (element1.shapeType == 'Route'){
-      var textToAdd = prompt('Condition:');
-
-      //If null, path is always travelled -> parallel
-      if (textToAdd == null || textToAdd.trim() == '') return;
+      //If new element, ask for condition
+      if (condition == null){
+        condition = prompt('Condition:');
+        //If null, path is always travelled -> parallel
+        if (condition == null || condition.trim() == '') return;
+      }
       
       //Need to determine correct x & y 
-      var x = 0, y =0;
-      var text = this.paper.text(x, y, textToAdd);
+      var x = 0, y = 0;
+      var text = this.paper.text(x, y, condition);
       text.shapeType = 'Condition';
 
       // PAIRING SHAPE AND TEXT
@@ -337,25 +380,21 @@ net.BpmnJS.prototype = {
           this.animate({"fill-opacity": .2}, 500);
         },
         move = function(dx, dy) {
-          //Only allow vertical movement for pools & pool lanes
+          //Don't allow movement for pools & pool lanes
           if (this.shapeType == 'Pool' || this.shapeType == 'PoolLane'){
-            this.translate(0, dy - this.ody);
-          }
-          else{
-            this.translate(dx - this.odx, dy - this.ody);
+            return;
           }
           
-          if (this.pair) {
-            //Only allow vertical movement for pools & pool lanes titles
-            if (this.pair.shapeType  == 'RotatedText' ){
-              this.pair.translate(-(dy - this.ody), 0);
-            }
-            else{
-              this.pair.translate(dx - this.odx, dy - this.ody);  
-            }
+          this.translate(dx - this.odx, dy - this.ody);
+          
+          //Don't allow movement for pools & pool lanes titles
+          if (this.pair && this.pair.shapeType  != 'RotatedText' ) {
+            this.pair.translate(dx - this.odx, dy - this.ody);  
             this.pair.odx = this.pair.attr("dx");
             this.pair.ody = this.pair.attr("dy");
           }
+
+          //Move connections as well
           for (var i = connections.length; i--;) {
             this.paper.connection(connections[i]);
           }
@@ -383,28 +422,6 @@ net.BpmnJS.prototype = {
     });
     return element;
   },
-
-  // DEPRECATED... use connectElements() instead.
-  // paintTransition : function(transition, xOrigin, yOrigin, xCoordinates, yCoordinates, borderColor, linkedElements){
-  //   var stringPath = "M"+xOrigin+","+yOrigin;
-
-  //   for(var i in xCoordinates){
-  //     stringPath += "L"+xCoordinates[i]+","+yCoordinates[i];
-  //   }
-  //   var shape = this.paper.path(stringPath);
-  //   // var shape = this.paper.path(stringPath).attr('cursor', 'move');
-
-  //   shape.linkedElements = linkedElements;
-
-  //   shape.associatedXPDL = transition;
-
-  //   shape.shapeType = 'Transition';
-
-  //   $(shape.node).attr('border', borderColor);
-    
-
-  //   return shape;
-  // },
   
   paintActivity : function(xpdlActivity, x, y, height, width, borderColor, fillColor, name){
     var shape;
@@ -414,18 +431,18 @@ net.BpmnJS.prototype = {
       
       switch(activityProperty){
         
-        case 'Event':
+        case 'xpdl:Event':
           shape = this.paintEvent(xpdlActivity,x,y,width, height, name, fillColor, borderColor);
           break;
 
-        case 'Implementation':
+        case 'xpdl:Implementation':
 
-          if(xpdlActivity.Implementation.hasOwnProperty('Task'))
+          // if(xpdlActivity["xpdl:Implementation"].hasOwnProperty('Task'))
             shape = this.paintImplementation(xpdlActivity,x,y,width,height, name, fillColor, borderColor);
           
           break;
 
-        case 'Route':
+        case 'xpdl:Route':
             shape = this.paintRoute(xpdlActivity,x,y,width,height, name, fillColor, borderColor);
           break;
       }
@@ -450,6 +467,7 @@ net.BpmnJS.prototype = {
     return shape;
   },
 
+  // Task
   paintImplementation : function(xpdlImplementation, x, y, width, height, name, fillColor, borderColor){
     // paint shape
     // var shape = this.paper.rect(x, y, width, height, 5).attr('cursor', 'move');
@@ -474,13 +492,15 @@ net.BpmnJS.prototype = {
     //shape.click(function(){alert(name)});
 
     // apply cssClass
-    var cssClass = "";
+    var cssClass = "implementation";
     $(shape.node).attr("class",cssClass);
     $(shape.node).attr("fill",fillColor); 
     $(shape.node).attr("border",borderColor);
 
     return shape;
   },
+
+  // Gateway
   paintRoute : function(xpdlRoute, x, y, width, height, name, fillColor, borderColor){
     var strPath = "M" + String(x+width/2) + " " + String(y+height) + ",L" + String(x+width) + " " + String(y+height/2) +",L" + String(x+width/2) + " " + String(y) + ",L" + String(x) + " " + String(y+height/2) + "Z";
     
@@ -509,6 +529,7 @@ net.BpmnJS.prototype = {
     return shape;
     
   },
+
   paintPool: function(xpdlRoute, x, y, poolTitleText, fillColor, borderColor){
     var lanes = totalLanes;
     if (lanes == 0) {lanes = 1;}
@@ -530,9 +551,9 @@ net.BpmnJS.prototype = {
 
     //Ordering of elements - put pool behind everything
     pool.toBack();
-  
     return pool;
   },
+
   paintLane: function(xpdlRoute, x, y, laneTitleText, poolTitle, fillColor, borderColor){
     //New Lane, increment total number of lanes
     totalLanes += 1;
@@ -547,17 +568,17 @@ net.BpmnJS.prototype = {
     poolLane.associatedXPDL = xpdlRoute;
     poolLane.shapeType = 'PoolLane';
     var laneTitle = this.paper.text(x1+offset, y1+height/2, laneTitleText).attr({transform: "r" + 270});
-    
+
     //Pair lane title with pool lane
     poolLane.pair = laneTitle;
     laneTitle.pair = poolLane;
-    laneTitle.shapeType = 'RotatedText';  
+    laneTitle.shapeType = 'RotatedText';
 
     if (totalLanes > 1){
       //Redraw expanded pool if greater than 1 lane
       this.initPool(x,y, poolTitle);
     }
-    
+
       //Ordering of elements - put pool behind everything
       var front = this.paper.set();
       var mid = this.paper.set();
@@ -575,6 +596,7 @@ net.BpmnJS.prototype = {
       mid.insertBefore(front);
     return poolLane;
   },
+
   getCss: function(bpmnElement, cssClass){
     for(i in this.highlighted){
       if(this.highlighted[i] == bpmnElement){
@@ -589,37 +611,175 @@ net.BpmnJS.prototype = {
   //  Driver/helper functions called by toolbox items in workflow editor.
   //===========================================================================
 
-  // Common to all activities: allow drag/move and contextmenu
+  // Common to all activities: allows drag/move, contextmenu and gives a new ID
   initActivity: function(activity) {
     this.moveElement(activity);
     this.enableContextMenu(activity);
+    activity.associatedXPDL.Id = this.generateNewID();
+    return activity;
   },
 
   initStartEvent: function(x, y) {
-    this.initActivity(this.paintEvent('startevent', x, y, 30, 30, '', 'green', 'black'));
+    var xpdlJson = XpdlJsonGenerator.getNewStartEventJson(this.generateNewID(), x, y),
+        name = xpdlJson.Name,
+        width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
+        height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
+        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
+        borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+
+    
+    // Add xpdl to tree
+    this.activities.push(xpdlJson);
+
+    var shape = this.initActivity(this.paintEvent(
+      xpdlJson, x, y, width, height, name, 'white', borderColor));
+
+    return shape;
   },
 
   initIntermediateEvent: function(x, y) {
-    this.initActivity(this.paintEvent('intermediateevent', x, y, 30, 30, '', 'gray', 'black'));
+    var xpdlJson = XpdlJsonGenerator.getNewIntermediateEventJson(this.generateNewID(), x, y),
+        name = xpdlJson.Name,
+        width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
+        height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
+        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
+        borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+
+
+    // Add xpdl to tree
+    this.activities.push(xpdlJson);
+
+    var shape = this.initActivity(this.paintEvent(
+      xpdlJson, x, y, width, height, name, 'lightyellow', borderColor));
+
+    return shape;
   },
 
   initEndEvent: function(x, y) {
-    this.initActivity(this.paintEvent('endevent', x, y, 30, 30, '', 'red', 'black'));
+    var xpdlJson = XpdlJsonGenerator.getNewEndEventJson(this.generateNewID(), x, y),
+        name = xpdlJson.Name,
+        width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
+        height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
+        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
+        borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+
+
+    // Add xpdl to tree
+    this.activities.push(xpdlJson);
+
+    var shape = this.initActivity(this.paintEvent(
+      xpdlJson, x, y, width, height, name, 'lightblue', borderColor));
+
+    return shape;
   },
 
   initGateway: function(x, y) {
-    this.initActivity(this.paintRoute('gateway', x, y, 40, 40, '', 'yellow', 'black'));
+    var xpdlJson = XpdlJsonGenerator.getNewGatewayJson(this.generateNewID(), x, y),
+        name = xpdlJson.Name,
+        width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
+        height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
+        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
+        borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+
+
+    // Add xpdl to tree
+    this.activities.push(xpdlJson);
+
+    var shape = this.initActivity(this.paintRoute(
+      xpdlJson, x, y, width, height, name, 'white', borderColor));
+
+    return shape;
   },
   
   initTask: function(x, y) {
-    this.initActivity(this.paintImplementation('task', x, y, 90, 60, '', 'blue', 'black'));
+    var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.generateNewID(), x, y),
+        name = xpdlJson.Name,
+        width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
+        height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
+        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
+        borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+
+
+    // Add xpdl to tree
+    this.activities.push(xpdlJson);
+
+    var shape = this.initActivity(this.paintImplementation(
+      xpdlJson, x, y, width, height, name, 'lightyellow', borderColor));
+
+    return shape;
   },
   
   initPool: function(x,y, poolTitle){
-    this.initActivity(this.paintPool('pool', x, y, poolTitle, 'cornflowerblue', 'black'));
+    var xpdlJson = XpdlJsonGenerator.getNewPoolJson(this.generateNewID(), poolTitle, x, y),
+        name = xpdlJson.Name,
+        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
+        borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+
+
+    // Add xpdl to tree
+    this.activities.push(xpdlJson);
+
+    var shape = this.initActivity(this.paintPool(xpdlJson, x, y, name, 'lightblue', borderColor));
+
+    return shape;
   },
 
   initLane: function(x,y, laneTitle, poolTitle){
-    this.initActivity(this.paintLane('lane', x, y, laneTitle, poolTitle, 'purple', 'black'));
-  }
+    // TODO
+    // FIND OUT THE FORMAT OF THE LANE
+    var xpdl = 'xpdlLane';
+    return this.initActivity(this.paintLane(xpdl, x, y, laneTitle, poolTitle, 'whitesmoke', 'black'));
+  },
+
+  // CALLED WHEN THE USER CLICKS THE SAVE BUTTON
+  updateXPDL: function(){
+    this.paper.forEach(function(shape){
+
+      if(shape.hasOwnProperty('shapeType')){
+          if (shape.shapeType != 'Text') {
+            shape.associatedXPDL["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].XCoordinate = shape.getBBox().x;
+            shape.associatedXPDL["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].YCoordinate= shape.getBBox().y;
+          }
+          switch(shape.shapeType){
+          case 'Pool':
+          break;
+          case 'PoolLane':
+          break;
+          case 'Transition':
+          break;
+          case 'Route':
+          break;
+          case 'Condition':
+          break;
+          case 'Event':
+          break;
+          case 'Text':
+          break;
+          case 'RotatedText':
+          break;
+        }
+      }
+      else{
+        console.log('This shape (' + shape + 'doesn\'t have a type');
+      }
+    });
+  },
+
+  generateNewID: function(){
+
+    // GUARANTEES THAT THE ID IS UNIQUE
+    do{
+      var newId = UUID.generate();
+      var alreadyTaken = false;
+      for(var i = 0; i<this.idList.length && !alreadyTaken; i++){
+        if(this.idList[i] === newId)
+          alreadyTaken = true;
+      }
+    } while(alreadyTaken);
+
+    this.idList.push(newId);
+    // DEBUG    
+    // console.log('ID: ' + newId);
+    return newId;
+  },
 };      

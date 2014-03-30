@@ -1,5 +1,5 @@
 <%#= form_for :bpmn do |f| %>
-<%#= f.file_field :bpmn %>
+  <%#= f.file_field :bpmn %>
 <%# end %>
 <%= stylesheet_link_tag 'workflow' %>
 <%= javascript_include_tag 'ext_lib/xml2json.min.js' %>
@@ -9,9 +9,10 @@
 <%= javascript_include_tag 'workflow/xpdl-json-generator.js' %>
 <%= javascript_include_tag 'workflow/graffle.js' %>
 <script type="text/javascript">
-$(function(){
 
-  var alreadyLoaded = false;
+var alreadyLoaded = false;
+
+$(function(){
 
   // Workflow editor instructions.
   $('#help').click(function() {
@@ -19,114 +20,118 @@ $(function(){
     $('#instructions').toggleClass('hide');
   });
 
-  var jsonObject = null;
+  $(document).keypress(function(e) {
+    var checkUndo = (e.which == 117);
+    $("#log").text("Todo: undo action!");
+    });
 
-  // WHEN YOU CLICK THE IMPORT BUTTON, IT LOADS THE JSON FROM THE SERVER
-  $('#MyButton').click(function(){
+  // WHEN YOU CLICK THE 'LOAD DEFAULT WORKFLOW' BUTTON
+  $("#import").click(function() {
 
+    // IF IT'S NOT ALREADY LOADED, MAKES AN AJAX CALL TO THE SERVER REQUESTING THE JSON AND DRAWS THE WORKFLOW WHEN THE DATA IS RETRIEVED
     if(!alreadyLoaded){
-        $.ajax({
-            beforeSend: function(req) {
-              req.setRequestHeader("Accept", "application/json");
-            },
-            url: "/workflow/xpdltojson", 
-            type: "POST",
-            success: function(data) {
-              alreadyLoaded = true;
-              jsonObject = data;
-              $('#toolbox').removeClass('hide');
 
-              // PLOTS THE WORKFLOW
-              var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
-              bpmn.plot(jsonObject);
+      console.log('waiting for server');
+      
+      $.ajax({
+        beforeSend: function(req) {
+          req.setRequestHeader("Accept", "application/json");
+        },
+        url: "/workflow/xpdltojson", 
+        type: "POST",
+        success: function(jsonObject) {
+          console.log('server responded!');
+          console.log(jsonObject);
+          $('#toolbox').removeClass('hide');
+          var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0],false);
+          bpmn.plot();
 
-              // Toolbox listeners
-              $('#toolbox > .tb-item').click(function(){
-                var el = $(this);
-                // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
-                var x = 10, y= 10;
-                 // var shape = null;
-                 switch (el.attr('id')) {
-                  case 'tb-startevent':
+          $('#convert').click(function(){
+              $('#jsonText').removeClass('hide');
+              $('#jsonText').html(JSON.stringify(jsonObject));
+          });
+
+          $("#save").click(function() {
+            bpmn.updateXPDL();
+          });
+
+          // Toolbox listeners
+          $('#toolbox > .tb-item').click(function(){
+            var el = $(this);
+            // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
+             var x = 10, y= 10;
+             // var shape = null;
+              switch (el.attr('id')) {
+                case 'tb-startevent':
                   bpmn.initStartEvent(x, y);
                   break;
-                  case 'tb-intermediateevent':
+                case 'tb-intermediateevent':
                   bpmn.initIntermediateEvent(x, y);
                   break;
-                  case 'tb-endevent':
+                case 'tb-endevent':
                   bpmn.initEndEvent(x, y);
                   break;
-                  case 'tb-gateway':
+                case 'tb-gateway':
                   bpmn.initGateway(x, y);
                   break;
-                  case 'tb-task':
+                case 'tb-task':
                   bpmn.initTask(x, y);
                   break;
-                  case 'tb-clearcanvas':
+                case 'tb-clearcanvas':
                   if (confirm('Are you sure you want to clear the workflow?')) {
                     bpmn.clear();
                   }
                   break;
-                  case 'tb-sequenceflow':
+                case 'tb-sequenceflow':
                   el.toggleClass('active hover');
                   $('#connect-instructions').toggleClass('hide');
                   bpmn.onConnect(function(e) {
                     if (e === 'success') {
-                          // We have successfully connected two elements.
-                          el.removeClass('active hover');
-                          $('#connect-instructions').addClass('hide');
-                        }
-                      });
-                  break;
-                  default:
-                      // Do nothing
-                      break;
+                      // We have successfully connected two elements.
+                      el.removeClass('active hover');
+                      $('#connect-instructions').addClass('hide');
                     }
-              });
-            }
-        });
+                  });
+                  break;
+                case 'tb-participant':
+                  var poolTitle = prompt('Please enter title of pool:');
+                  bpmn.initPool(x,y, poolTitle); 
+                  break;
+                case 'tb-lane': 
+                  alert('Please right-click on a drawn pool and select add lane.');
+                  //bpmn.initLane(x,y+10, laneTitle, 'poolTitle');   
+                  break;
+                default:
+                  // Do nothing
+                  break;
+              }
+
+          });
+          alreadyLoaded = true;
+        }
+      });
     }
-    
-
-
-
-    // Let's use a context menu (on right-click), but happy to reconsider. :)
-    // DELETE FUNCTION 
-    // $(document).keyup(function(e) {
-    //     switch(e.which){
-    //       // DELETE WHEN "DELETE" (46) OR "BACKSPACE" (8) IS PRESSED
-    //       case 46:
-    //       case 8:
-    //         // IT'S NOT REALLY DELETING RIGHT NOW, IT'S JUST HIDING
-    //         bpmn.selectedShape.glowEffect.remove();
-    //         bpmn.selectedShape.hide();
-    //         if(bpmn.selectedShape.hasOwnProperty('pair')){
-    //           bpmn.selectedShape.pair.hide();
-    //         }
-    //         break;
-    //     }       
-    // });
-
   });
 });
 </script>
 
-<div id="file_input">
-  <p>Select a workflow file to import.</p>
-  <div class="well">
-    <%= form_for :workflow, :url => {:action => "import"} do |f| %>
-    <p>
-      <%= f.file_field :workflow %>
-    </p>
-    <br />
-    <%= f.submit %>
-    <% end %>
-  </div>
-</div>
-<input type="button" value="Import" id="MyButton"></input>
-<br>
+<!-- IMPORT BUTTONS -->
+<form>
+  <table>
+    <tr>
+      <td> <input type="file" name="XPDL"> </td>
+      <td> <input type="submit"> </td>
+      <td> <input type="button" value="Load Default Workflow" id="import"></input> </td>
+    </tr> 
+  </table>
+</form>
+
+<br/>
+
 <div id="workflow-info" class="row">
-  <div class="col-md-11"><h3 id="workflow-name">My Workflow</h3><div id="log-form"></div><div id="log"></div></div>
+  <div class="col-md-11"><h3 id="workflow-name">My Workflow</h3>
+    <div id="log"></div>
+  </div>
   <div class="col-md-1"><button type="button" class="btn btn-default glyphicon glyphicon-question-sign" id="help"></button></div>
 </div>
 <div id="instructions" class="panel panel-info hide">
@@ -146,28 +151,28 @@ $(function(){
   </div>
 </div>
 <div class="btn-group hide" id="toolbox">
-  <!-- The buttons with dark borders have been currently implemented (have an associated action). -->
-  <button type="button" class="btn btn-default tb-item" id="tb-startevent" style="border:2px solid #333"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-intermediateevent" style="border:2px solid #333"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-endevent" style="border:2px solid #333"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-task" style="border:2px solid #333"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-transaction"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-subprocess"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-callactivity"></button>
-  <!-- <button type="button" class="btn btn-default tb-item" id="tb-implementation"></button> -->
-  <!-- <button type="button" class="btn btn-default tb-item" id="tb-edge"></button> -->
-  <button type="button" class="btn btn-default tb-item" id="tb-gateway" style="border:2px solid #333"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-datastore"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-participant"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-lane"></button>
-  <!-- <button type="button" class="btn btn-default tb-item" id="tb-boundaryevent"></button> -->
-  <!-- <button type="button" class="btn btn-default tb-item" id="tb-receivetask"></button> -->
-  <!-- <button type="button" class="btn btn-default tb-item" id="tb-sendtask"></button> -->
-  <button type="button" class="btn btn-default tb-item" id="tb-sequenceflow" style="border:2px solid #333"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-messageflow"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-association"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-annotation"></button>
-  <button type="button" class="btn btn-default tb-item" id="tb-clearcanvas" style="border:2px solid #333"></button>
+    <!-- The buttons with dark borders have been currently implemented (have an associated action). -->
+    <button type="button" class="btn btn-default tb-item" id="tb-startevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-intermediateevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-endevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-task" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-transaction"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-subprocess"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-callactivity"></button>
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-implementation"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-edge"></button> -->
+    <button type="button" class="btn btn-default tb-item" id="tb-gateway" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-datastore"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-participant" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-lane" style="border:2px solid #333"></button>
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-boundaryevent"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-receivetask"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-sendtask"></button> -->
+    <button type="button" class="btn btn-default tb-item" id="tb-sequenceflow" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-messageflow"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-association"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-annotation"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-clearcanvas" style="border:2px solid #333"></button>
 </div>
 <div id="canvas"></div>
 <div id="editor-contextmenu" class="dropdown clearfix">
@@ -175,6 +180,8 @@ $(function(){
     <li><a id="add-annotation">Add Annotation...</a></li>
     <li class="divider"></li>
     <li><a id="remove-element">Remove</a></li>
+    <li class="divider"></li>
+    <li><a id="add-pool">Add Pool Lane</a></li>
   </ul>
 </div>
 <div id="bottom-toolbar">
@@ -190,3 +197,12 @@ $(function(){
     </ul>
   </div>
 </div>
+
+<br/>
+<br/>
+<br/>
+<textarea class='hide' id='jsonText'> test</textarea>
+<br/>
+<br/>
+<br/>
+<br/>
