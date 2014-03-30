@@ -111,9 +111,15 @@ net.BpmnJS.prototype = {
         // Reference the activities we're transitioning to/from.
         var element1 = me.getById(transition.From);
         var element2 = me.getById(transition.To);
+        if (transition.hasOwnProperty('xpdl:Condition')){
+          var condition = transition["xpdl:Condition"];
+        }
+        else {
+          var condition = "";
+        }
 
         // Create link association between the two activities.
-        me.connectElements(element1, element2);
+        me.connectElements(element1, element2, condition);
       });
     }
 
@@ -279,7 +285,7 @@ net.BpmnJS.prototype = {
           assert(firstSelected !== undefined && secondSelected !== undefined,
             'Both required elements not selected for a connection.');
           // Both elements now selected; proceed to connect them.
-          me.connectElements(firstSelected, secondSelected);
+          me.connectElements(firstSelected, secondSelected, null);
           // Unbind click listener for all elements.
           me.paper.forEach(function (el) {
             $(el[0]).unbind('click');
@@ -290,7 +296,7 @@ net.BpmnJS.prototype = {
     });
   },
 
-  connectElements: function(element1, element2) {
+  connectElements: function(element1, element2, condition) {
     var connection = this.paper.connection(element1, element2, "#000");
     connection.shapeType = 'Transition';
     this.connections.push(connection);
@@ -299,14 +305,16 @@ net.BpmnJS.prototype = {
 
     //If gateway element, ask for condition(s)
     if (element1.shapeType == 'Route'){
-      var textToAdd = prompt('Condition:');
-
-      //If null, path is always travelled -> parallel
-      if (textToAdd == null || textToAdd.trim() == '') return;
+      //If new element, ask for condition
+      if (condition == null){
+        condition = prompt('Condition:');
+        //If null, path is always travelled -> parallel
+        if (condition == null || condition.trim() == '') return;
+      }
       
       //Need to determine correct x & y 
-      var x = 0, y =0;
-      var text = this.paper.text(x, y, textToAdd);
+      var x = 0, y = 0;
+      var text = this.paper.text(x, y, condition);
       text.shapeType = 'Condition';
 
       // PAIRING SHAPE AND TEXT
@@ -516,7 +524,6 @@ net.BpmnJS.prototype = {
 
     //Ordering of elements - put pool behind everything
     pool.toBack();
-    console.log(pool.getBBox());
     return pool;
   },
 
