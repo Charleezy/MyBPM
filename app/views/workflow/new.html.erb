@@ -32,6 +32,29 @@ $(function(){
     $("#log").text("Todo: undo action!");
     });
 
+
+  // Make a call to the server to create a new (blank) workflow.
+  // Save the id for future save (update) calls.
+  $.ajax({
+    beforeSend: function(req) {
+      req.setRequestHeader("Accept", "application/json");
+    },
+    url: "/workflow/create", 
+    type: "POST",
+    data: {
+      workflow: {
+        name: "test", // TODO read from user
+        xpdl: null
+      }
+    },
+    success: function(jsonObject) {
+      console.log('success');
+      console.log(jsonObject);
+      // TODO grab the workfow id of our newly-created workflow; should be 
+      // within the response object.
+    }
+  });
+
   // WHEN YOU CLICK THE 'LOAD DEFAULT WORKFLOW' BUTTON
   $("#import").click(function() {
 
@@ -61,16 +84,19 @@ $(function(){
           // FIXME you shouldn't have to import in order to be allowed to save the workflow...
           // what about workflows started from scratch without importing?
           $("#save").click(function() {
-            console.log('saving the workflow...');
+            console.log('saving (updating) the workflow...');
             var xpdlJson = workflow.updateXPDL();
+
+            // This assume a workflow has already been created and assigned an id.
             $.ajax({
               beforeSend: function(req) {
                 req.setRequestHeader("Accept", "application/json");
               },
-              url: "/workflow/create", 
+              url: "/workflow/update", 
               type: "POST",
               data: {
                 workflow: {
+                  id: workflowId,
                   name: "test", // TODO read from user
                   xpdl: xpdlJson
                 }

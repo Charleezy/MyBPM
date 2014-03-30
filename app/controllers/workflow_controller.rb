@@ -18,7 +18,8 @@ class WorkflowController < ApplicationController
 
   def create
     if( current_user.workflows.create( workflow_params) )
-      redirect_to :action => 'index', :notice => 'Workflow was created.'
+      # redirect_to :action => 'index', :notice => 'Workflow was created.'
+      render :new, :notice => 'successfuly to create workflow.'
     else 
       render :new, :notice => 'failed to create workflow.'
     end
