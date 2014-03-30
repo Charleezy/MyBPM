@@ -7,7 +7,7 @@ var XpdlJsonGenerator = function() {}
 // XpdlJsonGenerator.getNewWorkflowJson('My Simple Workflow')
 XpdlJsonGenerator.getNewWorkflowJson = function(workflowName) {
   var now = new Date();
-  return JSON.stringify({
+  return {
     "xpdl:Package": {
       "xpdl:PackageHeader": {
         "xpdl:XPDLVersion": "2.2",
@@ -34,7 +34,7 @@ XpdlJsonGenerator.getNewWorkflowJson = function(workflowName) {
       Name: workflowName,
       "xpdl:xmlns": "http://www.wfmc.org/2009/XPDL2.2"
     }
-  });
+  };
 }
 
 //===========================================================================
@@ -43,87 +43,87 @@ XpdlJsonGenerator.getNewWorkflowJson = function(workflowName) {
 
 // TODO consider using UUID.generate() instead of passing in id
 XpdlJsonGenerator.getNewStartEventJson = function(id, x, y) {
-  return JSON.stringify({
-    "xpdl:Description": null,
-    "xpdl:Event": {
-      "xpdl:StartEvent": {
-        "xpdl:Trigger": "None"
-      },
-    },
-    "xpdl:Documentation": null,
-    "xpdl:NodeGraphicsInfos": {
-      "xpdl:NodeGraphicsInfo": {
-        "xpdl:Coordinates": {
-          XCoordinate: x,
-          YCoordinate: y
-        },
-        "xpdl:ToolId": "ECE450_Workflow_Modeler",
-        Height: "30",
-        Width: "30",
-        BorderColor: "black",
-        FillColor: "green"
-      }
-    },
-    "xpdl:ExtendedAttributes": null,
-    Id: id,
-    Name: "StartEvent"
-  });
+  return  {
+            "xpdl:Description": null,
+            "xpdl:Event": {
+              "xpdl:StartEvent": {
+                "xpdl:Trigger": "None"
+              },
+            },
+            "xpdl:Documentation": null,
+            "xpdl:NodeGraphicsInfos": {
+              "xpdl:NodeGraphicsInfo": {
+                "xpdl:Coordinates": {
+                  XCoordinate: x,
+                  YCoordinate: y
+                },
+                "xpdl:ToolId": "ECE450_Workflow_Modeler",
+                Height: "30",
+                Width: "30",
+                BorderColor: "black",
+                FillColor: "green"
+              }
+            },
+            "xpdl:ExtendedAttributes": null,
+            Id: id,
+            Name: "StartEvent"
+          };
 }
 
 XpdlJsonGenerator.getNewIntermediateEventJson = function(id, x, y) {
-  return JSON.stringify({
-    "xpdl:Description": null,
-    "xpdl:Event": {
-      "xpdl:IntermediateEvent": {
-        "xpdl:Trigger": "None"
-      },
-    },
-    "xpdl:Documentation": null,
-    "xpdl:NodeGraphicsInfos": {
-      "xpdl:NodeGraphicsInfo": {
-        "xpdl:Coordinates": {
-          XCoordinate: x,
-          YCoordinate: y
-        },
-        "xpdl:ToolId": "ECE450_Workflow_Modeler",
-        Height: "30",
-        Width: "30",
-        BorderColor: "black",
-        FillColor: "yellow"
-      }
-    },
-    "xpdl:ExtendedAttributes": null,
-    Id: id,
-    Name: "IntermediateEvent"
-  });
+  return  {
+            "xpdl:Description": null,
+            "xpdl:Event": {
+              "xpdl:IntermediateEvent": {
+                "xpdl:Trigger": "None"
+              },
+            },
+            "xpdl:Documentation": null,
+            "xpdl:NodeGraphicsInfos": {
+              "xpdl:NodeGraphicsInfo": {
+                "xpdl:Coordinates": {
+                  XCoordinate: x,
+                  YCoordinate: y
+                },
+                "xpdl:ToolId": "ECE450_Workflow_Modeler",
+                Height: "30",
+                Width: "30",
+                BorderColor: "black",
+                FillColor: "yellow"
+              }
+            },
+            "xpdl:ExtendedAttributes": null,
+            Id: id,
+            Name: "IntermediateEvent"
+          };
 }
 
 XpdlJsonGenerator.getNewEndEventJson = function(id, x, y) {
-  return JSON.stringify({
-    "xpdl:Description": null,
-    "xpdl:Event": {
-      "xpdl:EndEvent": {
-        "xpdl:Trigger": "None"
-      },
-    },
-    "xpdl:Documentation": null,
-    "xpdl:NodeGraphicsInfos": {
-      "xpdl:NodeGraphicsInfo": {
-        "xpdl:Coordinates": {
-          XCoordinate: x,
-          YCoordinate: y
-        },
-        "xpdl:ToolId": "ECE450_Workflow_Modeler",
-        Height: "30",
-        Width: "30",
-        BorderColor: "black",
-        FillColor: "red"
-      }
-    },
-    "xpdl:ExtendedAttributes": null,
-    Id: id,
-    Name: "EndEvent"
-  });
+  return  {
+            "xpdl:Description": null,
+            "xpdl:Event": {
+              "xpdl:EndEvent": {
+                "xpdl:Trigger": "None"
+              },
+            },
+            "xpdl:Documentation": null,
+            "xpdl:NodeGraphicsInfos": {
+              "xpdl:NodeGraphicsInfo": {
+                "xpdl:Coordinates": {
+                  XCoordinate: x,
+                  YCoordinate: y
+                },
+                "xpdl:ToolId": "ECE450_Workflow_Modeler",
+                Height: "30",
+                Width: "30",
+                BorderColor: "black",
+                FillColor: "red"
+              }
+            },
+            "xpdl:ExtendedAttributes": null,
+            Id: id,
+            Name: "EndEvent"
+          };
 }
 
 //===========================================================================
@@ -133,27 +133,27 @@ XpdlJsonGenerator.getNewEndEventJson = function(id, x, y) {
 XpdlJsonGenerator.getNewGatewayJson = function(id, x, y) {
   // TODO seems like this is missing some properties...
   // TODO what is route?
-  return JSON.stringify({
-    "xpdl:Description": null,
-    "xpdl:Route": null,
-    "xpdl:Documentation": null,
-    "xpdl:NodeGraphicsInfos": {
-      "xpdl:NodeGraphicsInfo": {
-        "xpdl:Coordinates": {
-          XCoordinate: x,
-          YCoordinate: y
-        },
-        "xpdl:ToolId": "ECE450_Workflow_Modeler",
-        Height: "40",
-        Width: "40",
-        BorderColor: "black",
-        FillColor: "yellow"
-      }
-    },
-    "xpdl:ExtendedAttributes": null,
-    Id: id,
-    Name: "Gateway"
-  });
+  return  {
+            "xpdl:Description": null,
+            "xpdl:Route": null,
+            "xpdl:Documentation": null,
+            "xpdl:NodeGraphicsInfos": {
+              "xpdl:NodeGraphicsInfo": {
+                "xpdl:Coordinates": {
+                  XCoordinate: x,
+                  YCoordinate: y
+                },
+                "xpdl:ToolId": "ECE450_Workflow_Modeler",
+                Height: "40",
+                Width: "40",
+                BorderColor: "black",
+                FillColor: "yellow"
+              }
+            },
+            "xpdl:ExtendedAttributes": null,
+            Id: id,
+            Name: "Gateway"
+          };
 }
 
 //===========================================================================
@@ -162,33 +162,33 @@ XpdlJsonGenerator.getNewGatewayJson = function(id, x, y) {
 
 XpdlJsonGenerator.getNewTaskJson = function(id, x, y) {
   // TODO what about value of Task?
-  return JSON.stringify({
-    "xpdl:Description": null,
-    "xpdl:Implementation": {
-      "xpdl:Task": null
-    },
-    "xpdl:Performers": null,
-    "xpdl:Documentation": null,
-    "xpdl:Loop": {
-      "xpdl:LoopType": "None"
-    },
-    "xpdl:NodeGraphicsInfos": {
-      "xpdl:NodeGraphicsInfo": {
-        "xpdl:Coordinates": {
-          XCoordinate: x,
-          YCoordinate: y
-        },
-        "xpdl:ToolId": "ECE450_Workflow_Modeler",
-        Height: "60",
-        Width: "90",
-        BorderColor: "black",
-        FillColor: "blue"
-      }
-    },
-    "xpdl:ExtendedAttributes": null,
-    Id: id,
-    Name: "Task"
-  });
+  return  {
+            "xpdl:Description": null,
+            "xpdl:Implementation": {
+              "xpdl:Task": null
+            },
+            "xpdl:Performers": null,
+            "xpdl:Documentation": null,
+            "xpdl:Loop": {
+              "xpdl:LoopType": "None"
+            },
+            "xpdl:NodeGraphicsInfos": {
+              "xpdl:NodeGraphicsInfo": {
+                "xpdl:Coordinates": {
+                  XCoordinate: x,
+                  YCoordinate: y
+                },
+                "xpdl:ToolId": "ECE450_Workflow_Modeler",
+                Height: "60",
+                Width: "90",
+                BorderColor: "black",
+                FillColor: "blue"
+              }
+            },
+            "xpdl:ExtendedAttributes": null,
+            Id: id,
+            Name: "Task"
+          };
 }
 
 //===========================================================================
@@ -197,25 +197,25 @@ XpdlJsonGenerator.getNewTaskJson = function(id, x, y) {
 
 XpdlJsonGenerator.getNewPoolJson = function(id, name, x, y) {
   // TODO what about values of Lanes & Process?
-  return JSON.stringify({
-    "xpdl:Lanes": null,
-    "xpdl:NodeGraphicsInfos": {
-      "xpdl:NodeGraphicsInfo": {
-        "xpdl:Coordinates": {
-          XCoordinate: x,
-          YCoordinate: y
-        },
-        "xpdl:ToolId": "BizAgi_Process_Modeler",
-        Height: "0",
-        Width: "0",
-        BorderColor: "black",
-        FillColor: "cornflowerblue"
-      }
-    },
-    Id: id,
-    Name: name,
-    "xpdl:Process": null,
-    "xpdl:BoundaryVisible": "false"
-  });
+  return  {
+            "xpdl:Lanes": null,
+            "xpdl:NodeGraphicsInfos": {
+              "xpdl:NodeGraphicsInfo": {
+                "xpdl:Coordinates": {
+                  XCoordinate: x,
+                  YCoordinate: y
+                },
+                "xpdl:ToolId": "BizAgi_Process_Modeler",
+                Height: "0",
+                Width: "0",
+                BorderColor: "black",
+                FillColor: "cornflowerblue"
+              }
+            },
+            Id: id,
+            Name: name,
+            "xpdl:Process": null,
+            "xpdl:BoundaryVisible": "false"
+          };
 }
 

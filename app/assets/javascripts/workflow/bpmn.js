@@ -34,7 +34,12 @@ function assert(condition, message) {
 // Constructor
 net.BpmnJS = function(xpdlJson, canvas, isStatic){
 
-  this.xpdlJson = xpdlJson;
+  // IF THE JSON OBJECT IS NOT CREATED AT THE BEGINNING
+  if(xpdlJson === null)
+    this.xpdlJson = XpdlJsonGenerator.getNewWorkflowJson();
+  else
+    this.xpdlJson = xpdlJson;
+
   this.isStatic = isStatic;
 
   // CREATING RAPHAEL CANVAS
@@ -592,7 +597,7 @@ net.BpmnJS.prototype = {
   },
 
   initStartEvent: function(x, y) {
-    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewStartEventJson(this.generateNewID(), x, y)),
+    var xpdlJson = XpdlJsonGenerator.getNewStartEventJson(this.generateNewID(), x, y),
         name = xpdlJson.Name,
         width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
         height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
@@ -610,7 +615,7 @@ net.BpmnJS.prototype = {
   },
 
   initIntermediateEvent: function(x, y) {
-    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewIntermediateEventJson(this.generateNewID(), x, y)),
+    var xpdlJson = XpdlJsonGenerator.getNewIntermediateEventJson(this.generateNewID(), x, y),
         name = xpdlJson.Name,
         width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
         height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
@@ -628,7 +633,7 @@ net.BpmnJS.prototype = {
   },
 
   initEndEvent: function(x, y) {
-    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewEndEventJson(this.generateNewID(), x, y)),
+    var xpdlJson = XpdlJsonGenerator.getNewEndEventJson(this.generateNewID(), x, y),
         name = xpdlJson.Name,
         width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
         height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
@@ -646,7 +651,7 @@ net.BpmnJS.prototype = {
   },
 
   initGateway: function(x, y) {
-    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewGatewayJson(this.generateNewID(), x, y)),
+    var xpdlJson = XpdlJsonGenerator.getNewGatewayJson(this.generateNewID(), x, y),
         name = xpdlJson.Name,
         width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
         height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
@@ -664,7 +669,7 @@ net.BpmnJS.prototype = {
   },
   
   initTask: function(x, y) {
-    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewTaskJson(this.generateNewID(), x, y)),
+    var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.generateNewID(), x, y),
         name = xpdlJson.Name,
         width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
         height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
@@ -682,7 +687,7 @@ net.BpmnJS.prototype = {
   },
   
   initPool: function(x,y, poolTitle){
-    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewPoolJson(this.generateNewID(), poolTitle, x, y)),
+    var xpdlJson = XpdlJsonGenerator.getNewPoolJson(this.generateNewID(), poolTitle, x, y),
         name = xpdlJson.Name,
         //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
