@@ -208,11 +208,12 @@ net.BpmnJS.prototype = {
           // Remove element paired to this item (should be text).
           element.pair.remove();
         }
-        var xpdl = element.associatedXPDL,
-            x = parseInt(xpdl["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].XCoordinate),
-            y = parseInt(xpdl["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].YCoordinate),
-            height = parseInt(xpdl["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
-            width = parseInt(xpdl["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width);
+
+        element.associatedXPDL.Name = textToAdd;
+        var x = element.getBBox().x,
+            y = element.getBBox().y,
+            height = element.getBBox().height,
+            width = element.getBBox().width;
 
         if (element.shapeType == 'Pool' || element.shapeType == 'PoolLane'){
           var offset = 10; 
@@ -222,10 +223,10 @@ net.BpmnJS.prototype = {
         }
         else {
           var text = me.paper.text(x+width/2, y+height/2, textToAdd);
+          text.shapeType = 'Text';
         }
 
         text.toFront();
-        text.shapeType = 'Text';
 
         // PAIRING SHAPE AND TEXT
         element.pair = text;
@@ -245,7 +246,7 @@ net.BpmnJS.prototype = {
         var x = 10, y = 10;
         if (totalLanes > 0){
           //get current pool title
-          var poolTitle = element.pair[0].textContent;
+          var poolTitle = element.associatedXPDL.Name;
 
           //remove old pool & title elements
           element.pair.remove();
@@ -683,7 +684,7 @@ net.BpmnJS.prototype = {
   },
   
   initPool: function(x,y, poolTitle){
-    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewTaskJson(this.generateNewID(), poolTitle, x, y)),
+    var xpdlJson = JSON.parse(XpdlJsonGenerator.getNewPoolJson(this.generateNewID(), poolTitle, x, y)),
         name = xpdlJson.Name,
         //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
