@@ -352,23 +352,21 @@ net.BpmnJS.prototype = {
           this.animate({"fill-opacity": .2}, 500);
         },
         move = function(dx, dy) {
+          //Don't allow movement for pools & pool lanes
           if (this.shapeType == 'Pool' || this.shapeType == 'PoolLane'){
-            //Don't allow movement for pools & pool lanes
-          }
-          else{
-            this.translate(dx - this.odx, dy - this.ody);
+            return;
           }
           
-          if (this.pair) {
-            if (this.pair.shapeType  == 'RotatedText' ){
-              //Don't allow movement for pools & pool lanes titles
-            }
-            else{
-              this.pair.translate(dx - this.odx, dy - this.ody);  
-            }
+          this.translate(dx - this.odx, dy - this.ody);
+          
+          //Don't allow movement for pools & pool lanes titles
+          if (this.pair && this.pair.shapeType  != 'RotatedText' ) {
+            this.pair.translate(dx - this.odx, dy - this.ody);  
             this.pair.odx = this.pair.attr("dx");
             this.pair.ody = this.pair.attr("dy");
           }
+
+          //Move connections as well
           for (var i = connections.length; i--;) {
             this.paper.connection(connections[i]);
           }
