@@ -518,7 +518,7 @@ net.BpmnJS.prototype = {
 
     //Ordering of elements - put pool behind everything
     pool.toBack();
-  
+    console.log(pool.getBBox());
     return pool;
   },
 
@@ -704,6 +704,10 @@ net.BpmnJS.prototype = {
     this.paper.forEach(function(shape){
 
       if(shape.hasOwnProperty('shapeType')){
+          if (shape.shapeType != 'Text') {
+            shape.associatedXPDL["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].XCoordinate = shape.getBBox().x;
+            shape.associatedXPDL["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].YCoordinate= shape.getBBox().y;
+          }
           switch(shape.shapeType){
           case 'Pool':
           break;

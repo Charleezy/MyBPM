@@ -51,6 +51,10 @@ $(function(){
               $('#jsonText').html(JSON.stringify(jsonObject));
           });
 
+          $("#save").click(function() {
+            bpmn.updateXPDL();
+          });
+
           // Toolbox listeners
           $('#toolbox > .tb-item').click(function(){
             var el = $(this);
