@@ -34,6 +34,9 @@ $(function(){
 
   // WHEN YOU CLICK THE 'LOAD DEFAULT WORKFLOW' BUTTON
   $("#import").click(function() {
+      loadDefaultView();
+      });
+  function loadDefaultView() {
 
     // IF IT'S NOT ALREADY LOADED, MAKES AN AJAX CALL TO THE SERVER REQUESTING THE JSON AND DRAWS THE WORKFLOW WHEN THE DATA IS RETRIEVED
     if(!alreadyLoaded){
@@ -138,7 +141,7 @@ $(function(){
         }
       });
     }
-  });
+  };
 });
 </script>
 
