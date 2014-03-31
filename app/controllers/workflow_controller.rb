@@ -15,7 +15,6 @@ class WorkflowController < ApplicationController
   end
 
   def new
-    puts "here"
     @workflow = Workflow.new
   end
 

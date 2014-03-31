@@ -12,11 +12,18 @@
 
 
 $(function(){
+  // Get the json for this workflow.
+  var jsonObject = <%= @workflow.json %>;
 
-  var alreadyLoaded = false;
-  var workflow = { id: null, name: null, data: null };
+  var workflow = { 
+    id: '<%= @workflow.id %>', 
+    name: '<%= @workflow.name %>', 
+    data: null 
+  };
+  workflow.data = new net.BpmnJS(jsonObject,$('#canvas')[0],false);
+  workflow.data.plot();
 
-
+  
   // TODO
   // MAKE THE CANVAS RESIZABLE
   // http://jqueryui.com/resizable/
@@ -36,7 +43,7 @@ $(function(){
       $('#jsonText').removeClass('hide');
       $('#jsonText').html(JSON.stringify(workflow.jsonObject));
   });
-  
+
   $("#save").click(function() {
     console.log('saving (updating) the workflow...');
     var xpdlJson = workflow.data.updateXPDL();
@@ -180,6 +187,8 @@ $(function(){
     </ul>
   </div>
 </div>
+
+<div></div>
 
 <br/>
 <br/>

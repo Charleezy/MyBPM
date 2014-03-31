@@ -16,8 +16,7 @@ $(function(){
 
   $('#workflowname_err').hide();
   $('#importFile').hide();
-
-  var alreadyLoaded = false;
+  
   var workflow = { id: null, name: null, data: null };
 
   $('#create_workflow').on('hidden.bs.modal', function () {
@@ -136,10 +135,10 @@ $(function(){
       $('#jsonText').removeClass('hide');
       $('#jsonText').html(JSON.stringify(workflow.jsonObject));
   });
-  
+
   $("#save").click(function() {
     console.log('saving (updating) the workflow...');
-    var xpdlJson = workflow.data.updateXPDL();
+    workflow.data = workflow.data.updateXPDL();
 
     // This assume a workflow has already been created and assigned an id.
     $.ajax({
@@ -152,7 +151,7 @@ $(function(){
         workflow: {
           id: workflow.id,
           name: workflow.name,
-          xpdl: xpdlJson
+          json: workflow.data
         }
       },
       success: function(response) {
