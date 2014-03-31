@@ -1,4 +1,52 @@
+<script type="text/javascript">
+
+  $(function(){
+    $('#workflowname_err').hide();
+
+    $('#create_workflow').on('hidden.bs.modal', function () {
+      $('#workflowName').parent('div').removeClass('has-error');
+      $('#workflowname_err').hide();
+      $('#workflowName').val("");
+    });
+      
+    $('#workflowName').focus(function () {
+      if ($('#workflowName').parent('div').hasClass('has-error')) {
+        $('#workflowName').parent('div').removeClass('has-error');
+        $('#workflowname_err').hide();
+      }
+    });
+
+    $("#save").click(function() {
+      var workflowName = $('#workflowName').val();
+      // var workflow_id = $('#workflow').find(":selected").val();
+      if (workflowName == "" || workflowName == null) {
+        $('#workflowName').parent('div').addClass('has-error');
+        $('#workflowname_err').show();
+      }
+      // else
+      // {
+      //   $.ajax({
+      //     beforeSend: function(req) {
+      //       req.setRequestHeader("Accept", "application/json");
+      //     },
+      //     url: "simulation", 
+      //     type: "POST",
+      //     data: {mockdata : { "name" : sim_name, "workflow_id" : workflow_id}},
+      //     success: function(sim_id) {
+      //       /*console.log("Simulation " + sim_id + " successfully created.");*/
+      //       location.reload();
+      //     }
+      //   });
+      // }
+    });
+  });
+</script>
+
 <h1>My Workflows</h1>
+
+<button type="button" class="btn btn-primary" id="create" data-toggle="modal" data-target="#create_workflow">
+  Create Workflow
+</button>
 
 <table class="table table-striped table-hover">
   <thead>
@@ -32,3 +80,44 @@
     <% end %>
   </tbody>
 </table>
+
+<!-- Create Workflow Modal -->
+<div class="modal fade" id="create_workflow" role="dialog" aria-labelledby="createWorkflowModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="createWorkflowModalLabel">Create Workflow</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="form_container">
+                    <div class="form-group">
+                        <div class="formLabel">
+                            <label for="workflowName">Name</label>
+                        </div>
+                        <div class="formField">
+                            <input id="workflowName" name="workflowName" type="text" class="form-control" />
+                            <p id="workflowname_err" class="validation_msg control-label">Name is a mandatory field.</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="formLabel">
+                            <label for="workflow">Template</label>
+                        </div>
+                        <select class="form-control">
+                          <option>Blank</option>
+                          <option>Default</option>
+                          <option>Import...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save" type="button" class="btn btn-primary">Create</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+
+        </div>
+    </div>
+</div>
