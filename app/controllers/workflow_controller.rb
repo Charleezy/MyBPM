@@ -19,9 +19,10 @@ class WorkflowController < ApplicationController
   end
 
   def create
-    params[:workflow][:xpdl] = params[:workflow][:json].to_xml
-    if( current_user.workflows.create( workflow_params) )
-      render :nothing => true, :status => :created
+    params[:workflow][:xpdl] = params[:workflow][:json].to_xml if !params[:workflow][:json].blank?
+    workflow = current_user.workflows.create( workflow_params)
+    if( workflow )
+      render :text => workflow.id, :status => :created
     else 
       render :nothing => true, :status => :bad_request
     end
@@ -33,7 +34,7 @@ class WorkflowController < ApplicationController
   end
 
   def update
-    params[:workflow][:xpdl] = params[:workflow][:json].to_xml
+    params[:workflow][:xpdl] = params[:workflow][:json].to_xml if !params[:workflow][:json].blank?
     @workflow = Workflow.find(params[:id])
     render :nothing => true, :status => :bad_request if @workflow.nil?
 
