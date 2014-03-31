@@ -10,19 +10,19 @@
 <%= javascript_include_tag 'workflow/graffle.js' %>
 <script type="text/javascript">
 
-
+// EDIT
 $(function(){
   // Get the json for this workflow.
-  var jsonObject = <%= @workflow.json %>;
+  var workflow_json = <%= @workflow.json.to_json.html_safe %>;
 
   var workflow = { 
     id: '<%= @workflow.id %>', 
     name: '<%= @workflow.name %>', 
     data: null 
   };
-  workflow.data = new net.BpmnJS(jsonObject,$('#canvas')[0],false);
+  workflow.data = new net.BpmnJS(workflow_json,$('#canvas')[0],false);
   workflow.data.plot();
-
+  $('#toolbox').removeClass('hide');
   
   // TODO
   // MAKE THE CANVAS RESIZABLE

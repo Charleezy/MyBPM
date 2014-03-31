@@ -23,7 +23,7 @@
           <td><%= w[:workflow].name %></td>
           <td><%= w[:user] %></td>
           <td><%= w[:workflow].created_at %></td>
-          <td><a href="<%= workflow_path(w[:workflow].id) %>">View</a></td>
+          <td><a href="<%= workflow_path(w[:workflow].id) %>">Edit</a></td>
           <td>
             <%= link_to 'Delete', w[:workflow], :method => :delete, :confirm => "Are you sure you want to delete #{w[:workflow].name}?" %>
           </td>
