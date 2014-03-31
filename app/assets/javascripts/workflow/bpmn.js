@@ -568,6 +568,7 @@ net.BpmnJS.prototype = {
     $(shape.node).attr("fill",fillColor); 
     $(shape.node).attr("border",borderColor);
     $(shape.node).attr("class",'startEvent');
+    $(shape.node).attr("id",xpdlEvent.Id);
     
     return shape;
   },
@@ -585,6 +586,7 @@ net.BpmnJS.prototype = {
     $(shape.node).attr("fill",fillColor); 
     $(shape.node).attr("border",borderColor);
     $(shape.node).attr("class",'intermediateEvent');
+    $(shape.node).attr("id",xpdlEvent.Id);
     
     return shape;
   },
@@ -602,6 +604,7 @@ net.BpmnJS.prototype = {
     $(shape.node).attr("fill",fillColor); 
     $(shape.node).attr("border",borderColor);
     $(shape.node).attr("class",'endEvent');
+    $(shape.node).attr("id",xpdlEvent.Id);
     
     return shape;
   },
@@ -635,6 +638,7 @@ net.BpmnJS.prototype = {
     $(shape.node).attr("class",cssClass);
     $(shape.node).attr("fill",fillColor); 
     $(shape.node).attr("border",borderColor);
+    $(shape.node).attr("id",xpdlImplementation.Id);
 
     return shape;
   },
@@ -664,6 +668,7 @@ net.BpmnJS.prototype = {
     $(shape.node).attr("class",cssClass);
     $(shape.node).attr("fill",fillColor); 
     $(shape.node).attr("border",borderColor);
+    $(shape.node).attr("id",xpdlRoute.Id);
 
     return shape;
     
@@ -681,6 +686,7 @@ net.BpmnJS.prototype = {
     var pool = this.paper.rect(x,y1,width,height).attr({fill: fillColor, border: borderColor});
     pool.associatedXPDL = xpdlRoute;
     pool.shapeType = 'Pool';
+    $(pool.node).attr("id",xpdlRoute.Id);
     var poolTitle = this.paper.text(x+offset, y1+height/2, poolTitleText).attr({transform: "r" + 270});
     
     //Pair pool title with pool 
@@ -710,6 +716,7 @@ net.BpmnJS.prototype = {
     var poolLane = this.paper.rect(x1,y1,width,height).attr({fill: fillColor, border: borderColor});
     poolLane.associatedXPDL = xpdlRoute;
     poolLane.shapeType = 'Lane';
+    $(poolLane.node).attr("id",xpdlRoute.Id);
     var laneTitle = this.paper.text(x1+offset, y1+height/2, laneTitleText).attr({transform: "r" + 270});
 
     //Pair lane title with pool lane
