@@ -15,7 +15,12 @@ $(function(){
 
   var alreadyLoaded = false;
 
-  var workflow = null;
+  var workflow = {
+    name: "",
+    id: null,
+    data: null
+  };
+  workflow.name = "Test"; // TODO read from user
 
   // TODO
   // MAKE THE CANVAS RESIZABLE
@@ -43,15 +48,14 @@ $(function(){
     type: "POST",
     data: {
       workflow: {
-        name: "test", // TODO read from user
-        xpdl: null
+        name: workflow.name,
+        json: workflow.data // == null since no json data for new workflow yet!
       }
     },
-    success: function(jsonObject) {
-      console.log('success');
-      console.log(jsonObject);
-      // TODO grab the workfow id of our newly-created workflow; should be 
-      // within the response object.
+    success: function(workflowId) {
+      // Grab the workfow id of our newly-created workflow.
+      console.log('Created new workflow...');
+      workflow.id = workflowId;
     }
   });
 
@@ -76,8 +80,8 @@ $(function(){
           console.log('server responded!');
           console.log(jsonObject);
           $('#toolbox').removeClass('hide');
-          workflow = new net.BpmnJS(jsonObject,$('#canvas')[0],false);
-          workflow.plot();
+          workflow.data = new net.BpmnJS(jsonObject,$('#canvas')[0],false);
+          workflow.data.plot();
 
           $('#convert').click(function(){
               $('#jsonText').removeClass('hide');
@@ -88,7 +92,7 @@ $(function(){
           // what about workflows started from scratch without importing?
           $("#save").click(function() {
             console.log('saving (updating) the workflow...');
-            var xpdlJson = workflow.updateXPDL();
+            var xpdlJson = workflow.data.updateXPDL();
 
             // This assume a workflow has already been created and assigned an id.
             $.ajax({
@@ -99,14 +103,14 @@ $(function(){
               type: "POST",
               data: {
                 workflow: {
-                  id: workflowId,
-                  name: "test", // TODO read from user
+                  id: workflow.id,
+                  name: workflow.name,
                   xpdl: xpdlJson
                 }
               },
-              success: function(jsonObject) {
-                console.log('success');
-                console.log(jsonObject);
+              success: function(response) {
+                console.log('Saved workflow...');
+                console.log(response);
               }
             });
           });
@@ -119,29 +123,29 @@ $(function(){
              // var shape = null;
               switch (el.attr('id')) {
                 case 'tb-startevent':
-                  workflow.initStartEvent(x, y);
+                  workflow.data.initStartEvent(x, y);
                   break;
                 case 'tb-intermediateevent':
-                  workflow.initIntermediateEvent(x, y);
+                  workflow.data.initIntermediateEvent(x, y);
                   break;
                 case 'tb-endevent':
-                  workflow.initEndEvent(x, y);
+                  workflow.data.initEndEvent(x, y);
                   break;
                 case 'tb-gateway':
-                  workflow.initGateway(x, y);
+                  workflow.data.initGateway(x, y);
                   break;
                 case 'tb-task':
-                  workflow.initTask(x, y);
+                  workflow.data.initTask(x, y);
                   break;
                 case 'tb-clearcanvas':
                   if (confirm('Are you sure you want to clear the workflow?')) {
-                    workflow.clear();
+                    workflow.data.clear();
                   }
                   break;
                 case 'tb-sequenceflow':
                   el.toggleClass('active hover');
                   $('#connect-instructions').toggleClass('hide');
-                  workflow.onConnect(function(e) {
+                  workflow.data.onConnect(function(e) {
                     if (e === 'success') {
                       // We have successfully connected two elements.
                       el.removeClass('active hover');
@@ -151,7 +155,7 @@ $(function(){
                   break;
                 case 'tb-participant':
                   var poolTitle = prompt('Please enter title of pool:');
-                  workflow.initPool(x,y, poolTitle); 
+                  workflow.data.initPool(x,y, poolTitle); 
                   break;
                 case 'tb-lane': 
                   alert('Please right-click on a drawn pool and select add lane.');
