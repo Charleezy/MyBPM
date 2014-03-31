@@ -64,8 +64,8 @@ $(function(){
         case 'default':
           createNewWorkflow(); loadDefaultWorkflow(); break;
         case 'import':
-          console.log('import');
-          break;
+          var file = $('#importFile').val();
+          createNewWorkflow(); importWorkflow(file); break;
       }
     }
     e.preventDefault();
@@ -109,6 +109,11 @@ $(function(){
         $('#create_workflow').modal('hide');
       }
     });
+  }
+
+  function importWorkflow(file) {
+    // TODO
+    console.log(file);
   }
 
   function loadDefaultWorkflow() {
