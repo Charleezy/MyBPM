@@ -299,7 +299,7 @@ net.BpmnJS.prototype = {
       $('body:not(#editor-contextmenu)').click(function() {
         contextMenu.off('click', 'a#remove-element');
         contextMenu.off('click', 'a#add-annotation');
-        contextMenu.off('click', 'a#add-pool');
+        contextMenu.off('click', 'a#add-pool-lane');
         contextMenu.hide();
       });
       return false;
