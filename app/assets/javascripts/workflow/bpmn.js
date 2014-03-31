@@ -569,6 +569,7 @@ net.BpmnJS.prototype = {
     $(shape.node).attr("border",borderColor);
     $(shape.node).attr("class",'startEvent');
     $(shape.node).attr("id",xpdlEvent.Id);
+    $(shape.node).attr("data-type","StartEvent");
     
     return shape;
   },
@@ -587,6 +588,7 @@ net.BpmnJS.prototype = {
     $(shape.node).attr("border",borderColor);
     $(shape.node).attr("class",'intermediateEvent');
     $(shape.node).attr("id",xpdlEvent.Id);
+    $(shape.node).attr("data-type","IntermediateEvent");
     
     return shape;
   },
@@ -605,6 +607,7 @@ net.BpmnJS.prototype = {
     $(shape.node).attr("border",borderColor);
     $(shape.node).attr("class",'endEvent');
     $(shape.node).attr("id",xpdlEvent.Id);
+    $(shape.node).attr("data-type","EndEvent");
     
     return shape;
   },
@@ -639,6 +642,7 @@ net.BpmnJS.prototype = {
     $(shape.node).attr("fill",fillColor); 
     $(shape.node).attr("border",borderColor);
     $(shape.node).attr("id",xpdlImplementation.Id);
+    $(shape.node).attr("data-type","Task");
 
     return shape;
   },
@@ -669,6 +673,7 @@ net.BpmnJS.prototype = {
     $(shape.node).attr("fill",fillColor); 
     $(shape.node).attr("border",borderColor);
     $(shape.node).attr("id",xpdlRoute.Id);
+    $(shape.node).attr("data-type","Gateway");
 
     return shape;
     
@@ -687,6 +692,7 @@ net.BpmnJS.prototype = {
     pool.associatedXPDL = xpdlRoute;
     pool.shapeType = 'Pool';
     $(pool.node).attr("id",xpdlRoute.Id);
+    $(pool.node).attr("data-type","Pool");
     var poolTitle = this.paper.text(x+offset, y1+height/2, poolTitleText).attr({transform: "r" + 270});
     
     //Pair pool title with pool 
@@ -717,6 +723,7 @@ net.BpmnJS.prototype = {
     poolLane.associatedXPDL = xpdlRoute;
     poolLane.shapeType = 'Lane';
     $(poolLane.node).attr("id",xpdlRoute.Id);
+    $(poolLane.node).attr("data-type","Lane");
     var laneTitle = this.paper.text(x1+offset, y1+height/2, laneTitleText).attr({transform: "r" + 270});
 
     //Pair lane title with pool lane
