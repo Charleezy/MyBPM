@@ -1,4 +1,6 @@
 <script type="text/javascript">
+	var current_id;
+
 	$(document).ready(function() {
 		var mockdata_text = $('#mockdata').text();
 		var mockdata;
@@ -28,6 +30,7 @@
 		
 		$('#canvas').on( "click", "rect", function() {
 			$('#addData').modal('show');
+			current_id = $(this).attr('id');
 		});
 		
 		$('#addData').on('hidden.bs.modal', function () {
@@ -53,8 +56,9 @@
 		
 		$('#add').click(function() {
 			// ID of the clicked element
-			//var stage_id = $(this).id;
-			var stage_id = "A3";
+			//alert($(this).id);
+			var stage_id = current_id
+			//var stage_id = "A3";
 			
 			var i = 0;
 			var flag = 0;
@@ -130,7 +134,6 @@
 <span id="sim_id" style="display:none"><%= @simulation.id %></span>
 <span id="workflow_id" style="display:none"><%= @workflow.id %></span>
 <span id="mockdata" style="display:none"><%= @simulation.mockdata %></span>
-<span id="workflow_json" style="display:none"><%= @workflow.json %></span>
 
 <h1 class="sim_title"><%= @simulation.name %></h1>
 
