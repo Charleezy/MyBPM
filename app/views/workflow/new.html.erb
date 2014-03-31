@@ -41,6 +41,13 @@ $(function(){
     }
   });
 
+  $('button.close').click(function() {
+    window.location = "/workflow";
+  });
+  $('button#cancel').click(function() {
+    window.location = "/workflow";
+  });
+
   // When clicking "Create" from the popup window in "Create a workflow".
   $("#create_workflow form").submit(function(e) {
     var workflowName = $('#workflowName').val();
@@ -53,9 +60,9 @@ $(function(){
     else {
       switch ($('#template-type').val()) {
         case 'blank':
-          loadBlank(); break;
+          createNewWorkflow(); break;
         case 'default':
-          loadDefaultView(); break;
+          createNewWorkflow(); loadDefaultWorkflow(); break;
         case 'import':
           console.log('import');
           break;
@@ -79,8 +86,7 @@ $(function(){
     $("#log").text("Todo: undo action!");
     });
 
-
-  function loadBlank() {
+  function createNewWorkflow() {
     // Make a call to the server to create a new (blank) workflow.
     // Save the id for future save (update) calls.
     $.ajax({
@@ -104,10 +110,7 @@ $(function(){
     });
   }
 
-  
-  function loadDefaultView() {
-    console.log('waiting for server');
-    
+  function loadDefaultWorkflow() {
     $.ajax({
       beforeSend: function(req) {
         req.setRequestHeader("Accept", "application/json");
@@ -115,101 +118,97 @@ $(function(){
       url: "/workflow/xpdltojson", 
       type: "POST",
       success: function(jsonObject) {
-        $('#create_workflow').modal('hide');
-        console.log('server responded!');
-        console.log(jsonObject);
         $('#toolbox').removeClass('hide');
         workflow.data = new net.BpmnJS(jsonObject,$('#canvas')[0],false);
         workflow.data.plot();
-
-        $('#convert').click(function(){
-            $('#jsonText').removeClass('hide');
-            $('#jsonText').html(JSON.stringify(jsonObject));
-        });
-
-        // FIXME you shouldn't have to import in order to be allowed to save the workflow...
-        // what about workflows started from scratch without importing?
-        $("#save").click(function() {
-          console.log('saving (updating) the workflow...');
-          var xpdlJson = workflow.data.updateXPDL();
-
-          // This assume a workflow has already been created and assigned an id.
-          $.ajax({
-            beforeSend: function(req) {
-              req.setRequestHeader("Accept", "application/json");
-            },
-            url: "/workflow/update", 
-            type: "POST",
-            data: {
-              workflow: {
-                id: workflow.id,
-                name: workflow.name,
-                xpdl: xpdlJson
-              }
-            },
-            success: function(response) {
-              console.log('Saved workflow...');
-              console.log(response);
-            }
-          });
-        });
-
-        // Toolbox listeners
-        $('#toolbox > .tb-item').click(function(){
-          var el = $(this);
-          // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
-           var x = 10, y= 10;
-           // var shape = null;
-            switch (el.attr('id')) {
-              case 'tb-startevent':
-                workflow.data.initStartEvent(x, y);
-                break;
-              case 'tb-intermediateevent':
-                workflow.data.initIntermediateEvent(x, y);
-                break;
-              case 'tb-endevent':
-                workflow.data.initEndEvent(x, y);
-                break;
-              case 'tb-gateway':
-                workflow.data.initGateway(x, y);
-                break;
-              case 'tb-task':
-                workflow.data.initTask(x, y);
-                break;
-              case 'tb-clearcanvas':
-                if (confirm('Are you sure you want to clear the workflow?')) {
-                  workflow.data.clear();
-                }
-                break;
-              case 'tb-sequenceflow':
-                el.toggleClass('active hover');
-                $('#connect-instructions').toggleClass('hide');
-                workflow.data.onConnect(function(e) {
-                  if (e === 'success') {
-                    // We have successfully connected two elements.
-                    el.removeClass('active hover');
-                    $('#connect-instructions').addClass('hide');
-                  }
-                });
-                break;
-              case 'tb-participant':
-                var poolTitle = prompt('Please enter title of pool:');
-                workflow.data.initPool(x,y, poolTitle); 
-                break;
-              case 'tb-lane': 
-                alert('Please right-click on a drawn pool and select add lane.');
-                //workflow.initLane(x,y+10, laneTitle, 'poolTitle');   
-                break;
-              default:
-                // Do nothing
-                break;
-            }
-
-        });
-        alreadyLoaded = true;
       }
     });
-  };
+  }
+
+  $('#convert').click(function(){
+      $('#jsonText').removeClass('hide');
+      $('#jsonText').html(JSON.stringify(jsonObject));
+  });
+
+  // FIXME you shouldn't have to import in order to be allowed to save the workflow...
+  // what about workflows started from scratch without importing?
+  $("#save").click(function() {
+    console.log('saving (updating) the workflow...');
+    var xpdlJson = workflow.data.updateXPDL();
+
+    // This assume a workflow has already been created and assigned an id.
+    $.ajax({
+      beforeSend: function(req) {
+        req.setRequestHeader("Accept", "application/json");
+      },
+      url: "/workflow/update", 
+      type: "POST",
+      data: {
+        workflow: {
+          id: workflow.id,
+          name: workflow.name,
+          xpdl: xpdlJson
+        }
+      },
+      success: function(response) {
+        console.log('Saved workflow...');
+        console.log(response);
+      }
+    });
+  });
+
+  // Toolbox listeners
+  $('#toolbox > .tb-item').click(function(){
+    var el = $(this);
+    // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
+     var x = 10, y= 10;
+     // var shape = null;
+      switch (el.attr('id')) {
+        case 'tb-startevent':
+          workflow.data.initStartEvent(x, y);
+          break;
+        case 'tb-intermediateevent':
+          workflow.data.initIntermediateEvent(x, y);
+          break;
+        case 'tb-endevent':
+          workflow.data.initEndEvent(x, y);
+          break;
+        case 'tb-gateway':
+          workflow.data.initGateway(x, y);
+          break;
+        case 'tb-task':
+          workflow.data.initTask(x, y);
+          break;
+        case 'tb-clearcanvas':
+          if (confirm('Are you sure you want to clear the workflow?')) {
+            workflow.data.clear();
+          }
+          break;
+        case 'tb-sequenceflow':
+          el.toggleClass('active hover');
+          $('#connect-instructions').toggleClass('hide');
+          workflow.data.onConnect(function(e) {
+            if (e === 'success') {
+              // We have successfully connected two elements.
+              el.removeClass('active hover');
+              $('#connect-instructions').addClass('hide');
+            }
+          });
+          break;
+        case 'tb-participant':
+          var poolTitle = prompt('Please enter title of pool:');
+          workflow.data.initPool(x,y, poolTitle); 
+          break;
+        case 'tb-lane': 
+          alert('Please right-click on a drawn pool and select add lane.');
+          //workflow.initLane(x,y+10, laneTitle, 'poolTitle');   
+          break;
+        default:
+          // Do nothing
+          break;
+      }
+
+  });
 });
 </script>
 
@@ -296,7 +295,7 @@ $(function(){
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <button type="button" class="close" aria-hidden="true">&times;</button>
                 <h4 class="modal-title" id="createWorkflowModalLabel">Create Workflow</h4>
             </div>
             <form role="form">
@@ -328,7 +327,7 @@ $(function(){
               </div>
               <div class="modal-footer">
                   <button id="create" type="submit" class="btn btn-primary">Create</button>
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                  <button id="cancel" type="button" class="btn btn-default">Cancel</button>
               </div>
             </form>
         </div>
