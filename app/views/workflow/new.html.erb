@@ -136,9 +136,7 @@ $(function(){
       $('#jsonText').removeClass('hide');
       $('#jsonText').html(JSON.stringify(workflow.jsonObject));
   });
-
-  // FIXME you shouldn't have to import in order to be allowed to save the workflow...
-  // what about workflows started from scratch without importing?
+  
   $("#save").click(function() {
     console.log('saving (updating) the workflow...');
     var xpdlJson = workflow.data.updateXPDL();
