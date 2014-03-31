@@ -13,6 +13,7 @@ Mybpm::Application.routes.draw do
   resources :workflow
   resources :simulation
 
+  post '/workflow/new', :controller => 'workflow', :action => 'new'
   post '/workflow/import', :controller => 'workflow', :action => 'import'
   post '/workflow/xpdltojson', :controller => 'workflow', :action => 'xpdltojson'
   post '/workflow/create', :controller => 'workflow', :action => 'create'

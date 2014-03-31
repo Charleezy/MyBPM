@@ -24,7 +24,6 @@
 // Namespace
 var net = net || {};
 net = {};
-var totalLanes = 0;
 function assert(condition, message) {
   if (!condition) {
       throw message || "Assertion failed";
@@ -42,6 +41,8 @@ net.BpmnJS = function(xpdlJson, canvas, isStatic){
   // USED FOR SIMULATION
   this.isStatic = isStatic;
 
+  this.totalLanes = 0;
+
   // RAPHAEL CANVAS
   this.paper = Raphael(canvas, canvas.clientWidth, canvas.clientHeight);
   
@@ -49,13 +50,18 @@ net.BpmnJS = function(xpdlJson, canvas, isStatic){
   this.allConnections = [];
   this.newConnections = [];
   this.oldConnections = [];
-  this.deletedConnectionsIds = [];
+  this.removedConnectionsIds = [];
 
-  this.activities = [];
   this.allActivities = [];
   this.newActivities = [];
   this.oldActivities = [];
-  this.deletedActivitiesIds = [];
+  this.removedActivitiesIds = [];
+
+  this.pools = [];
+  this.allPools = [];
+  this.newPools = [];
+  this.oldPools = [];
+  this.deletedPoolsIds = [];
 
   // ALL ID'S GENERATED FROM THE BEGINNING
   this.idList = [];
@@ -116,19 +122,34 @@ net.BpmnJS.prototype = {
       me.replaceProperty(me.xpdlJson, 'To', temporaryId, newId);
       // console.log('newId: ' + pool.Id);
       // The coordinates of the pools
+      
       // FIXIT
-      // borderColor and fillColor are hardcoded here
+      // borderColor and fillColor shouldn't be hardcoded here
       var borderColor = pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
       var fillColor = pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor;
       var name = pool.Name;
-      this.paintPool(pool, 10, 10, name, 'lightblue', 'black');
+      var poolShape = me.paintPool(pool, 10, 10, name, 'lightblue', 'black');
+
+      // TODO
+      // FINISH IMPORT FOR LANES
+      // WE HAVE THE SAME PROBLEM WITH THE LANES (NO COORDINATES)
+      var lanes = pool['xpdl:Lanes']['xpdl:Lane'];
+      console.log(lanes);
+      lanes.forEach(function(lane){
+        var name = lane.Name;
+        // FIXIT
+        // I HARDCODED THE COORDINATES OF THE LANE TO x=0 y=0 BUT WE SHOULD FIX IT
+        // THERE'S A BUG WITH THE LANE NAME 
+        me.paintLane(lane, 0, 0, '', poolShape, 'white', 'black');
+
+      });
       
     }
 
     // Parse through processes' activities
     if (this.process.hasOwnProperty('xpdl:Activities')) {
-      this.activities = this.process["xpdl:Activities"]["xpdl:Activity"];
-      this.activities.forEach(function(activity) {
+      var activities = this.process["xpdl:Activities"]["xpdl:Activity"];
+      activities.forEach(function(activity) {
         var temporaryId = activity.Id;
         var newId = me.generateNewID();
         me.replaceProperty(me.xpdlJson, 'Id', temporaryId, newId);
@@ -142,7 +163,9 @@ net.BpmnJS.prototype = {
         var borderColor = activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
         var fillColor = activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor;
         var name = activity.Name;
-        me.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
+        var activityShape = me.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
+        me.allActivities.push(activityShape);
+        me.oldActivities.push(activityShape);
       });
     }
 
@@ -161,7 +184,8 @@ net.BpmnJS.prototype = {
           var condition = "";
         }
         // Create link association between the two activities.
-        me.connectElements(element1, element2, condition, 'imported');
+        var connection = me.connectElements(element1, element2, condition, 'imported');
+        connection.associatedXPDL = transition;
       });
     }
 
@@ -173,7 +197,7 @@ net.BpmnJS.prototype = {
           this.moveElement(el);
         }
         // Bind contextmenu to all elements, to enable options such as removing.
-        this.enableContextMenu(el);
+        this.enableContextMenu(el, this);
       }, this);
     }
   },
@@ -183,7 +207,7 @@ net.BpmnJS.prototype = {
     this.allConnections.length = 0;
   },
 
-  enableContextMenu: function(element) {
+  enableContextMenu: function(element, workflow) {
     var canvas = "#canvas"
         // These two should be updated every resize. need to fix this!
         var position = $(canvas).position();
@@ -196,16 +220,17 @@ net.BpmnJS.prototype = {
     });
     var contextMenu = $('#editor-contextmenu'),
         me = this;
-        $( document ).on( "mousemove", function( event ) {
-          var canvasX = parseInt(event.pageX - offset.left - 1)
-          var canvasY = parseInt(event.pageY - offset.top - 22)
-          if (canvasX < 0 || canvasY < 0) {
-            canvasX = "out of range";
-            canvasY = "out of range";
-          };
-          // DEBUG
-          $( "#log" ).text("X: " + event.pageX + ", Y: " + event.pageY + ". Canvas X:"+ canvasX +", canvas Y:" + canvasY);
-        });
+    $( document ).on( "mousemove", function( event ) {
+      var canvasX = parseInt(event.pageX - offset.left - 1)
+      var canvasY = parseInt(event.pageY - offset.top - 22)
+      if (canvasX < 0 || canvasY < 0) {
+        canvasX = "out of range";
+        canvasY = "out of range";
+      };
+      // DEBUG
+      $( "#log" ).text("X: " + event.pageX + ", Y: " + event.pageY + ". Canvas X:"+ canvasX +", canvas Y:" + canvasY);
+    });
+
     $(element[0]).on('contextmenu', function(e) {
       contextMenu.css({
         display: "block",
@@ -215,6 +240,20 @@ net.BpmnJS.prototype = {
 
       // FIXME why is this called twice per element?
       contextMenu.on('click', 'a#remove-element', function() {
+        if(element.hasOwnProperty('shapeType')){
+          console.log('removing ' + element.shapeType);
+          switch(element.shapeType){
+            case 'StartEvent':
+            case 'IntermediateEvent':
+            case 'EndEvent':
+            case 'Gateway':
+            case 'Task':
+              me.removedActivitiesIds.push(element.associatedXPDL.Id);
+              console.log('me.removedActivitiesIds:');
+              console.log(me.removedActivitiesIds);
+              break;
+          }
+        }
         // If the element has connections, remove them.
         if(element.hasOwnProperty('connections')){
           element.connections.forEach(function(connection) {
@@ -225,8 +264,31 @@ net.BpmnJS.prototype = {
               // Connnection is incoming to me.
               me.removeConnection(connection.from, connection);
             }
+            
+            // REMOVE FROM GLOBAL CONNECTION ARRAY
+            var connectionToRemove = connection;
+            workflow.removedConnectionsIds.push(connection.associatedXPDL.Id);
+
+            workflow.allConnections.forEach(function(connection, index) {
+              if (connection === connectionToRemove) {
+                workflow.allConnections.splice(index, 1);
+                return;
+              }
+            });
+            workflow.oldConnections.forEach(function(connection, index) {
+              if (connection === connectionToRemove) {
+                workflow.oldConnections.splice(index, 1);
+                return;
+              }
+            });
+            workflow.newConnections.forEach(function(connection, index) {
+              if (connection === connectionToRemove) {
+                workflow.newConnections.splice(index, 1);
+                return;
+              }
+            });
           });
-          element.connrctions = [];
+          element.connections = [];
           element.connections.length = 0;
         }
         if (element.pair !== undefined) {
@@ -260,7 +322,7 @@ net.BpmnJS.prototype = {
             height = element.getBBox().height,
             width = element.getBBox().width;
 
-        if (element.shapeType === 'Pool' || element.shapeType === 'PoolLane'){
+        if (element.shapeType === 'Pool' || element.shapeType === 'Lane'){
           var offset = 10; 
           //FixMe: Need to check if correct location after the x&y are updated
           var text = me.paper.text(x+offset, y+height/2, textToAdd).attr({transform: "r" + 270});
@@ -288,7 +350,8 @@ net.BpmnJS.prototype = {
         }
         var laneTitle = prompt('Please enter title of lane:');
         if (laneTitle === null) return;
-        var x = 10, y = 10;
+        var x = 0, y = 0;
+
         me.initLane(x,y, laneTitle, element);  
         contextMenu.hide();
       });
@@ -297,7 +360,7 @@ net.BpmnJS.prototype = {
       $('body:not(#editor-contextmenu)').click(function() {
         contextMenu.off('click', 'a#remove-element');
         contextMenu.off('click', 'a#add-annotation');
-        contextMenu.off('click', 'a#add-pool-lane');
+        contextMenu.off('click', 'a#add-pool');
         contextMenu.hide();
       });
       return false;
@@ -322,7 +385,8 @@ net.BpmnJS.prototype = {
           assert(firstSelected !== undefined && secondSelected !== undefined,
             'Both required elements not selected for a connection.');
           // Both elements now selected; proceed to connect them.
-          me.connectElements(firstSelected, secondSelected, null);
+          var connection = me.connectElements(firstSelected, secondSelected, null);
+          connection.associatedXPDL = XpdlJsonGenerator.getNewTransitionJson(me.generateNewID(), 'Transition', firstSelected.associatedXPDL.Id, secondSelected.associatedXPDL.Id);
           // Unbind click listener for all elements.
           me.paper.forEach(function (el) {
             $(el[0]).unbind('click');
@@ -349,7 +413,7 @@ net.BpmnJS.prototype = {
     }
 
     //If gateway element, ask for condition(s)
-    if (element1.shapeType === 'Route'){
+    if (element1.shapeType === 'Gateway'){
       //If new element, ask for condition
       if (condition === null){
         condition = prompt('Condition:');
@@ -366,11 +430,11 @@ net.BpmnJS.prototype = {
       connection.pair = text;
       text.pair = connection;
     }
+
+    return connection;
   },
 
   removeConnection: function(element, connectionToRemove) {
-    // TODO
-    // REMOVE FROM ARRAY OF CONNECTIONS
     // Remove 'connectionToRemove' from element's connections.
     element.connections.forEach(function(connection, index) {
       if (connection === connectionToRemove) {
@@ -411,7 +475,7 @@ net.BpmnJS.prototype = {
         },
         move = function(dx, dy) {
           //Don't allow movement for pools & pool lanes
-          if (this.shapeType === 'Pool' || this.shapeType === 'PoolLane'){
+          if (this.shapeType === 'Pool' || this.shapeType === 'Lane'){
             return;
           }
           
@@ -546,7 +610,7 @@ net.BpmnJS.prototype = {
     // var shape = this.paper.rect(x, y, width, height, 5).attr('cursor', 'move');
     var shape = this.paper.rect(x, y, width, height, 5);
     shape.associatedXPDL = xpdlImplementation;
-    shape.shapeType = 'Implementation';
+    shape.shapeType = 'Task';
     shape.outgoing = [];
     shape.incoming = [];
     shape.connections = [];
@@ -585,7 +649,7 @@ net.BpmnJS.prototype = {
 
     // shape.rotate(45, x, y);
     shape.associatedXPDL = xpdlRoute;
-    shape.shapeType = 'Route';
+    shape.shapeType = 'Gateway';
     // var text = this.paper.text(x+width/2,y+height/2,name).attr('cursor', 'move');
     var text = this.paper.text(x+width/2,y+height/2,name);
     text.shapeType = 'Text';
@@ -604,7 +668,7 @@ net.BpmnJS.prototype = {
   },
 
   paintPool: function(xpdlRoute, x, y, poolTitleText, fillColor, borderColor){
-    var lanes = totalLanes;
+    var lanes = this.totalLanes;
     if (lanes === 0) {lanes = 1;}
     x = 0;
     var offset = 10,
@@ -629,19 +693,21 @@ net.BpmnJS.prototype = {
     return pool;
   },
 
+  // FIXIT
+  // WE SHOULD CHANGE THE WAY WE PAINT LANES
   paintLane: function(xpdlRoute, x, y, laneTitleText, pool, fillColor, borderColor){
     //New Lane, increment total number of lanes
-    totalLanes += 1;
+    this.totalLanes += 1;
 
     var offset = 10,
         x1 = x+offset*2,
-        y1 = y+40+((totalLanes-1)*350),
+        y1 = y+40+((this.totalLanes-1)*350),
         width = this.paper.canvas.offsetWidth - x1,
         height = 350;
 
     var poolLane = this.paper.rect(x1,y1,width,height).attr({fill: fillColor, border: borderColor});
     poolLane.associatedXPDL = xpdlRoute;
-    poolLane.shapeType = 'PoolLane';
+    poolLane.shapeType = 'Lane';
     var laneTitle = this.paper.text(x1+offset, y1+height/2, laneTitleText).attr({transform: "r" + 270});
 
     //Pair lane title with pool lane
@@ -649,8 +715,9 @@ net.BpmnJS.prototype = {
     laneTitle.pair = poolLane;
     laneTitle.shapeType = 'RotatedText';
 
-    if (totalLanes > 1){
+    if (this.totalLanes > 1){
       //Redraw expanded pool if greater than 1 lane
+      this.initPool(x,y, pool);
       //get current pool title
       var poolTitle = pool.associatedXPDL.Name;
 
@@ -658,8 +725,7 @@ net.BpmnJS.prototype = {
       pool.pair.remove();
       $(pool[0]).remove();
       pool.remove();
-    
-      this.initPool(x,y, poolTitle);
+
     }
 
       //Ordering of elements - put pool behind everything
@@ -669,7 +735,7 @@ net.BpmnJS.prototype = {
         if (el.shapeType === 'Pool'){
           //do nothing
         }
-        else if (el.shapeType === 'PoolLane'){
+        else if (el.shapeType === 'Lane'){
           mid.push(el);
         }
         else{
@@ -700,7 +766,7 @@ net.BpmnJS.prototype = {
   // Common to all activities: allows drag/move, contextmenu and gives a new ID
   initActivity: function(activity) {
     this.moveElement(activity);
-    this.enableContextMenu(activity);
+    this.enableContextMenu(activity, this);
     activity.associatedXPDL.Id = this.generateNewID();
     return activity;
   },
@@ -712,10 +778,6 @@ net.BpmnJS.prototype = {
         height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
         //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
-
-    
-    // Add xpdl to tree
-    this.activities.push(xpdlJson);
 
     var shape = this.initActivity(this.paintStartEvent(
       xpdlJson, x, y, width, height, name, 'white', borderColor));
@@ -733,10 +795,6 @@ net.BpmnJS.prototype = {
         //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
 
-
-    // Add xpdl to tree
-    this.activities.push(xpdlJson);
-
     var shape = this.initActivity(this.paintIntermediateEvent(
       xpdlJson, x, y, width, height, name, 'lightyellow', borderColor));
 
@@ -752,10 +810,6 @@ net.BpmnJS.prototype = {
         height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
         //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
-
-
-    // Add xpdl to tree
-    this.activities.push(xpdlJson);
 
     var shape = this.initActivity(this.paintEndEvent(
       xpdlJson, x, y, width, height, name, 'lightblue', borderColor));
@@ -774,13 +828,10 @@ net.BpmnJS.prototype = {
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
 
 
-    // Add xpdl to tree
-    this.activities.push(xpdlJson);
-
     var shape = this.initActivity(this.paintRoute(
       xpdlJson, x, y, width, height, name, 'white', borderColor));
 
-    shape.shapeType = 'Route';
+    shape.shapeType = 'Gateway';
 
     return shape;
   },
@@ -792,10 +843,6 @@ net.BpmnJS.prototype = {
         height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
         //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
-
-
-    // Add xpdl to tree
-    this.activities.push(xpdlJson);
 
     var shape = this.initActivity(this.paintImplementation(
       xpdlJson, x, y, width, height, name, 'lightyellow', borderColor));
@@ -811,10 +858,6 @@ net.BpmnJS.prototype = {
         //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
 
-
-    // Add xpdl to tree
-    this.activities.push(xpdlJson);
-
     var shape = this.initActivity(this.paintPool(xpdlJson, x, y, name, 'lightblue', borderColor));
 
     shape.shapeType = 'Pool';
@@ -827,7 +870,7 @@ net.BpmnJS.prototype = {
     // FIND OUT THE FORMAT OF THE LANE
     var xpdl = 'xpdlLane';
     var shape = this.initActivity(this.paintLane(xpdl, x, y, laneTitle, pool, 'whitesmoke', 'black'));
-    shape.shapeType = 'Pool';
+    shape.shapeType = 'Lane';
     return shape;
   },
 
@@ -840,7 +883,8 @@ net.BpmnJS.prototype = {
       if(shape.hasOwnProperty('shapeType')){
 
           // UPDATE COORDINATES
-          if (shape.shapeType != 'Text' && shape.shapeType != 'Transition') {
+          if (shape.shapeType != 'Text' && shape.shapeType != 'Transition' && shape.shapeType != 'Pool' && shape.shapeType != 'Lane' && shape.shapeType != 'RotatedText' && shape.shapeType != 'Condition') {
+            console.log(shape);
             shape.associatedXPDL["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].XCoordinate = shape.getBBox().x;
             shape.associatedXPDL["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].YCoordinate= shape.getBBox().y;
           }
@@ -849,11 +893,11 @@ net.BpmnJS.prototype = {
           switch(shape.shapeType){
           case 'Pool':
           break;
-          case 'PoolLane':
+          case 'Lane':
           break;
           case 'Transition':
           break;
-          case 'Route':
+          case 'Gateway':
           break;
           case 'Condition':
           break;
@@ -876,16 +920,48 @@ net.BpmnJS.prototype = {
     });
 
     // UPDATES THE XPDL TREE WITH THE NEW ELEMENTS CREATED
+    var me = this;
+
+    // UPDATE THE TRANSITIONS
     this.newConnections.forEach(function(connection){
-
+      me.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Transitions']['xpdl:Transition'].push(connection.associatedXPDL);
     });
+    this.oldConnections.concat(this.newConnections);
+    this.newConnections = [];
 
-    this.newActivities.forEach(function(connection){
+    var xpdlTransitionsArray = me.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Transitions']['xpdl:Transition'];
+    xpdlTransitionsArray.forEach(function(transition, index){
+      me.removedConnectionsIds.forEach(function(id){
+        if(id === transition.Id){
+          xpdlTransitionsArray.splice(index, 1);
+        }
 
+      });
     });
+    me.removedConnectionsIds = [];
 
-    console.log('updated xpdlJson: ');
-    console.log(this.xpdlJson);
+    // UPDATE THE ACTIVITIES
+    this.newActivities.forEach(function(activity){
+      me.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Activities']['xpdl:Activity'].push(activity.associatedXPDL);
+    });
+    this.oldActivities.concat(this.newActivities);
+    this.newActivities = [];
+
+    console.log('removed activities:');
+    console.log(me.removedActivitiesIds);
+    var xpdlActivitiesArray = me.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Activities']['xpdl:Activity'];
+    xpdlActivitiesArray.forEach(function(activity, index){
+      me.removedActivitiesIds.forEach(function(id){
+        if(id === activity.Id){
+          xpdlActivitiesArray.splice(index, 1);
+        }
+
+      });
+    });
+    me.removedActivitiesIds = [];
+
+    console.log('updated activities: ');
+    console.log(this.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Activities']['xpdl:Activity']);
     return this.xpdlJson;
   },
 
