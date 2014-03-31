@@ -122,7 +122,7 @@ net.BpmnJS.prototype = {
       var borderColor = pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
       var fillColor = pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor;
       var name = pool.Name;
-      this.paintPool(pool, 0, 0, name, 'lightblue', 'black');
+      this.paintPool(pool, 10, 10, name, 'lightblue', 'black');
       
     }
 
@@ -282,7 +282,7 @@ net.BpmnJS.prototype = {
       });
 
       //FIXME: only show for pool elements
-      contextMenu.on('click', 'a#add-pool', function() {
+      contextMenu.on('click', 'a#add-pool-lane', function() {
         if (element.shapeType != 'Pool'){
           alert('Can only add lanes to pools');
           contextMenu.hide(); 
@@ -291,16 +291,7 @@ net.BpmnJS.prototype = {
         var laneTitle = prompt('Please enter title of lane:');
         if (laneTitle === null) return;
         var x = 10, y = 10;
-        if (totalLanes > 0){
-          //get current pool title
-          var poolTitle = element.associatedXPDL.Name;
-
-          //remove old pool & title elements
-          element.pair.remove();
-          $(element[0]).remove();
-        }
-
-        me.initLane(x,y, laneTitle, poolTitle);  
+        me.initLane(x,y, laneTitle, element);  
         contextMenu.hide();
       });
 
@@ -640,7 +631,7 @@ net.BpmnJS.prototype = {
     return pool;
   },
 
-  paintLane: function(xpdlRoute, x, y, laneTitleText, poolTitle, fillColor, borderColor){
+  paintLane: function(xpdlRoute, x, y, laneTitleText, pool, fillColor, borderColor){
     //New Lane, increment total number of lanes
     totalLanes += 1;
 
@@ -662,6 +653,14 @@ net.BpmnJS.prototype = {
 
     if (totalLanes > 1){
       //Redraw expanded pool if greater than 1 lane
+      //get current pool title
+      var poolTitle = pool.associatedXPDL.Name;
+
+      //remove old pool & title elements
+      pool.pair.remove();
+      $(pool[0]).remove();
+      pool.remove();
+    
       this.initPool(x,y, poolTitle);
     }
 
@@ -825,11 +824,11 @@ net.BpmnJS.prototype = {
     return shape;
   },
 
-  initLane: function(x,y, laneTitle, poolTitle){
+  initLane: function(x,y, laneTitle, pool){
     // TODO
     // FIND OUT THE FORMAT OF THE LANE
     var xpdl = 'xpdlLane';
-    var shape = this.initActivity(this.paintLane(xpdl, x, y, laneTitle, poolTitle, 'whitesmoke', 'black'));
+    var shape = this.initActivity(this.paintLane(xpdl, x, y, laneTitle, pool, 'whitesmoke', 'black'));
     shape.shapeType = 'Pool';
     return shape;
   },
