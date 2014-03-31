@@ -11,22 +11,22 @@
 		else {
 			mockdata = jQuery.parseJSON($('#mockdata').text());
 		}
-/*
+
 		var workflow_json = <%= @workflow.json.to_json.html_safe %>;
 		
 		var alreadyLoaded = false;
 
 		if(!alreadyLoaded){
-			var bpmn = new net.BpmnJS(workflow_json, $('#static_canvas')[0], true);
+			var bpmn = new net.BpmnJS(workflow_json, $('#canvas')[0], true);
 			bpmn.plot();
 			alreadyLoaded = true;
-		}*/
+		}
 	  
-		$('#static_canvas').on( "click", "circle", function() {
+		$('#canvas').on( "click", "circle", function() {
 			$('#addData').modal('show');
 		});
 		
-		$('#static_canvas').on( "click", "rect", function() {
+		$('#canvas').on( "click", "rect", function() {
 			$('#addData').modal('show');
 		});
 		
@@ -53,7 +53,8 @@
 		
 		$('#add').click(function() {
 			// ID of the clicked element
-			var stage_id = $(this).id;
+			//var stage_id = $(this).id;
+			var stage_id = "A3";
 			
 			var i = 0;
 			var flag = 0;
@@ -140,7 +141,7 @@
 				<h3 class="panel-title">Workflow</h3>
 			</div>
 			<div class="panel-body">
-				<div id="static_canvas"></div>
+				<div id="canvas"></div>
 			</div>
 		</div>
 		
