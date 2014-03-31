@@ -105,6 +105,7 @@ $(function(){
         // Grab the workfow id of our newly-created workflow.
         console.log('Created new blank workflow...');
         workflow.id = workflowId;
+        $('#workflow-name').text(workflow.name);
         $('#create_workflow').modal('hide');
       }
     });
