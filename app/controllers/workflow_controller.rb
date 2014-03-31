@@ -56,6 +56,15 @@ class WorkflowController < ApplicationController
       render :nothing => true, :status => :bad_request
     end 
   end
+
+  def xpdltojson 
+    myXML = Crack::XML.parse(File.read("data/XML.txt"));
+    myJSON = myXML.to_json;
+    
+    respond_to do |format| 
+      format.json { render :json => myJSON}
+    end
+  end
   
   def setup_side_nav_links
     super

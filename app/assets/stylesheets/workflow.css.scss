@@ -148,6 +148,10 @@ div#canvas{
    stroke-width:2px;
 }
 
+.implementation{
+   fill:lightgray;
+}
+
 .participant{
    fill:lightgray;
 }
@@ -157,7 +161,7 @@ div#canvas{
 }
 
 .startEvent, .boundaryEvent{
-   fill:white;
+   fill:AliceBlue ;
 }
 
 .startEvent-high, .boundaryEvent-high{
