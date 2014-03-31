@@ -2,7 +2,7 @@ require 'crack'
 require 'active_support/core_ext/hash/conversions'
 
 class WorkflowController < ApplicationController
-  around_filter :exception_handler
+  #around_filter :exception_handler
 
   def index
     @workflows = 
@@ -19,12 +19,13 @@ class WorkflowController < ApplicationController
   end
 
   def create
+    {}.to_xml
     params[:workflow][:xpdl] = params[:workflow][:json].to_xml if !params[:workflow][:json].blank?
     workflow = current_user.workflows.create( workflow_params)
     if( workflow )
       render :text => workflow.id, :status => :created
     else 
-      render :nothing => true, :status => :bad_request
+      render :text => "Failed to save workflow", :status => :bad_request
     end
   end
 
@@ -34,12 +35,13 @@ class WorkflowController < ApplicationController
   end
 
   def update
-    params[:workflow][:xpdl] = params[:workflow][:json].to_xml if !params[:workflow][:json].blank?
-    @workflow = Workflow.find(params[:id])
-    render :nothing => true, :status => :bad_request if @workflow.nil?
+    {}.to_xml
+    params[:workflow][:xpdl] = (params[:workflow][:json]).to_xml if !params[:workflow][:json].blank?
+    @workflow = Workflow.find( params[:workflow][:id].to_i)
+    render :text => "Failed to find workflow", :status => :bad_request if @workflow.nil?
 
     @workflow.update_attributes(workflow_params)
-    render :nothing => true, :status => :created
+    render :text => "Successfully updated workflow", :status => :created
   end
 
   def destroy
@@ -81,11 +83,11 @@ class WorkflowController < ApplicationController
         yield
       rescue ActiveRecord::RecordNotFound => e
         flash[:error] = 'No workflow found with that id'
-        redirect_to :action => 'index' and return
+        redirect_to :action => 'index' 
       end 
     end
 
     def workflow_params
-      params.require(:workflow).permit(:name, :xpdl)
+      params.require(:workflow).permit(:name, :xpdl, :json)
     end
 end
