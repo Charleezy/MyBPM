@@ -119,6 +119,7 @@ $(function(){
       type: "POST",
       success: function(jsonObject) {
         $('#toolbox').removeClass('hide');
+        workflow.jsonObject = jsonObject;
         workflow.data = new net.BpmnJS(jsonObject,$('#canvas')[0],false);
         workflow.data.plot();
       }
@@ -127,7 +128,7 @@ $(function(){
 
   $('#convert').click(function(){
       $('#jsonText').removeClass('hide');
-      $('#jsonText').html(JSON.stringify(jsonObject));
+      $('#jsonText').html(JSON.stringify(workflow.jsonObject));
   });
 
   // FIXME you shouldn't have to import in order to be allowed to save the workflow...
