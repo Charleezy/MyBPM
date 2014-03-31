@@ -123,19 +123,21 @@ $(function(){
              // var shape = null;
               switch (el.attr('id')) {
                 case 'tb-startevent':
-                  workflow.data.initStartEvent(x, y);
+                  console.log('startevent');
+                  workflow.data.newActivities.push(workflow.data.initStartEvent(x, y));
+
                   break;
                 case 'tb-intermediateevent':
-                  workflow.data.initIntermediateEvent(x, y);
+                  workflow.data.newActivities.push(workflow.data.initIntermediateEvent(x, y));
                   break;
                 case 'tb-endevent':
-                  workflow.data.initEndEvent(x, y);
+                  workflow.data.newActivities.push(workflow.data.initEndEvent(x, y));
                   break;
                 case 'tb-gateway':
-                  workflow.data.initGateway(x, y);
+                  workflow.data.newActivities.push(workflow.data.initGateway(x, y));
                   break;
                 case 'tb-task':
-                  workflow.data.initTask(x, y);
+                  workflow.data.newActivities.push(workflow.data.initTask(x, y));
                   break;
                 case 'tb-clearcanvas':
                   if (confirm('Are you sure you want to clear the workflow?')) {

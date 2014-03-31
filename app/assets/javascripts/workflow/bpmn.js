@@ -53,7 +53,6 @@ net.BpmnJS = function(xpdlJson, canvas, isStatic){
   this.oldConnections = [];
   this.removedConnectionsIds = [];
 
-  this.activities = [];
   this.allActivities = [];
   this.newActivities = [];
   this.oldActivities = [];
@@ -150,8 +149,8 @@ net.BpmnJS.prototype = {
 
     // Parse through processes' activities
     if (this.process.hasOwnProperty('xpdl:Activities')) {
-      this.activities = this.process["xpdl:Activities"]["xpdl:Activity"];
-      this.activities.forEach(function(activity) {
+      var activities = this.process["xpdl:Activities"]["xpdl:Activity"];
+      activities.forEach(function(activity) {
         var temporaryId = activity.Id;
         var newId = me.generateNewID();
         me.replaceProperty(me.xpdlJson, 'Id', temporaryId, newId);
@@ -165,7 +164,9 @@ net.BpmnJS.prototype = {
         var borderColor = activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
         var fillColor = activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor;
         var name = activity.Name;
-        me.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
+        var activityShape = me.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
+        me.allActivities.push(activityShape);
+        me.oldActivities.push(activityShape);
       });
     }
 
@@ -221,16 +222,17 @@ net.BpmnJS.prototype = {
     });
     var contextMenu = $('#editor-contextmenu'),
         me = this;
-        $( document ).on( "mousemove", function( event ) {
-          var canvasX = parseInt(event.pageX - offset.left - 1)
-          var canvasY = parseInt(event.pageY - offset.top - 22)
-          if (canvasX < 0 || canvasY < 0) {
-            canvasX = "out of range";
-            canvasY = "out of range";
-          };
-          // DEBUG
-          $( "#log" ).text("X: " + event.pageX + ", Y: " + event.pageY + ". Canvas X:"+ canvasX +", canvas Y:" + canvasY);
-        });
+    $( document ).on( "mousemove", function( event ) {
+      var canvasX = parseInt(event.pageX - offset.left - 1)
+      var canvasY = parseInt(event.pageY - offset.top - 22)
+      if (canvasX < 0 || canvasY < 0) {
+        canvasX = "out of range";
+        canvasY = "out of range";
+      };
+      // DEBUG
+      $( "#log" ).text("X: " + event.pageX + ", Y: " + event.pageY + ". Canvas X:"+ canvasX +", canvas Y:" + canvasY);
+    });
+
     $(element[0]).on('contextmenu', function(e) {
       contextMenu.css({
         display: "block",
@@ -240,6 +242,20 @@ net.BpmnJS.prototype = {
 
       // FIXME why is this called twice per element?
       contextMenu.on('click', 'a#remove-element', function() {
+        if(element.hasOwnProperty('shapeType')){
+          console.log('removing ' + element.shapeType);
+          switch(element.shapeType){
+            case 'StartEvent':
+            case 'IntermediateEvent':
+            case 'EndEvent':
+            case 'Gateway':
+            case 'Task':
+              me.removedActivitiesIds.push(element.associatedXPDL.Id);
+              console.log('me.removedActivitiesIds:');
+              console.log(me.removedActivitiesIds);
+              break;
+          }
+        }
         // If the element has connections, remove them.
         if(element.hasOwnProperty('connections')){
           element.connections.forEach(function(connection) {
@@ -250,7 +266,7 @@ net.BpmnJS.prototype = {
               // Connnection is incoming to me.
               me.removeConnection(connection.from, connection);
             }
-            // TODO
+            
             // REMOVE FROM GLOBAL CONNECTION ARRAY
             var connectionToRemove = connection;
             workflow.removedConnectionsIds.push(connection.associatedXPDL.Id);
@@ -399,7 +415,7 @@ net.BpmnJS.prototype = {
     }
 
     //If gateway element, ask for condition(s)
-    if (element1.shapeType === 'Route'){
+    if (element1.shapeType === 'Gateway'){
       //If new element, ask for condition
       if (condition === null){
         condition = prompt('Condition:');
@@ -596,7 +612,7 @@ net.BpmnJS.prototype = {
     // var shape = this.paper.rect(x, y, width, height, 5).attr('cursor', 'move');
     var shape = this.paper.rect(x, y, width, height, 5);
     shape.associatedXPDL = xpdlImplementation;
-    shape.shapeType = 'Implementation';
+    shape.shapeType = 'Task';
     shape.outgoing = [];
     shape.incoming = [];
     shape.connections = [];
@@ -635,7 +651,7 @@ net.BpmnJS.prototype = {
 
     // shape.rotate(45, x, y);
     shape.associatedXPDL = xpdlRoute;
-    shape.shapeType = 'Route';
+    shape.shapeType = 'Gateway';
     // var text = this.paper.text(x+width/2,y+height/2,name).attr('cursor', 'move');
     var text = this.paper.text(x+width/2,y+height/2,name);
     text.shapeType = 'Text';
@@ -765,10 +781,6 @@ net.BpmnJS.prototype = {
         //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
 
-    
-    // Add xpdl to tree
-    this.activities.push(xpdlJson);
-
     var shape = this.initActivity(this.paintStartEvent(
       xpdlJson, x, y, width, height, name, 'white', borderColor));
 
@@ -785,10 +797,6 @@ net.BpmnJS.prototype = {
         //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
 
-
-    // Add xpdl to tree
-    this.activities.push(xpdlJson);
-
     var shape = this.initActivity(this.paintIntermediateEvent(
       xpdlJson, x, y, width, height, name, 'lightyellow', borderColor));
 
@@ -804,10 +812,6 @@ net.BpmnJS.prototype = {
         height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
         //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
-
-
-    // Add xpdl to tree
-    this.activities.push(xpdlJson);
 
     var shape = this.initActivity(this.paintEndEvent(
       xpdlJson, x, y, width, height, name, 'lightblue', borderColor));
@@ -826,13 +830,10 @@ net.BpmnJS.prototype = {
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
 
 
-    // Add xpdl to tree
-    this.activities.push(xpdlJson);
-
     var shape = this.initActivity(this.paintRoute(
       xpdlJson, x, y, width, height, name, 'white', borderColor));
 
-    shape.shapeType = 'Route';
+    shape.shapeType = 'Gateway';
 
     return shape;
   },
@@ -844,10 +845,6 @@ net.BpmnJS.prototype = {
         height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
         //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
-
-
-    // Add xpdl to tree
-    this.activities.push(xpdlJson);
 
     var shape = this.initActivity(this.paintImplementation(
       xpdlJson, x, y, width, height, name, 'lightyellow', borderColor));
@@ -862,10 +859,6 @@ net.BpmnJS.prototype = {
         name = xpdlJson.Name,
         //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
         borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
-
-
-    // Add xpdl to tree
-    this.activities.push(xpdlJson);
 
     var shape = this.initActivity(this.paintPool(xpdlJson, x, y, name, 'lightblue', borderColor));
 
@@ -892,7 +885,7 @@ net.BpmnJS.prototype = {
       if(shape.hasOwnProperty('shapeType')){
 
           // UPDATE COORDINATES
-          if (shape.shapeType != 'Text' && shape.shapeType != 'Transition' && shape.shapeType != 'Pool' && shape.shapeType != 'RotatedText') {
+          if (shape.shapeType != 'Text' && shape.shapeType != 'Transition' && shape.shapeType != 'Pool' && shape.shapeType != 'Lane' && shape.shapeType != 'RotatedText' && shape.shapeType != 'Condition') {
             console.log(shape);
             shape.associatedXPDL["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].XCoordinate = shape.getBBox().x;
             shape.associatedXPDL["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].YCoordinate= shape.getBBox().y;
@@ -906,7 +899,7 @@ net.BpmnJS.prototype = {
           break;
           case 'Transition':
           break;
-          case 'Route':
+          case 'Gateway':
           break;
           case 'Condition':
           break;
@@ -938,7 +931,7 @@ net.BpmnJS.prototype = {
     this.oldConnections.concat(this.newConnections);
     this.newConnections = [];
 
-    var xpdlTransitionsArray = me.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Transitions']['xpdl:Transition']
+    var xpdlTransitionsArray = me.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Transitions']['xpdl:Transition'];
     xpdlTransitionsArray.forEach(function(transition, index){
       me.removedConnectionsIds.forEach(function(id){
         if(id === transition.Id){
@@ -947,14 +940,30 @@ net.BpmnJS.prototype = {
 
       });
     });
+    me.removedConnectionsIds = [];
 
     // UPDATE THE ACTIVITIES
-    this.newActivities.forEach(function(connection){
-
+    this.newActivities.forEach(function(activity){
+      me.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Activities']['xpdl:Activity'].push(activity.associatedXPDL);
     });
+    this.oldActivities.concat(this.newActivities);
+    this.newActivities = [];
 
-    console.log('updated xpdlJson: ');
-    console.log(this.xpdlJson);
+    console.log('removed activities:');
+    console.log(me.removedActivitiesIds);
+    var xpdlActivitiesArray = me.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Activities']['xpdl:Activity'];
+    xpdlActivitiesArray.forEach(function(activity, index){
+      me.removedActivitiesIds.forEach(function(id){
+        if(id === activity.Id){
+          xpdlActivitiesArray.splice(index, 1);
+        }
+
+      });
+    });
+    me.removedActivitiesIds = [];
+
+    console.log('updated activities: ');
+    console.log(this.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Activities']['xpdl:Activity']);
     return this.xpdlJson;
   },
 
