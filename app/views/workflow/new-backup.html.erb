@@ -12,84 +12,15 @@
 
 
 $(function(){
-  $('#create').hide().click(); // load 'Create Workflow' modal
-
-  $('#workflowname_err').hide();
-  $('#importFile').hide();
 
   var alreadyLoaded = false;
-  var workflow = { id:null, name:null, data:null };
 
-  $('#create_workflow').on('hidden.bs.modal', function () {
-    $('#workflowName').parent('div').removeClass('has-error');
-    $('#workflowname_err').hide();
-    $('#workflowName').val("");
-  });
-    
-  $('#workflowName').focus(function () {
-    if ($('#workflowName').parent('div').hasClass('has-error')) {
-      $('#workflowName').parent('div').removeClass('has-error');
-      $('#workflowname_err').hide();
-    }
-  });
-
-  $('#template-type').on('change', function(e) {
-    if ($(this).val() === 'import') {
-      $('#importFile').show();
-    } else {
-      $('#importFile').hide();
-    }
-  });
-
-  $("#create_workflow form").submit(function(e) {
-    var workflowName = $('#workflowName').val();
-    workflow.name = workflowName;
-
-    if (workflowName == "" || workflowName == null) {
-      $('#workflowName').parent('div').addClass('has-error');
-      $('#workflowname_err').show();
-    }
-    else {
-      switch ($('#template-type').val()) {
-        case 'blank':
-          console.log('blank');
-          // Make a call to the server to create a new (blank) workflow.
-          // Save the id for future save (update) calls.
-          console.log(workflow.name);
-          $.ajax({
-            beforeSend: function(req) {
-              req.setRequestHeader("Accept", "application/json");
-            },
-            url: "/workflow/create", 
-            type: "POST",
-            data: {
-              workflow: {
-                name: workflow.name,
-                json: workflow.data // == null since no json data for new workflow yet!
-              }
-            },
-            success: function(workflowId) {
-              // Grab the workfow id of our newly-created workflow.
-              console.log('Created new workflow...');
-              workflow.id = workflowId;
-              // Hide modal.
-              $('#create_workflow').modal('hide');
-            }
-          });
-          break;
-        case 'default':
-          console.log('default');
-          break;
-        case 'import':
-          console.log('import');
-          break;
-      }
-    }
-    e.preventDefault();
-  });
-
-  
-  // workflow.name = "Test"; // TODO read from user
+  var workflow = {
+    name: "",
+    id: null,
+    data: null
+  };
+  workflow.name = "Test"; // TODO read from user
 
   // TODO
   // MAKE THE CANVAS RESIZABLE
@@ -107,7 +38,26 @@ $(function(){
     });
 
 
-  
+  // Make a call to the server to create a new (blank) workflow.
+  // Save the id for future save (update) calls.
+  $.ajax({
+    beforeSend: function(req) {
+      req.setRequestHeader("Accept", "application/json");
+    },
+    url: "/workflow/create", 
+    type: "POST",
+    data: {
+      workflow: {
+        name: workflow.name,
+        json: workflow.data // == null since no json data for new workflow yet!
+      }
+    },
+    success: function(workflowId) {
+      // Grab the workfow id of our newly-created workflow.
+      console.log('Created new workflow...');
+      workflow.id = workflowId;
+    }
+  });
 
   // WHEN YOU CLICK THE 'LOAD DEFAULT WORKFLOW' BUTTON
   $("#import").click(function() {
@@ -225,6 +175,19 @@ $(function(){
 });
 </script>
 
+<!-- IMPORT BUTTONS -->
+<form>
+  <table>
+    <tr>
+      <td> <input type="file" name="XPDL"> </td>
+      <td> <input type="submit"> </td>
+      <td> <input type="button" value="Load Default Workflow" id="import"></input> </td>
+    </tr> 
+  </table>
+</form>
+
+<br/>
+
 <div id="workflow-info" class="row">
   <div class="col-md-11"><h3 id="workflow-name">My Workflow</h3>
     <div id="log"></div>
@@ -256,10 +219,15 @@ $(function(){
     <button type="button" class="btn btn-default tb-item" id="tb-transaction"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-subprocess"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-callactivity"></button>
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-implementation"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-edge"></button> -->
     <button type="button" class="btn btn-default tb-item" id="tb-gateway" style="border:2px solid #333"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-datastore"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-participant" style="border:2px solid #333"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-lane" style="border:2px solid #333"></button>
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-boundaryevent"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-receivetask"></button> -->
+    <!-- <button type="button" class="btn btn-default tb-item" id="tb-sendtask"></button> -->
     <button type="button" class="btn btn-default tb-item" id="tb-sequenceflow" style="border:2px solid #333"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-messageflow"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-association"></button>
@@ -298,51 +266,3 @@ $(function(){
 <br/>
 <br/>
 <br/>
-
-<button type="button" class="btn btn-primary" id="create" data-toggle="modal" data-target="#create_workflow">
-  Create Workflow
-</button>
-
-<!-- Create Workflow Modal -->
-<div class="modal fade" id="create_workflow" role="dialog" aria-labelledby="createWorkflowModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="createWorkflowModalLabel">Create Workflow</h4>
-            </div>
-            <form role="form">
-              <div class="modal-body">
-                  <div class="form_container">
-                      <div class="form-group">
-                          <div class="formLabel">
-                              <label for="workflowName">Name</label>
-                          </div>
-                          <div class="formField">
-                              <input id="workflowName" name="workflowName" type="text" class="form-control" />
-                              <p id="workflowname_err" class="validation_msg control-label">Name is a mandatory field.</p>
-                          </div>
-                      </div>
-                      <div class="form-group">
-                          <div class="formLabel">
-                              <label for="workflow">Template</label>
-                          </div>
-                          <select id="template-type" class="form-control">
-                            <option value="blank">Blank</option>
-                            <option value="default">Default</option>
-                            <option value="import">Import...</option>
-                          </select>
-                      </div>
-                      <div class="form-group">
-                        <input type="file" id="importFile">
-                      </div>
-                  </div>
-              </div>
-              <div class="modal-footer">
-                  <button id="create" type="submit" class="btn btn-primary">Create</button>
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-              </div>
-            </form>
-        </div>
-    </div>
-</div>
