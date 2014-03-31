@@ -19,7 +19,7 @@
       <% @simulation_results.each do |simulation_result| %>
         <tr>
           <td><%= simulation_result.id %></td>
-          <td><%= simulation_result.workflow_id %></td>
+          <td><%= simulation_result.workflow_id%></td>
           <td><%= simulation_result.created_at %></td>
           <td><a href="#<%= simulation_result.id %>" data-toggle="modal">View</a></td>
           <td><%= simulation_result.status %></td>
