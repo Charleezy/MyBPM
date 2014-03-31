@@ -59,7 +59,7 @@ $(function(){
     else {
       switch ($('#template-type').val()) {
         case 'blank':
-          createNewWorkflow(); break;
+          createNewWorkflow(); loadBlankWorkflow(); break;
         case 'default':
           createNewWorkflow(); loadDefaultWorkflow(); break;
         case 'import':
@@ -115,6 +115,12 @@ $(function(){
     console.log(file);
   }
 
+  function loadBlankWorkflow() {
+    $('#toolbox').removeClass('hide');
+    // TODO pass in workflow name
+    workflow.data = new net.BpmnJS(null,$('#canvas')[0],false);
+  }
+
   function loadDefaultWorkflow() {
     $.ajax({
       beforeSend: function(req) {
@@ -154,6 +160,7 @@ $(function(){
           json: workflow.data
         }
       },
+      processData: false,
       success: function(response) {
         console.log('Saved workflow...');
         console.log(response);
