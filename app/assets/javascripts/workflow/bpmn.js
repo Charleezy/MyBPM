@@ -32,6 +32,7 @@ function assert(condition, message) {
         
 // Constructor
 net.BpmnJS = function(xpdlJson, canvas, isStatic){
+
   // IF THE JSON OBJECT IS NOT CREATED AT THE BEGINNING
   if(xpdlJson === null)
     this.xpdlJson = XpdlJsonGenerator.getNewWorkflowJson();
@@ -116,10 +117,6 @@ net.BpmnJS.prototype = {
       var pool = this.pools["xpdl:Pool"];
       console.log(pool);
       var temporaryId = pool.Id;
-      var newId = me.generateNewID();
-      me.replaceProperty(me.xpdlJson, 'Id', temporaryId, newId);
-      me.replaceProperty(me.xpdlJson, 'From', temporaryId, newId);
-      me.replaceProperty(me.xpdlJson, 'To', temporaryId, newId);
       // console.log('newId: ' + pool.Id);
       // The coordinates of the pools
       
@@ -151,10 +148,6 @@ net.BpmnJS.prototype = {
       var activities = this.process["xpdl:Activities"]["xpdl:Activity"];
       activities.forEach(function(activity) {
         var temporaryId = activity.Id;
-        var newId = me.generateNewID();
-        me.replaceProperty(me.xpdlJson, 'Id', temporaryId, newId);
-        me.replaceProperty(me.xpdlJson, 'From', temporaryId, newId);
-        me.replaceProperty(me.xpdlJson, 'To', temporaryId, newId);
         // console.log('newId: ' + activity.Id);
         var xCoordinate = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].XCoordinate);
         var yCoordinate = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].YCoordinate);
@@ -173,7 +166,6 @@ net.BpmnJS.prototype = {
     if (this.process.hasOwnProperty('xpdl:Transitions')) {
       this.transitions = this.process["xpdl:Transitions"]["xpdl:Transition"];
       this.transitions.forEach(function(transition) {
-        me.replaceProperty(me.xpdlJson, 'Id', transition.Id, me.generateNewID());
         // Reference the activities we're transitioning to/from.
         var element1 = me.getById(transition.From);
         var element2 = me.getById(transition.To);
@@ -183,6 +175,7 @@ net.BpmnJS.prototype = {
         else {
           var condition = "";
         }
+
         // Create link association between the two activities.
         var connection = me.connectElements(element1, element2, condition, 'imported');
         connection.associatedXPDL = transition;
