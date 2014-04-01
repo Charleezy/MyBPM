@@ -215,6 +215,7 @@ funSaveAsImage: function() {
   clear: function() {
     this.paper.clear();
     this.allConnections.length = 0;
+    this.totalLanes = 0;
   },
 
   enableContextMenu: function(element, workflow) {
@@ -360,7 +361,7 @@ funSaveAsImage: function() {
         }
         var laneTitle = prompt('Please enter title of lane:');
         if (laneTitle === null) return;
-        var x = 0, y = 0;
+        var x = 10, y = 10;
 
         me.initLane(x,y, laneTitle, element);  
         contextMenu.hide();
@@ -370,7 +371,7 @@ funSaveAsImage: function() {
       $('body:not(#editor-contextmenu)').click(function() {
         contextMenu.off('click', 'a#remove-element');
         contextMenu.off('click', 'a#add-annotation');
-        contextMenu.off('click', 'a#add-pool');
+        contextMenu.off('click', 'a#add-pool-lane');
         contextMenu.hide();
       });
       return false;
