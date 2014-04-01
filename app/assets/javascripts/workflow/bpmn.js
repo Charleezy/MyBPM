@@ -194,6 +194,22 @@ net.BpmnJS.prototype = {
       }, this);
     }
   },
+  
+funSaveAsImage: function() {
+    var svg = this.paper.toSVG();
+    canvg(document.getElementById('myCanvas'), svg);
+    $("#myCanvas").hide();
+    var varMyCanvas = document.getElementById("myCanvas");
+    var img = new Image();
+    img    = varMyCanvas.toDataURL("image/png");
+    var choice = confirm("are you sure you want to download?");
+    if (choice == true)
+      {
+        var a = $("<a>").attr("href", img).attr("download", "img.png").appendTo("body");
+        a[0].click();
+        a.remove();
+      }
+    },
 
   clear: function() {
     this.paper.clear();

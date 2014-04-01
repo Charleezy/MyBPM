@@ -8,6 +8,10 @@
 <%= javascript_include_tag 'workflow/bpmn.js' %>
 <%= javascript_include_tag 'workflow/xpdl-json-generator.js' %>
 <%= javascript_include_tag 'workflow/graffle.js' %>
+<%= javascript_include_tag 'workflow/raphael.export.js' %>
+<%= javascript_include_tag 'workflow/rgbcolor.js' %>
+<%= javascript_include_tag 'workflow/StackBlur.js' %>
+<%= javascript_include_tag 'workflow/canvg.js' %>
 <script type="text/javascript">
 
 
@@ -137,6 +141,10 @@ $(function(){
     });
   }
 
+  $("#saveAsImage").click(function(){
+        workflow.data.funSaveAsImage();    
+  });
+  
   $("#save").click(function() {
     console.log('saving (updating) the workflow...');
     workflow.data = workflow.data.updateXPDL();
@@ -259,6 +267,9 @@ $(function(){
     <button type="button" class="btn btn-default tb-item" id="tb-clearcanvas" style="border:2px solid #333"></button>
 </div>
 <div id="canvas"></div>
+<a href="img.png" download="output.png">
+<canvas id="myCanvas"></canvas>
+</a>
 <div id="editor-contextmenu" class="dropdown clearfix">
   <ul class="dropdown-menu" role="menu">
     <li><a id="add-annotation">Add Annotation...</a></li>
@@ -276,7 +287,7 @@ $(function(){
     </button>
     <ul class="dropdown-menu" role="menu">
       <li><a href="#">As File...</a></li>
-      <li><a href="#">As Image...</a></li>
+      <li id = "saveAsImage">As Image...</li> 
     </ul>
   </div>
 </div>
