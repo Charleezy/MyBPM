@@ -1,7 +1,7 @@
 class Workflow < ActiveRecord::Base
   belongs_to :user
 
-  attr_accessor :xpdl
+  attr_accessor :xpdl, :json
 
   # Causes ActiveRecord to run this method
   # before saving (creating or updating).
@@ -11,10 +11,14 @@ class Workflow < ActiveRecord::Base
 private
 
   def copy_to_file
+    puts "HELLO"
+    puts json.inspect
+
     # Write data to the file.
     unless File.directory?(file_directory)
       FileUtils.mkdir_p(file_directory)
     end
+    #xpdl = json.to_xml if !json.blank?
     File.open(file_name, 'w') { |file| file.write( xpdl ) }
   end
 

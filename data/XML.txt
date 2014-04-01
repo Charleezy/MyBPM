@@ -1,226 +1,231 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Id="aeedaf10-d58c-40e3-bc2b-b132e368319a" Name="Simple Workflow" xmlns="http://www.wfmc.org/2009/XPDL2.2">
-  <PackageHeader>
-    <XPDLVersion>2.2</XPDLVersion>
-    <Vendor>Bizagi Process Modeler.</Vendor>
-    <Created>2014-03-04T15:33:04.505654-05:00</Created>
-    <ModificationDate>2014-03-04T15:36:45.3532839-05:00</ModificationDate>
-    <Description>Diagram 1</Description>
-    <Documentation ></Documentation>
-  </PackageHeader>
-  <RedefinableHeader>
-    <Author>Thiago</Author>
-    <Version>1.0</Version>
-    <Countrykey>CO</Countrykey>
-  </RedefinableHeader>
-  <ExternalPackages ></ExternalPackages>
-  <Pools>
-    <Pool Id="519e79d7-b709-44bf-8d6a-f8c8704b6b1e" Name="Main Process" Process="63081326-d2c3-4bee-9156-93ad0c73ba96" BoundaryVisible="false">
-      <Lanes ></Lanes>
-      <NodeGraphicsInfos>
-        <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="0" Width="0" BorderColor="-16777216" FillColor="-1">
-          <Coordinates XCoordinate="0" YCoordinate="0" ></Coordinates>
-        </NodeGraphicsInfo>
-      </NodeGraphicsInfos>
-    </Pool>
-    <Pool Id="bcc86ce6-7139-4afc-a293-400d5a43d002" Name="Process 1" Process="bcb151a7-2710-46a8-9a48-d4a9ade4302c" BoundaryVisible="true">
-      <Lanes ></Lanes>
-      <NodeGraphicsInfos>
-        <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="350" Width="700" BorderColor="-16777216" FillColor="-1">
-          <Coordinates XCoordinate="30" YCoordinate="30" ></Coordinates>
-        </NodeGraphicsInfo>
-      </NodeGraphicsInfos>
-    </Pool>
-  </Pools>
-  <Associations ></Associations>
-  <Artifacts ></Artifacts>
-  <WorkflowProcesses>
-    <WorkflowProcess Id="63081326-d2c3-4bee-9156-93ad0c73ba96" Name="Main Process">
-      <ProcessHeader>
-        <Created>2014-03-04T15:37:03.1480824-05:00</Created>
-        <Description ></Description>
-      </ProcessHeader>
-      <RedefinableHeader>
-        <Author ></Author>
-        <Version ></Version>
-        <Countrykey>CO</Countrykey>
-      </RedefinableHeader>
-      <ActivitySets ></ActivitySets>
-      <DataInputOutputs ></DataInputOutputs>
-      <ExtendedAttributes ></ExtendedAttributes>
-    </WorkflowProcess>
-    <WorkflowProcess Id="bcb151a7-2710-46a8-9a48-d4a9ade4302c" Name="Process 1">
-      <ProcessHeader>
-        <Created>2014-03-04T15:37:03.1480824-05:00</Created>
-        <Description ></Description>
-      </ProcessHeader>
-      <RedefinableHeader>
-        <Author ></Author>
-        <Version ></Version>
-        <Countrykey>CO</Countrykey>
-      </RedefinableHeader>
-      <ActivitySets ></ActivitySets>
-      <DataInputOutputs ></DataInputOutputs>
-      <Activities>
-        <Activity Id="55fef658-cc7c-4f86-aa07-e65c5f6f94fa" Name="">
-          <Description ></Description>
-          <Event>
-            <StartEvent Trigger="None" ></StartEvent>
-          </Event>
-          <Documentation ></Documentation>
-          <NodeGraphicsInfos>
-            <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="30" Width="30" BorderColor="-10311914" FillColor="green">
-              <Coordinates XCoordinate="124" YCoordinate="169" ></Coordinates>
-            </NodeGraphicsInfo>
-          </NodeGraphicsInfos>
-          <ExtendedAttributes ></ExtendedAttributes>
-        </Activity>
-        <Activity Id="31bcc7c6-249b-4223-95d0-c7f9106c1279" Name="Task 1">
-          <Description ></Description>
-          <Implementation>
-            <Task ></Task>
-          </Implementation>
-          <Performers ></Performers>
-          <Documentation ></Documentation>
-          <Loop LoopType="None" ></Loop>
-          <NodeGraphicsInfos>
-            <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="60" Width="90" BorderColor="-16553830" FillColor="blue">
-              <Coordinates XCoordinate="285" YCoordinate="57" ></Coordinates>
-            </NodeGraphicsInfo>
-          </NodeGraphicsInfos>
-          <ExtendedAttributes ></ExtendedAttributes>
-        </Activity>
-        <Activity Id="c8557b1f-8e5e-4ddd-9e02-510b0f2b9581" Name="Task 2">
-          <Description ></Description>
-          <Implementation>
-            <Task ></Task>
-          </Implementation>
-          <Performers ></Performers>
-          <Documentation ></Documentation>
-          <Loop LoopType="None" ></Loop>
-          <NodeGraphicsInfos>
-            <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="60" Width="90" BorderColor="-16553830" FillColor="blue">
-              <Coordinates XCoordinate="276" YCoordinate="238" ></Coordinates>
-            </NodeGraphicsInfo>
-          </NodeGraphicsInfos>
-          <ExtendedAttributes ></ExtendedAttributes>
-        </Activity>
-        <Activity Id="7783f32d-5d7a-4f19-b685-fc124203ae97" Name="">
-          <Description ></Description>
-          <Route ></Route>
-          <Documentation ></Documentation>
-          <NodeGraphicsInfos>
-            <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="40" Width="40" BorderColor="-5855715" FillColor="yellow">
-              <Coordinates XCoordinate="192" YCoordinate="164" ></Coordinates>
-            </NodeGraphicsInfo>
-          </NodeGraphicsInfos>
-          <ExtendedAttributes ></ExtendedAttributes>
-        </Activity>
-        <Activity Id="6fd131d6-238e-4382-ba5f-e4c927b8b1c7" Name="">
-          <Description ></Description>
-          <Route ></Route>
-          <Documentation ></Documentation>
-          <NodeGraphicsInfos>
-            <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="40" Width="40" BorderColor="-5855715" FillColor="-52">
-              <Coordinates XCoordinate="417" YCoordinate="168" ></Coordinates>
-            </NodeGraphicsInfo>
-          </NodeGraphicsInfos>
-          <ExtendedAttributes ></ExtendedAttributes>
-        </Activity>
-        <Activity Id="33ed61d6-e8ec-4295-9fac-24ef63668ac0" Name="">
-          <Description ></Description>
-          <Event>
-            <EndEvent Result="None" ></EndEvent>
-          </Event>
-          <Documentation ></Documentation>
-          <NodeGraphicsInfos>
-            <NodeGraphicsInfo ToolId="BizAgi_Process_Modeler" Height="30" Width="30" BorderColor="-6750208" FillColor="red">
-              <Coordinates XCoordinate="522" YCoordinate="173" ></Coordinates>
-            </NodeGraphicsInfo>
-          </NodeGraphicsInfos>
-          <ExtendedAttributes ></ExtendedAttributes>
-        </Activity>
-      </Activities>
-      <Transitions>
-        <Transition Id="d4f3a5d0-1d7c-423a-80a9-d41451376977" From="55fef658-cc7c-4f86-aa07-e65c5f6f94fa" To="7783f32d-5d7a-4f19-b685-fc124203ae97">
-          <Condition ></Condition>
-          <Description ></Description>
-          <ConnectorGraphicsInfos>
-            <ConnectorGraphicsInfo ToolId="BizAgi_Process_Modeler" BorderColor="-16777216">
-              <Coordinates XCoordinate="154" YCoordinate="184" ></Coordinates>
-              <Coordinates XCoordinate="192" YCoordinate="184" ></Coordinates>
-            </ConnectorGraphicsInfo>
-          </ConnectorGraphicsInfos>
-          <ExtendedAttributes ></ExtendedAttributes>
-        </Transition>
-        <Transition Id="95221df9-a495-4cf2-b4c9-cfb73aef10a5" From="7783f32d-5d7a-4f19-b685-fc124203ae97" To="31bcc7c6-249b-4223-95d0-c7f9106c1279">
-          <Condition Type="CONDITION">
-            <Expression ></Expression>
-          </Condition>
-          <Description ></Description>
-          <ConnectorGraphicsInfos>
-            <ConnectorGraphicsInfo ToolId="BizAgi_Process_Modeler" BorderColor="-16777216">
-              <Coordinates XCoordinate="212" YCoordinate="164" ></Coordinates>
-              <Coordinates XCoordinate="212" YCoordinate="87" ></Coordinates>
-              <Coordinates XCoordinate="285" YCoordinate="87" ></Coordinates>
-            </ConnectorGraphicsInfo>
-          </ConnectorGraphicsInfos>
-          <ExtendedAttributes ></ExtendedAttributes>
-        </Transition>
-        <Transition Id="f5a79436-3eae-4dac-815e-d327e436bc7d" From="7783f32d-5d7a-4f19-b685-fc124203ae97" To="c8557b1f-8e5e-4ddd-9e02-510b0f2b9581">
-          <Condition Type="CONDITION">
-            <Expression ></Expression>
-          </Condition>
-          <Description ></Description>
-          <ConnectorGraphicsInfos>
-            <ConnectorGraphicsInfo ToolId="BizAgi_Process_Modeler" BorderColor="-16777216">
-              <Coordinates XCoordinate="212" YCoordinate="204" ></Coordinates>
-              <Coordinates XCoordinate="212" YCoordinate="268" ></Coordinates>
-              <Coordinates XCoordinate="276" YCoordinate="268" ></Coordinates>
-            </ConnectorGraphicsInfo>
-          </ConnectorGraphicsInfos>
-          <ExtendedAttributes ></ExtendedAttributes>
-        </Transition>
-        <Transition Id="c7bce546-429f-4924-9880-b078a926a2c0" From="31bcc7c6-249b-4223-95d0-c7f9106c1279" To="6fd131d6-238e-4382-ba5f-e4c927b8b1c7">
-          <Condition ></Condition>
-          <Description ></Description>
-          <ConnectorGraphicsInfos>
-            <ConnectorGraphicsInfo ToolId="BizAgi_Process_Modeler" BorderColor="-16777216">
-              <Coordinates XCoordinate="375" YCoordinate="87" ></Coordinates>
-              <Coordinates XCoordinate="437" YCoordinate="87" ></Coordinates>
-              <Coordinates XCoordinate="437" YCoordinate="168" ></Coordinates>
-            </ConnectorGraphicsInfo>
-          </ConnectorGraphicsInfos>
-          <ExtendedAttributes ></ExtendedAttributes>
-        </Transition>
-        <Transition Id="40e13754-b2da-47d3-9efd-a7c7b109b375" From="c8557b1f-8e5e-4ddd-9e02-510b0f2b9581" To="6fd131d6-238e-4382-ba5f-e4c927b8b1c7">
-          <Condition ></Condition>
-          <Description ></Description>
-          <ConnectorGraphicsInfos>
-            <ConnectorGraphicsInfo ToolId="BizAgi_Process_Modeler" BorderColor="-16777216">
-              <Coordinates XCoordinate="366" YCoordinate="268" ></Coordinates>
-              <Coordinates XCoordinate="437" YCoordinate="268" ></Coordinates>
-              <Coordinates XCoordinate="437" YCoordinate="208" ></Coordinates>
-            </ConnectorGraphicsInfo>
-          </ConnectorGraphicsInfos>
-          <ExtendedAttributes ></ExtendedAttributes>
-        </Transition>
-        <Transition Id="f868ee8c-b95b-4645-952e-f32749b91506" From="6fd131d6-238e-4382-ba5f-e4c927b8b1c7" To="33ed61d6-e8ec-4295-9fac-24ef63668ac0">
-          <Condition Type="CONDITION">
-            <Expression ></Expression>
-          </Condition>
-          <Description ></Description>
-          <ConnectorGraphicsInfos>
-            <ConnectorGraphicsInfo ToolId="BizAgi_Process_Modeler" BorderColor="-16777216">
-              <Coordinates XCoordinate="457" YCoordinate="188" ></Coordinates>
-              <Coordinates XCoordinate="522" YCoordinate="188" ></Coordinates>
-            </ConnectorGraphicsInfo>
-          </ConnectorGraphicsInfos>
-          <ExtendedAttributes ></ExtendedAttributes>
-        </Transition>
-      </Transitions>
-      <ExtendedAttributes ></ExtendedAttributes>
-    </WorkflowProcess>
-  </WorkflowProcesses>
-  <ExtendedAttributes ></ExtendedAttributes>
-</Package>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+    Together Workflow Editor
+    Copyright (C) 2011 Together Teamsolutions Co., Ltd.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or 
+    (at your option) any later version.
+ 
+    This program is distributed in the hope that it will be useful, 
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+    GNU General Public License for more details.
+ 
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see http://www.gnu.org/licenses
+-->
+<xpdl:Package xmlns:xpdl="http://www.wfmc.org/2008/XPDL2.1" xmlns="http://www.wfmc.org/2008/XPDL2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Id="workflow_patterns" Name="Workflow patterns" xsi:schemaLocation="http://www.wfmc.org/2008/XPDL2.1 http://www.wfmc.org/standards/docs/bpmnxpdl_31.xsd">
+    <xpdl:PackageHeader>
+        <xpdl:XPDLVersion>2.1</xpdl:XPDLVersion>
+        <xpdl:Vendor>(c) Together Teamsolutions Co., Ltd.</xpdl:Vendor>
+        <xpdl:Created>2004-08-31 22:22:17</xpdl:Created>
+        <xpdl:Description>Contains workflow processes that show workflow patterns defined by Wil van der Aalst that are more or less directly supported by XPDL and Shark engine</xpdl:Description>
+    </xpdl:PackageHeader>
+    <xpdl:RedefinableHeader PublicationStatus="UNDER_TEST">
+        <xpdl:Author>Sasa Bojanic</xpdl:Author>
+    </xpdl:RedefinableHeader>
+    <xpdl:ConformanceClass GraphConformance="NON_BLOCKED"/>
+    <xpdl:Script Type="text/javascript"/>
+    <xpdl:Participants>
+        <xpdl:Participant Id="test" Name="Test">
+            <xpdl:ParticipantType Type="ROLE"/>
+        </xpdl:Participant>
+    </xpdl:Participants>
+    <xpdl:Applications>
+        <xpdl:Application Id="ResetCounter">
+            <xpdl:FormalParameters>
+                <xpdl:FormalParameter Id="counter" IsArray="false" Mode="OUT">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="INTEGER"/>
+                    </xpdl:DataType>
+                </xpdl:FormalParameter>
+            </xpdl:FormalParameters>
+            <xpdl:ExtendedAttributes>
+                <xpdl:ExtendedAttribute Name="ToolAgentClass" Value="org.enhydra.shark.toolagent.JavaScriptToolAgent"/>
+                <xpdl:ExtendedAttribute Name="Script" Value="counter = 0;"/>
+            </xpdl:ExtendedAttributes>
+        </xpdl:Application>
+        <xpdl:Application Id="IncrementCounter">
+            <xpdl:FormalParameters>
+                <xpdl:FormalParameter Id="counter" IsArray="false" Mode="INOUT">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="INTEGER"/>
+                    </xpdl:DataType>
+                </xpdl:FormalParameter>
+            </xpdl:FormalParameters>
+            <xpdl:ExtendedAttributes>
+                <xpdl:ExtendedAttribute Name="ToolAgentClass" Value="org.enhydra.shark.toolagent.JavaScriptToolAgent"/>
+                <xpdl:ExtendedAttribute Name="Script" Value="counter = counter + 1;"/>
+            </xpdl:ExtendedAttributes>
+        </xpdl:Application>
+        <xpdl:Application Id="DecrementCounter">
+            <xpdl:FormalParameters>
+                <xpdl:FormalParameter Id="counter" IsArray="false" Mode="INOUT">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="INTEGER"/>
+                    </xpdl:DataType>
+                </xpdl:FormalParameter>
+            </xpdl:FormalParameters>
+            <xpdl:ExtendedAttributes>
+                <xpdl:ExtendedAttribute Name="ToolAgentClass" Value="org.enhydra.shark.toolagent.JavaScriptToolAgent"/>
+                <xpdl:ExtendedAttribute Name="Script" Value="counter = counter - 1;"/>
+            </xpdl:ExtendedAttributes>
+        </xpdl:Application>
+        <xpdl:Application Id="SetCounter">
+            <xpdl:FormalParameters>
+                <xpdl:FormalParameter Id="value" IsArray="false" Mode="IN">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="INTEGER"/>
+                    </xpdl:DataType>
+                </xpdl:FormalParameter>
+                <xpdl:FormalParameter Id="counter" IsArray="false" Mode="OUT">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="INTEGER"/>
+                    </xpdl:DataType>
+                </xpdl:FormalParameter>
+            </xpdl:FormalParameters>
+            <xpdl:ExtendedAttributes>
+                <xpdl:ExtendedAttribute Name="ToolAgentClass" Value="org.enhydra.shark.toolagent.JavaScriptToolAgent"/>
+                <xpdl:ExtendedAttribute Name="Script" Value="counter = value;"/>
+            </xpdl:ExtendedAttributes>
+        </xpdl:Application>
+    </xpdl:Applications>
+    <xpdl:DataFields>
+        <xpdl:DataField Id="whereToGo" IsArray="false" Name="Where to go">
+            <xpdl:DataType>
+                <xpdl:BasicType Type="STRING"/>
+            </xpdl:DataType>
+            <xpdl:InitialValue>B</xpdl:InitialValue>
+            <xpdl:Description>The value of this variable determines the process flow.</xpdl:Description>
+        </xpdl:DataField>
+    </xpdl:DataFields>
+    <xpdl:Pools>
+        <xpdl:Pool BoundaryVisible="true" Id="workflow_patterns_pool1" MainPool="true" Name="WfBCP1 Sequence" Orientation="HORIZONTAL" Process="WfBCP1_Sequence">
+            <xpdl:Lanes>
+                <xpdl:Lane Id="workflow_patterns_pool1_lan1" Name="Test">
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:NodeGraphicsInfos>
+                    <xpdl:Performers>
+                        <xpdl:Performer>test</xpdl:Performer>
+                    </xpdl:Performers>
+                </xpdl:Lane>
+                <xpdl:Lane Id="workflow_patterns_pool1_lan1" Name="Test">
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:NodeGraphicsInfos>
+                    <xpdl:Performers>
+                        <xpdl:Performer>test</xpdl:Performer>
+                    </xpdl:Performers>
+                </xpdl:Lane>
+            </xpdl:Lanes>
+            <xpdl:NodeGraphicsInfos>
+                <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" IsVisible="true" ToolId="JaWE"/>
+            </xpdl:NodeGraphicsInfos>
+        </xpdl:Pool>
+    </xpdl:Pools>
+    <xpdl:WorkflowProcesses>
+        <xpdl:WorkflowProcess AccessLevel="PUBLIC" Id="WfBCP1_Sequence" Name="WfBCP1 Sequence">
+            <xpdl:ProcessHeader DurationUnit="D">
+                <xpdl:Created>2004-08-31 22:28:17</xpdl:Created>
+                <xpdl:Description>execute activities A, B and C in sequence</xpdl:Description>
+            </xpdl:ProcessHeader>
+            <xpdl:RedefinableHeader PublicationStatus="UNDER_TEST">
+                <xpdl:Author>Sasa Bojanic</xpdl:Author>
+            </xpdl:RedefinableHeader>
+            <xpdl:Activities>
+                <xpdl:Activity Id="A3" Name="A">
+                    <xpdl:Description>Just press 'Complete' button</xpdl:Description>
+                    <xpdl:Implementation>
+                        <xpdl:No/>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>test</xpdl:Performer>
+                    </xpdl:Performers>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="60" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="90">
+                            <xpdl:Coordinates XCoordinate="206" YCoordinate="48"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity Id="B5" Name="B">
+                    <xpdl:Description>Just press 'Complete' button</xpdl:Description>
+                    <xpdl:Implementation>
+                        <xpdl:No/>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>test</xpdl:Performer>
+                    </xpdl:Performers>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="60" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="90">
+                            <xpdl:Coordinates XCoordinate="356" YCoordinate="48"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity Id="C4" Name="C">
+                    <xpdl:Description>Just press 'Complete' button</xpdl:Description>
+                    <xpdl:Implementation>
+                        <xpdl:No/>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>test</xpdl:Performer>
+                    </xpdl:Performers>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="60" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="90">
+                            <xpdl:Coordinates XCoordinate="509" YCoordinate="48"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity Id="WfBCP1_Sequence_act1">
+                    <xpdl:Event>
+                        <xpdl:StartEvent Trigger="None"/>
+                    </xpdl:Event>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="31" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="31">
+                            <xpdl:Coordinates XCoordinate="92" YCoordinate="88"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity Id="WfBCP1_Sequence_act2">
+                    <xpdl:Event>
+                        <xpdl:EndEvent Result="None"/>
+                    </xpdl:Event>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="31" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="31">
+                            <xpdl:Coordinates XCoordinate="661" YCoordinate="101"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+            </xpdl:Activities>
+            <xpdl:Transitions>
+                <xpdl:Transition From="A3" Id="WfBCP1_Sequence_Tra1" Name="Transition" To="B5">
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="white" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="B5" Id="WfBCP1_Sequence_Tra2" Name="Transition" To="C4">
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="white" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="WfBCP1_Sequence_act1" Id="WfBCP1_Sequence_tra1" To="A3">
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="white" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="C4" Id="WfBCP1_Sequence_tra2" To="WfBCP1_Sequence_act2">
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="white" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+            </xpdl:Transitions>
+        </xpdl:WorkflowProcess>
+    </xpdl:WorkflowProcesses>
+    <xpdl:ExtendedAttributes>
+        <xpdl:ExtendedAttribute Name="EDITING_TOOL" Value="Together Workflow Editor"/>
+        <xpdl:ExtendedAttribute Name="EDITING_TOOL_VERSION" Value="4.0-1-20110124-0813"/>
+        <xpdl:ExtendedAttribute Name="JaWE_CONFIGURATION" Value="default"/>
+    </xpdl:ExtendedAttributes>
+</xpdl:Package>

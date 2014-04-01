@@ -1,0 +1,35 @@
+<h1>My Simulation Results</h1>
+
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Workflow ID</th>
+      <th>Created On</th>
+      <th>Step Trace</th>
+      <th>Status</th>
+    <tr>
+  </thead>
+  <tbody>
+    <% if(@simulation_results.count == 0) %>
+      <tr>
+        <td colspan="5" align="center">You have no simulation results</td>
+      </tr>
+    <% else %>
+      <% @simulation_results.each do |simulation_result| %>
+        <tr>
+          <td><%= simulation_result.id %></td>
+          <td><%= simulation_result.workflow_id%></td>
+          <td><%= simulation_result.created_at %></td>
+          <td><a href="#<%= simulation_result.id %>" data-toggle="modal">View</a></td>
+          <td><%= simulation_result.status %></td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>
+
+
+<% @simulation_results.each do |simulation_result| %>
+  <%= generate_modal( simulation_result.id, simulation_result.step_trace, "Step Trace").html_safe %>
+<% end %>

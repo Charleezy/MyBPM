@@ -11,14 +11,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140310172229) do
+ActiveRecord::Schema.define(version: 20140324134116) do
 
   create_table "mock_data", force: true do |t|
-    t.string   "name",        null: false
     t.integer  "workflow_id"
     t.text     "mockdata"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "name"
   end
 
   add_index "mock_data", ["workflow_id"], name: "index_mock_data_on_workflow_id"
@@ -29,6 +29,7 @@ ActiveRecord::Schema.define(version: 20140310172229) do
     t.integer  "mock_data_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "status"
   end
 
   add_index "simulation_results", ["mock_data_id"], name: "index_simulation_results_on_mock_data_id"

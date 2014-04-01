@@ -1,23 +1,198 @@
-<% content_for :javascripts do %>
-  <script type="text/javascript">
-    $(document).ready(function(){
-        var bpmn = new net.BpmnJS($('#canvas')[0], []);
-        bpmn.plot($('#bpmn')[0].value);
+<%#= form_for :bpmn do |f| %>
+  <%#= f.file_field :bpmn %>
+<%# end %>
+<%= stylesheet_link_tag 'workflow' %>
+<%= javascript_include_tag 'ext_lib/xml2json.min.js' %>
+<%= javascript_include_tag 'ext_lib/raphael.js' %>
+<%= javascript_include_tag 'uuid.js' %>
+<%= javascript_include_tag 'workflow/bpmn.js' %>
+<%= javascript_include_tag 'workflow/xpdl-json-generator.js' %>
+<%= javascript_include_tag 'workflow/graffle.js' %>
+<script type="text/javascript">
+
+// EDIT
+$(function(){
+  // Get the json for this workflow.
+  var workflow_json = <%= @workflow.json.to_json.html_safe %>;
+
+  var workflow = { 
+    id: '<%= @workflow.id %>', 
+    name: '<%= @workflow.name %>', 
+    data: null 
+  };
+  workflow.data = new net.BpmnJS(workflow_json,$('#canvas')[0],false);
+  workflow.data.plot();
+  $('#toolbox').removeClass('hide');
+  
+  // TODO
+  // MAKE THE CANVAS RESIZABLE
+  // http://jqueryui.com/resizable/
+  
+  // Workflow editor instructions.
+  $('#help').click(function() {
+    $(this).toggleClass('active');
+    $('#instructions').toggleClass('hide');
+  });
+
+  $(document).keypress(function(e) {
+    var checkUndo = (e.which == 117);
+    $("#log").text("Todo: undo action!");
     });
-  </script>
-<% end %>
 
-<input type="button" value="Import" id="MyButton" >
+  $("#save").click(function() {
+    console.log('saving (updating) the workflow...');
+    var xpdlJson = workflow.data.updateXPDL();
 
+    // This assume a workflow has already been created and assigned an id.
+    $.ajax({
+      beforeSend: function(req) {
+        req.setRequestHeader("Accept", "application/json");
+      },
+      url: "/workflow/update", 
+      type: "POST",
+      data: {
+        workflow: {
+          id: workflow.id,
+          name: workflow.name,
+          xpdl: xpdlJson
+        }
+      },
+      processRequest: false,
+      success: function(response) {
+        console.log('Saved workflow...');
+        console.log(response);
+      }
+    });
+  });
 
-<%# This will get removed just keeping for testing %>
-<textarea id="bpmn" style="width:1050px;height:500px;margin:60px;">
-  <%= @workflow.xpdl %>
-</textarea>
+  // Toolbox listeners
+  $('#toolbox > .tb-item').click(function(){
+    var el = $(this);
+    // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
+     var x = 10, y= 10;
+     // var shape = null;
+      switch (el.attr('id')) {
+        case 'tb-startevent':
+          workflow.data.initStartEvent(x, y);
+          break;
+        case 'tb-intermediateevent':
+          workflow.data.initIntermediateEvent(x, y);
+          break;
+        case 'tb-endevent':
+          workflow.data.initEndEvent(x, y);
+          break;
+        case 'tb-gateway':
+          workflow.data.initGateway(x, y);
+          break;
+        case 'tb-task':
+          workflow.data.initTask(x, y);
+          break;
+        case 'tb-clearcanvas':
+          if (confirm('Are you sure you want to clear the workflow?')) {
+            workflow.data.clear();
+          }
+          break;
+        case 'tb-sequenceflow':
+          el.toggleClass('active hover');
+          $('#connect-instructions').toggleClass('hide');
+          workflow.data.onConnect(function(e) {
+            if (e === 'success') {
+              // We have successfully connected two elements.
+              el.removeClass('active hover');
+              $('#connect-instructions').addClass('hide');
+            }
+          });
+          break;
+        case 'tb-participant':
+          var poolTitle = prompt('Please enter title of pool:');
+          workflow.data.initPool(x,y, poolTitle); 
+          break;
+        case 'tb-lane': 
+          alert('Please right-click on a drawn pool and select add lane.');
+          //workflow.initLane(x,y+10, laneTitle, 'poolTitle');   
+          break;
+        default:
+          // Do nothing
+          break;
+      }
+  });
+});
+</script>
+
+<div id="workflow-info" class="row">
+  <div class="col-md-11"><h3 id="workflow-name"><%= @workflow.name %></h3>
+    <div id="log"></div>
+  </div>
+  <div class="col-md-1"><button type="button" class="btn btn-default glyphicon glyphicon-question-sign" id="help"></button></div>
+</div>
+<div id="instructions" class="panel panel-info hide">
+  <div class="panel-heading">
+    Instructions:
+  </div>
+  <div class="panel-body">
+    <ul>
+      <li>Click on a toolbox item to add it to your workflow.</li>
+      <li>Right-click on a workflow item for more options (e.g. to remove item).</li>
+    </ul>
+  </div>
+</div>
+<div id="connect-instructions" class="panel panel-primary hide">
+  <div class="panel-heading">
+    Click on two elements in your workflow to connect them...
+  </div>
+</div>
+<div class="btn-group hide" id="toolbox">
+    <!-- The buttons with dark borders have been currently implemented (have an associated action). -->
+    <button type="button" class="btn btn-default tb-item" id="tb-startevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-intermediateevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-endevent" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-task" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-transaction"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-subprocess"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-callactivity"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-gateway" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-datastore"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-participant" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-lane" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-sequenceflow" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-messageflow"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-association"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-annotation"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-clearcanvas" style="border:2px solid #333"></button>
+</div>
+<div id="canvas"></div>
+<div id="editor-contextmenu" class="dropdown clearfix">
+  <ul class="dropdown-menu" role="menu">
+    <li><a id="add-annotation">Add Annotation...</a></li>
+    <li class="divider"></li>
+    <li><a id="remove-element">Remove</a></li>
+    <li class="divider"></li>
+    <li><a id="add-pool-lane">Add Pool Lane</a></li>
+  </ul>
+</div>
+<div id="bottom-toolbar">
+  <button type="button" class="btn btn-primary" id="save">Save</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+      Export <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#">As File...</a></li>
+      <li><a href="#">As Image...</a></li>
+    </ul>
+  </div>
+</div>
+
+<div></div>
+
 <br/>
-Dynamic model:
-<div id="canvas"/> <br/>
-
+<br/>
+<br/>
+<textarea class='hide' id='jsonText'> test</textarea>
+<br/>
+<br/>
+<br/>
+<br/>
 
 
 

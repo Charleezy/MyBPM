@@ -4,159 +4,231 @@
 <%= stylesheet_link_tag 'workflow' %>
 <%= javascript_include_tag 'ext_lib/xml2json.min.js' %>
 <%= javascript_include_tag 'ext_lib/raphael.js' %>
+<%= javascript_include_tag 'uuid.js' %>
 <%= javascript_include_tag 'workflow/bpmn.js' %>
+<%= javascript_include_tag 'workflow/xpdl-json-generator.js' %>
 <%= javascript_include_tag 'workflow/graffle.js' %>
+<%= javascript_include_tag 'workflow/raphael.export.js' %>
+<%= javascript_include_tag 'workflow/rgbcolor.js' %>
+<%= javascript_include_tag 'workflow/StackBlur.js' %>
+<%= javascript_include_tag 'workflow/canvg.js' %>
 <script type="text/javascript">
-  $(function(){
-    var client = new XMLHttpRequest();
 
-    // GET JSON FILE
-    client.open('GET', 'https://dl.dropboxusercontent.com/s/yyimks43gemdazq/jsonFile.json?dl=1&token_hash=AAEwKPu9isScXrMb-m9dVvUkYjxLiZTsM2DcEiIvPbXFnQ',false);
-    client.send();
-    var jsonText = client.responseText;
-    
-    // GET XPDL FILE
-    client.open('GET', 'https://dl.dropboxusercontent.com/s/j1w6mr83r8ug0om/simpleWorkflow.xpdl?dl=1&token_hash=AAH7PHIpUBmIim-BUM6uC7WC8lAqG-36HYOqxJHkbm2WzA',false);
-    client.send();
-    var XPDLText = client.responseText;
 
-    // GET BPMN FILE
-    client.open('GET', 'https://dl.dropboxusercontent.com/s/8gmm8lss2j88i1b/testFile.bpmn?dl=1&token_hash=AAGfdvQIrgIaaLbx4cpJLbFEF9izHR-iuzOhMy5esvnV1w',false);
-    client.send();
-    var bpmnText = client.responseText;
+$(function(){
+  $('#create').hide().click(); // load 'Create Workflow' modal
 
-    // CONVERT JSON TO XPDL (NOT WORKING)
-    var x2js = new X2JS();
-    var newXPDLText = x2js.json2xml_str(jsonText);
-    
-    // CREATE THE JAVASCRIPT OBJECT BASED ON THE JSON FILE
-    var jsonObject = JSON.parse(jsonText);
-    
-
-    // FILL THE HTML ELEMENTS WITH TEXT
-    $('#json').html(jsonText);
-    $('#XPDL').html(XPDLText);
-    $('#bpmn').html(bpmnText);
-    $('#newXPDL').html(newXPDLText);
-
-    // Workflow editor instructions.
-    $('#help').click(function() {
-      $(this).toggleClass('active');
-      $('#instructions').toggleClass('hide');
-    });
-
-    var alreadyLoaded = false;
-
-    $("#convert").click(function() {
-      $.ajax({
-        beforeSend: function(req) {
-          req.setRequestHeader("Accept", "application/json");
-        },
-        url: "/workflow/xpdltojson", 
-        type: "POST",
-        success: function(data) {
-          if(!alreadyLoaded){
-            var bpmn = new net.BpmnJS($('#canvas')[0], []);
-            bpmn.plot(jsonObject);
-            alreadyLoaded = true;
-          }
-        }
-      });
-    });
-
-    // WHEN YOU CLICK THE IMPORT BUTTON
-    $('#MyButton').click(function(){
-      if(!alreadyLoaded){
-          $('#toolbox').removeClass('hide');
-          var bpmn = new net.BpmnJS(jsonObject,$('#canvas')[0]);
-          bpmn.plot();
-
-          // Toolbox listeners
-          $('#toolbox > .tb-item').click(function(){
-            var el = $(this);
-            // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
-             var x = 10, y= 10;
-             // var shape = null;
-              switch (el.attr('id')) {
-                case 'tb-startevent':
-                  bpmn.initStartEvent(x, y);
-                  break;
-                case 'tb-intermediateevent':
-                  bpmn.initIntermediateEvent(x, y);
-                  break;
-                case 'tb-endevent':
-                  bpmn.initEndEvent(x, y);
-                  break;
-                case 'tb-gateway':
-                  bpmn.initGateway(x, y);
-                  break;
-                case 'tb-task':
-                  bpmn.initTask(x, y);
-                  break;
-                case 'tb-clearcanvas':
-                  if (confirm('Are you sure you want to clear the workflow?')) {
-                    bpmn.clear();
-                  }
-                  break;
-                case 'tb-sequenceflow':
-                  el.toggleClass('active hover');
-                  $('#connect-instructions').toggleClass('hide');
-                  bpmn.onConnect(function(e) {
-                    if (e === 'success') {
-                      // We have successfully connected two elements.
-                      el.removeClass('active hover');
-                      $('#connect-instructions').addClass('hide');
-                    }
-                  });
-                  break;
-                default:
-                  // Do nothing
-                  break;
-              }
-
-          });
-
-          alreadyLoaded = true;
-      }
-
-      // Let's use a context menu (on right-click), but happy to reconsider. :)
-      // DELETE FUNCTION 
-      // $(document).keyup(function(e) {
-      //     switch(e.which){
-      //       // DELETE WHEN "DELETE" (46) OR "BACKSPACE" (8) IS PRESSED
-      //       case 46:
-      //       case 8:
-      //         // IT'S NOT REALLY DELETING RIGHT NOW, IT'S JUST HIDING
-      //         bpmn.selectedShape.glowEffect.remove();
-      //         bpmn.selectedShape.hide();
-      //         if(bpmn.selectedShape.hasOwnProperty('pair')){
-      //           bpmn.selectedShape.pair.hide();
-      //         }
-      //         break;
-      //     }       
-      // });
+  $('#workflowname_err').hide();
+  $('#importFile').hide();
   
+  var workflow = { id: null, name: null, data: null };
+
+  $('#create_workflow').on('hidden.bs.modal', function () {
+    $('#workflowName').parent('div').removeClass('has-error');
+    $('#workflowname_err').hide();
+    $('#workflowName').val("");
   });
- 
+    
+  $('#workflowName').focus(function () {
+    if ($('#workflowName').parent('div').hasClass('has-error')) {
+      $('#workflowName').parent('div').removeClass('has-error');
+      $('#workflowname_err').hide();
+    }
   });
+
+  $('#template-type').on('change', function(e) {
+    if ($(this).val() === 'import') {
+      $('#importFile').show();
+    } else {
+      $('#importFile').hide();
+    }
+  });
+
+  $('button.close').click(function() {
+    window.location = "/workflow";
+  });
+  $('button#cancel').click(function() {
+    window.location = "/workflow";
+  });
+
+  // When clicking "Create" from the popup window in "Create a workflow".
+  $("#create_workflow form").submit(function(e) {
+    var workflowName = $('#workflowName').val();
+    workflow.name = workflowName;
+
+    if (workflowName == "" || workflowName == null) {
+      $('#workflowName').parent('div').addClass('has-error');
+      $('#workflowname_err').show();
+    }
+    else {
+      switch ($('#template-type').val()) {
+        case 'blank':
+          createNewWorkflow(); loadBlankWorkflow(); break;
+        case 'default':
+          createNewWorkflow(); loadDefaultWorkflow(); break;
+        case 'import':
+          var file = $('#importFile').val();
+          createNewWorkflow(); importWorkflow(file); break;
+      }
+    }
+    e.preventDefault();
+  });
+
+  // TODO
+  // MAKE THE CANVAS RESIZABLE
+  // http://jqueryui.com/resizable/
+  
+  // Workflow editor instructions.
+  $('#help').click(function() {
+    $(this).toggleClass('active');
+    $('#instructions').toggleClass('hide');
+  });
+
+  $(document).keypress(function(e) {
+    var checkUndo = (e.which == 117);
+    $("#log").text("Todo: undo action!");
+    });
+
+  function createNewWorkflow() {
+    // Make a call to the server to create a new (blank) workflow.
+    // Save the id for future save (update) calls.
+    $.ajax({
+      beforeSend: function(req) {
+        req.setRequestHeader("Accept", "application/json");
+      },
+      url: "/workflow/create", 
+      type: "POST",
+      data: {
+        workflow: {
+          name: workflow.name,
+          json: workflow.data // == null since no json data for new workflow yet!
+        }
+      },
+      success: function(workflowId) {
+        // Grab the workfow id of our newly-created workflow.
+        console.log('Created new blank workflow...');
+        workflow.id = workflowId;
+        $('#workflow-name').text(workflow.name);
+        $('#create_workflow').modal('hide');
+      }
+    });
+  }
+
+  function importWorkflow(file) {
+    // TODO
+    console.log(file);
+  }
+
+  function loadBlankWorkflow() {
+    $('#toolbox').removeClass('hide');
+    // TODO pass in workflow name
+    workflow.data = new net.BpmnJS(null,$('#canvas')[0],false);
+  }
+
+  function loadDefaultWorkflow() {
+    $.ajax({
+      beforeSend: function(req) {
+        req.setRequestHeader("Accept", "application/json");
+      },
+      url: "/workflow/xpdltojson", 
+      type: "POST",
+      success: function(jsonObject) {
+        $('#toolbox').removeClass('hide');
+        workflow.jsonObject = jsonObject;
+        workflow.data = new net.BpmnJS(jsonObject,$('#canvas')[0],false);
+        workflow.data.plot();
+      }
+    });
+  }
+
+  $("#saveAsImage").click(function(){
+        workflow.data.funSaveAsImage();    
+  });
+  
+  $("#save").click(function() {
+    console.log('saving (updating) the workflow...');
+    workflow.data = workflow.data.updateXPDL();
+
+    // This assume a workflow has already been created and assigned an id.
+    $.ajax({
+      beforeSend: function(req) {
+        req.setRequestHeader("Accept", "application/json");
+      },
+      url: "/workflow/update", 
+      type: "POST",
+      data: {
+        workflow: {
+          id: workflow.id,
+          name: workflow.name,
+          json: workflow.data
+        }
+      },
+      processData: false,
+      success: function(response) {
+        console.log('Saved workflow...');
+        console.log(response);
+      }
+    });
+  });
+
+  // Toolbox listeners
+  $('#toolbox > .tb-item').click(function(){
+    var el = $(this);
+    // After selecting toolbox item, the new element is drawn on the upper left corner of canvas.
+     var x = 10, y= 10;
+     // var shape = null;
+      switch (el.attr('id')) {
+        case 'tb-startevent':
+          workflow.data.initStartEvent(x, y);
+          break;
+        case 'tb-intermediateevent':
+          workflow.data.initIntermediateEvent(x, y);
+          break;
+        case 'tb-endevent':
+          workflow.data.initEndEvent(x, y);
+          break;
+        case 'tb-gateway':
+          workflow.data.initGateway(x, y);
+          break;
+        case 'tb-task':
+          workflow.data.initTask(x, y);
+          break;
+        case 'tb-clearcanvas':
+          if (confirm('Are you sure you want to clear the workflow?')) {
+            workflow.data.clear();
+          }
+          break;
+        case 'tb-sequenceflow':
+          el.toggleClass('active hover');
+          $('#connect-instructions').toggleClass('hide');
+          workflow.data.onConnect(function(e) {
+            if (e === 'success') {
+              // We have successfully connected two elements.
+              el.removeClass('active hover');
+              $('#connect-instructions').addClass('hide');
+            }
+          });
+          break;
+        case 'tb-participant':
+          var poolTitle = prompt('Please enter title of pool:');
+          workflow.data.initPool(x,y, poolTitle); 
+          break;
+        case 'tb-lane': 
+          alert('Please right-click on a drawn pool and select add lane.');
+          //workflow.initLane(x,y+10, laneTitle, 'poolTitle');   
+          break;
+        default:
+          // Do nothing
+          break;
+      }
+  });
+});
 </script>
 
-<div id="file_input">
-  <p>Select a workflow file to import.</p>
-  <div class="well">
-    <%= form_for :workflow, :url => {:action => "import"} do |f| %>
-      <p>
-        <%= f.file_field :workflow %>
-      </p>
-      <br />
-      <%= f.submit %>
-    <% end %>
-  </div>
-</div>
-<input type="button" value="Import" id="MyButton"></input>
-<br>
 <div id="workflow-info" class="row">
-  <div class="col-md-11"><h3 id="workflow-name">My Workflow</h3></div>
+  <div class="col-md-11"><h3 id="workflow-name">My Workflow</h3>
+    <div id="log"></div>
+  </div>
   <div class="col-md-1"><button type="button" class="btn btn-default glyphicon glyphicon-question-sign" id="help"></button></div>
 </div>
 <div id="instructions" class="panel panel-info hide">
@@ -184,15 +256,10 @@
     <button type="button" class="btn btn-default tb-item" id="tb-transaction"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-subprocess"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-callactivity"></button>
-    <!-- <button type="button" class="btn btn-default tb-item" id="tb-implementation"></button> -->
-    <!-- <button type="button" class="btn btn-default tb-item" id="tb-edge"></button> -->
     <button type="button" class="btn btn-default tb-item" id="tb-gateway" style="border:2px solid #333"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-datastore"></button>
-    <button type="button" class="btn btn-default tb-item" id="tb-participant"></button>
-    <button type="button" class="btn btn-default tb-item" id="tb-lane"></button>
-    <!-- <button type="button" class="btn btn-default tb-item" id="tb-boundaryevent"></button> -->
-    <!-- <button type="button" class="btn btn-default tb-item" id="tb-receivetask"></button> -->
-    <!-- <button type="button" class="btn btn-default tb-item" id="tb-sendtask"></button> -->
+    <button type="button" class="btn btn-default tb-item" id="tb-participant" style="border:2px solid #333"></button>
+    <button type="button" class="btn btn-default tb-item" id="tb-lane" style="border:2px solid #333"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-sequenceflow" style="border:2px solid #333"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-messageflow"></button>
     <button type="button" class="btn btn-default tb-item" id="tb-association"></button>
@@ -200,33 +267,84 @@
     <button type="button" class="btn btn-default tb-item" id="tb-clearcanvas" style="border:2px solid #333"></button>
 </div>
 <div id="canvas"></div>
+<a href="img.png" download="output.png">
+<canvas id="myCanvas"></canvas>
+</a>
 <div id="editor-contextmenu" class="dropdown clearfix">
   <ul class="dropdown-menu" role="menu">
     <li><a id="add-annotation">Add Annotation...</a></li>
     <li class="divider"></li>
     <li><a id="remove-element">Remove</a></li>
+    <li class="divider"></li>
+    <li><a id="add-pool-lane">Add Pool Lane</a></li>
   </ul>
 </div>
 <div id="bottom-toolbar">
   <button type="button" class="btn btn-primary" id="save">Save</button>
-  <button type="button" class="btn btn-default" id="convert">Convert to JSON</button>
   <div class="btn-group">
     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
       Export <span class="caret"></span>
     </button>
     <ul class="dropdown-menu" role="menu">
       <li><a href="#">As File...</a></li>
-      <li><a href="#">As Image...</a></li>
+      <li id = "saveAsImage" style="margin-left:20px;">As Image...</li> 
     </ul>
   </div>
 </div>
-<%# This will get removed just keeping for testing %>
-<br><br>
-XPDL
-<textarea id="XPDL" style="width:100%;height:200px;"></textarea>
-json
-<textarea id="json" style="width:100%;height:200px;"></textarea>
-bpmn
-<textarea id="bpmn" style="width:100%;height:200px;"></textarea>
-newXPDL
-<textarea id="newXPDL" style="width:100%;height:200px;"></textarea>
+
+<br/>
+<br/>
+<br/>
+<textarea class='hide' id='jsonText'> test</textarea>
+<br/>
+<br/>
+<br/>
+<br/>
+
+<button type="button" class="btn btn-primary" id="create" data-toggle="modal" data-target="#create_workflow">
+  Create Workflow
+</button>
+
+<!-- Create Workflow Modal -->
+<div class="modal fade" id="create_workflow" role="dialog" aria-labelledby="createWorkflowModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="createWorkflowModalLabel">Create Workflow</h4>
+            </div>
+            <form role="form">
+              <div class="modal-body">
+                  <div class="form_container">
+                      <div class="form-group">
+                          <div class="formLabel">
+                              <label for="workflowName">Name</label>
+                          </div>
+                          <div class="formField">
+                              <input id="workflowName" name="workflowName" type="text" class="form-control" />
+                              <p id="workflowname_err" class="validation_msg control-label">Name is a mandatory field.</p>
+                          </div>
+                      </div>
+                      <div class="form-group">
+                          <div class="formLabel">
+                              <label for="workflow">Template</label>
+                          </div>
+                          <select id="template-type" class="form-control">
+                            <option value="blank">Blank</option>
+                            <option value="default">Default</option>
+                            <option value="import">Import...</option>
+                          </select>
+                      </div>
+                      <div class="form-group">
+                        <input type="file" id="importFile">
+                      </div>
+                  </div>
+              </div>
+              <div class="modal-footer">
+                  <button id="create" type="submit" class="btn btn-primary">Create</button>
+                  <button id="cancel" type="button" class="btn btn-default">Cancel</button>
+              </div>
+            </form>
+        </div>
+    </div>
+</div>

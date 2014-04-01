@@ -1,3 +1,78 @@
-// Place all the styles related to the simulation controller here.
-// They will automatically be included in application.css.
-// You can use Sass (SCSS) here: http://sass-lang.com/
+.actions {
+	text-align:center;
+}
+
+#add_data_err {
+	display:none;
+}
+
+.add_remove_buttons {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+}
+
+#addData {
+	display:none;
+}
+
+#create {
+	float:right; 
+	margin-bottom:5px;
+}
+
+#create_simulation {
+	display:none;
+}
+
+.delete {
+	cursor:pointer; 
+	margin-left:10px;
+}
+
+.form_container {
+	width:80%; 
+	margin:0 auto;
+}
+
+.heading {
+	padding-left:0px;
+}
+
+.keyval_row {
+	width:100%;
+	margin:0 auto;
+	position:relative;
+}
+
+.sim_button {
+	margin-top:5px;
+	margin-bottom:5px;
+}
+
+#sim_container {
+	margin:5px;
+}
+
+#sim_results {
+	height:600px;
+}
+
+#sim_titles {
+	margin:5px;
+}
+
+#simname_err {
+	display:none; 
+	color:red;
+}
+
+.sim_title {
+	padding-left:15px;
+}
+
+#canvas {
+	height:600px;
+	max-height:600px;
+	overflow-y:auto;
+}

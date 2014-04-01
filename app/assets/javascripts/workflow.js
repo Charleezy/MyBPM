@@ -4,3 +4,7 @@
 //= require ext_lib/xmlw3cdom
 //= require ext_lib/xml2json.min
 //= require workflow/bpmn
+//= require workflow/canvg
+//= require workflow/raphael.export
+//= require workflow/rgbcolor
+//= require workflow/StackBlur
