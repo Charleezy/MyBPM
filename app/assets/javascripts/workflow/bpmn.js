@@ -733,15 +733,15 @@ net.BpmnJS.prototype = {
 
     if (this.totalLanes > 1){
       //Redraw expanded pool if greater than 1 lane
-      this.initPool(x,y, pool);
-      //get current pool title
+      //Get current pool title
       var poolTitle = pool.associatedXPDL.Name;
 
-      //remove old pool & title elements
+      //Remove old pool & title elements
       pool.pair.remove();
       $(pool[0]).remove();
       pool.remove();
 
+      this.initPool(x,y, poolTitle);
     }
 
       //Ordering of elements - put pool behind everything
@@ -882,8 +882,6 @@ net.BpmnJS.prototype = {
   },
 
   initLane: function(x,y, laneTitle, pool){
-    // TODO
-    // FIND OUT THE FORMAT OF THE LANE
     var xpdl = 'xpdlLane';
     var shape = this.initActivity(this.paintLane(xpdl, x, y, laneTitle, pool, 'whitesmoke', 'black'));
     shape.shapeType = 'Lane';
