@@ -101,13 +101,14 @@ $(function(){
       data: {
         workflow: {
           name: workflow.name,
-          json: workflow.data // == null since no json data for new workflow yet!
+          json: null // == null since no json data for new workflow yet!
         }
       },
       success: function(workflowId) {
         // Grab the workfow id of our newly-created workflow.
         console.log('Created new blank workflow...');
         workflow.id = workflowId;
+        console.log(workflowId);
         $('#workflow-name').text(workflow.name);
         $('#create_workflow').modal('hide');
       }
@@ -147,7 +148,7 @@ $(function(){
   
   $("#save").click(function() {
     console.log('saving (updating) the workflow...');
-    workflow.data = workflow.data.updateXPDL();
+    var xpdlJson = workflow.data.updateXPDL();
 
     // This assume a workflow has already been created and assigned an id.
     $.ajax({
@@ -160,10 +161,9 @@ $(function(){
         workflow: {
           id: workflow.id,
           name: workflow.name,
-          json: workflow.data
+          json: xpdlJson
         }
       },
-      processData: false,
       success: function(response) {
         console.log('Saved workflow...');
         console.log(response);
