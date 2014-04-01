@@ -7,6 +7,12 @@ div#canvas{
   margin-top: 1px;
 }
 
+#myCanvas{
+  height:0px;
+  width:0px;
+  background-color:white;
+}
+
 #toolbox {
   border: 1px solid #bbb;
   background-color: #d9edf7;
