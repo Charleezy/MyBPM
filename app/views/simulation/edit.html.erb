@@ -55,38 +55,18 @@
 				
 				// If mockdata exists for this stage, display it
 				if (result[0] != null) {
-				
-					var targ;
-					if (!evt)
-						evt = window.event;
-					if (evt.target)
-						targ = evt.target;
-					else if (evt.srcElement)
-						targ = evt.srcElement;
-					if (targ.nodeType == 3) // defeat Safari bug
-						targ = targ.parentNode;
-
-					// jQuery normalizes the pageX and pageY
-					// pageX,Y are the mouse positions relative to the document
-					// offset() returns the position of the element relative to the document
-					var x = $(targ).offset().left;
-					var y =  $(targ).offset().top;
+					var targ = $('#page-wrapper');
+					var x = evt.pageX - $(targ).offset().left;
+					var y = evt.pageY - $(targ).offset().top;
 					
 					$("#popOver").css({
-							top: y,
-							left: x
-						}).show();
+						top: y,
+						left: x
+					}).show();
 				
 					result[0].stage_data.forEach(function(data) {
 						$('#data_list').append('<li>' + data.name + ': ' + data.value + '</li>');
-						
 					});
-					
-				}
-				
-				// No mockdata yet for this stage
-				else {
-				
 				}
 			}
 		});
@@ -156,6 +136,7 @@
 					result[0].stage_data.push(new stage_data(key, value));
 				}
 				
+				$('#sim_alert').hide();
 				$('#addData').modal('hide');
 			}
 		});
