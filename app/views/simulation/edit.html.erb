@@ -23,14 +23,83 @@
 			bpmn.plot();
 			alreadyLoaded = true;
 		}
-	  
+	    /*
 		$('#canvas').on( "click", "circle", function() {
-			$('#addData').modal('show');
+			if ($(this).attr("data-type") == "Task") {
+				$('#addData').modal('show');
+				current_id = $(this).attr('id');
+			}
+		});
+		*/
+		$('#canvas').on( "click", "rect", function() {
+			if ($(this).attr("data-type") == "Task") {
+				$('#addData').modal('show');
+				current_id = $(this).attr('id');
+			}
 		});
 		
-		$('#canvas').on( "click", "rect", function() {
-			$('#addData').modal('show');
-			current_id = $(this).attr('id');
+		$(document).on( "mouseover", "rect", function(evt) {
+			// If we hover on an activity
+			if ($(this).attr("data-type") == "Task") {
+				// Get the id of this activity
+				var id = $(this).attr('id');
+				
+				// Find mockdata for this activity
+				var result = mockdata.stages.filter(function(element){
+					if (element.stage_id == id) {
+						return true;
+					} else {
+						return false;
+					}
+				});
+				
+				// If mockdata exists for this stage, display it
+				if (result[0] != null) {
+				
+					var targ;
+					if (!evt)
+						evt = window.event;
+					if (evt.target)
+						targ = evt.target;
+					else if (evt.srcElement)
+						targ = evt.srcElement;
+					if (targ.nodeType == 3) // defeat Safari bug
+						targ = targ.parentNode;
+
+					// jQuery normalizes the pageX and pageY
+					// pageX,Y are the mouse positions relative to the document
+					// offset() returns the position of the element relative to the document
+					var x = $(targ).offset().left;
+					var y =  $(targ).offset().top;
+					
+					$("#popOver").css({
+							top: y,
+							left: x
+						}).show();
+				
+					result[0].stage_data.forEach(function(data) {
+						$('#data_list').append('<li>' + data.name + ': ' + data.value + '</li>');
+						
+					});
+					
+				}
+				
+				// No mockdata yet for this stage
+				else {
+				
+				}
+			}
+		});
+		
+		$(document).on( "mouseleave", "rect", function() {
+			if ($(this).attr("data-type") == "Task") {
+				$('#popOver').hide();
+				$('#data_list li').remove();
+			}
+		});
+		
+		$('#alert_close').click(function () {
+			$('#sim_alert').hide();
 		});
 		
 		$('#addData').on('hidden.bs.modal', function () {
@@ -49,16 +118,15 @@
 				url: "/simulation/run",
 				data: { id : sim_id },
 				success: function(data) {
-					alert(data);
+					$('#alert_msg').html('Simulation has completed!');
+					$('#sim_alert').show();
 				}
 			});
 		});
 		
 		$('#add').click(function() {
 			// ID of the clicked element
-			//alert($(this).id);
-			var stage_id = current_id
-			//var stage_id = "A3";
+			var stage_id = current_id;
 			
 			var i = 0;
 			var flag = 0;
@@ -102,16 +170,35 @@
 				},
 				url: "/simulation/" + sim_id,
 				type: "PUT",
-				data: { mockdata : { "workflow_id" : workflow_id, "mockdata" : JSON.stringify(mockdata) } }
+				data: { mockdata : { "workflow_id" : workflow_id, "mockdata" : JSON.stringify(mockdata) } },
+				success: function() {
+					$('#alert_msg').html('Your changes have been saved!');
+					$('#sim_alert').show();
+				}
 			});
 		});
 		
 		$('#clear_mockdata').click(function() {
-			var answer = confirm('Are you sure you want to delete all your mock data?');
+			var answer = confirm('Are you sure you want to permanently delete all your mock data?');
 			if(answer == true) {
-				mockdata = { "stages" : [] };
+				var sim_id = $('#sim_id').text();
+				var workflow_id = $('#workflow_id').text();
+				var empty_mockdata = { "stages" : [] };
+			
+				$.ajax({
+					beforeSend: function(req) {
+						req.setRequestHeader("Accept", "application/json");
+					},
+					url: "/simulation/" + sim_id,
+					type: "PUT",
+					data: { mockdata : { "workflow_id" : workflow_id, "mockdata" : JSON.stringify(empty_mockdata) } },
+					success: function() {
+						mockdata = { "stages" : [] };
+						$('#alert_msg').html('All Mock Data has been cleared. Click on an element to create new data.');
+						$('#sim_alert').show();
+					}
+				});
 			}
-			console.log(mockdata);
 		});
 	});
 	
@@ -137,6 +224,11 @@
 
 <h1 class="sim_title"><%= @simulation.name %></h1>
 
+<div id="sim_alert" class="alert alert-info" style="margin:15px;">
+	<button id="alert_close" type="button" class="close" aria-hidden="true">&times;</button>
+	<p id="alert_msg">Click on an element to create Mock Data.</p>
+</div>
+
 <div class="row" id="sim_container">
 	<div class="col-md-8">
 		<div class="panel panel-default">
@@ -154,17 +246,24 @@
 		</div>
 	</div>
 	<div class="col-md-4">
-	<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title">Simulation Results</h3>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Simulation Results</h3>
+			</div>
+			<div class="panel-body">
+				<div id="sim_results"></div>
+			</div>
 		</div>
-		<div class="panel-body">
-			<div id="sim_results"></div>
+		<div class="btn-group">
+			<button type="button" class="btn btn-primary sim_button" id="run_sim">Run Simulation</button>
 		</div>
 	</div>
-	<div class="btn-group">
-		<button type="button" class="btn btn-primary sim_button" id="run_sim">Run Simulation</button>
-	</div>
+</div>
+
+<div id="popOver">
+	<h4>Mock Data</h4>
+	<ul id="data_list">
+	</ul>
 </div>
 
 <div class="modal fade" id="addData" role="dialog" aria-labelledby="addDataModalLabel" aria-hidden="true">

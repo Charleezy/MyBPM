@@ -25,6 +25,10 @@
 	display:none;
 }
 
+#data_list {
+	padding-left:15px;
+}
+
 .delete {
 	cursor:pointer; 
 	margin-left:10px;
@@ -43,6 +47,19 @@
 	width:100%;
 	margin:0 auto;
 	position:relative;
+}
+
+#popOver {
+	display:none; 
+	position: absolute; 
+	z-index:999;
+	background-color:#474747;
+	color:lightgrey;
+	padding:10px;
+	
+	border-radius:5px;
+	-webkit-border-radius:5px;
+	-moz-border-radius:5px;
 }
 
 .sim_button {
@@ -74,5 +91,4 @@
 #canvas {
 	height:600px;
 	max-height:600px;
-	overflow-y:auto;
 }
