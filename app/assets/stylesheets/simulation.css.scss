@@ -49,6 +49,11 @@
 	position:relative;
 }
 
+.panel-body {
+  overflow:auto;
+  max-height:600px;
+}
+
 #popOver {
 	display:none; 
 	position: absolute; 

@@ -93,12 +93,21 @@
 			var sim_id = $('#sim_id').text();
 			
 			$.ajax({
-				beforeSend: function(req) {
-					req.setRequestHeader("Accept", "application/json");
-				},
+				//beforeSend: function(req) {
+				//	req.setRequestHeader("Accept", "application/json");
+				//},
+        headers: {          
+                 Accept : "text/plain; charset=utf-8",         
+                "Content-Type": "text/plain; charset=utf-8"   
+        },
 				url: "/simulation/run",
 				data: { id : sim_id },
 				success: function(data) {
+          console.log(data);
+
+          
+          
+          $('#sim_results').html(data);
 					$('#alert_msg').html('Simulation has completed!');
 					$('#sim_alert').show();
 				}
