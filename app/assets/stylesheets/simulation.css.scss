@@ -44,7 +44,7 @@
 }
 
 .keyval_row {
-	width:100%;
+	width:80%;
 	margin:0 auto;
 	position:relative;
 }
@@ -60,6 +60,10 @@
 	border-radius:5px;
 	-webkit-border-radius:5px;
 	-moz-border-radius:5px;
+}
+
+#sim_alert {
+	margin:15px;
 }
 
 .sim_button {
