@@ -86,6 +86,7 @@
 			$('#key').val("");
 			$('#value').val("");
 			$('#add_data_err').hide();
+			$('#sim_alert').show();
 		});
 		
 		$('#run_sim').click(function() {
@@ -136,9 +137,12 @@
 					result[0].stage_data.push(new stage_data(key, value));
 				}
 				
+				$('#key').val('');
+				$('#value').val('');
+				
 				$('#alert_msg').html('Your changes will be permanently saved once you hit the "Save Changes" button.');
-				$('#sim_alert').show();
-				$('#addData').modal('hide');
+				//$('#sim_alert').show();
+				//$('#addData').modal('hide');
 			}
 		});
 		
@@ -294,7 +298,7 @@
             <div class="modal-footer">
 				<button id="add" type="button" class="btn btn-primary">Add Key/Value</button>
 				<button id="clear_stagedata" class="btn btn-primary">Clear Stage Data</button>
-				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
 
         </div>
