@@ -10,8 +10,9 @@ class WorkflowController < ApplicationController
   end
 
   def show
-    puts @workflow
     @workflow = Workflow.find(params[:id])
+    logger.fatal "BLAHHH" + @workflow.inspect()
+
     @workflow.json = Crack::XML.parse(@workflow.xpdl)
   end
 
@@ -39,9 +40,12 @@ class WorkflowController < ApplicationController
     {}.to_xml
     params[:workflow][:xpdl] = (params[:workflow][:json]).to_xml if !params[:workflow][:json].blank?
     @workflow = Workflow.find( params[:workflow][:id].to_i)
+    
     @workflow.xpdl = params[:workflow][:xpdl]
+    # logger.fatal "BLAHHH" + @workflow.xpdl
     render :text => "Failed to find workflow", :status => :bad_request if @workflow.nil?
 
+    logger.fatal "BLAHHH" + workflow_params.inspect()
     @workflow.update_attributes(workflow_params)
     render :text => "Successfully updated workflow", :status => :created
   end
@@ -90,6 +94,6 @@ class WorkflowController < ApplicationController
     end
 
     def workflow_params
-      params.require(:workflow).permit(:name, :xpdl, :json)
+      params.require(:workflow).permit(:id, :name, :xpdl, :json)
     end
 end
