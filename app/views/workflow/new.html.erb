@@ -149,6 +149,7 @@ $(function(){
   $("#save").click(function() {
     console.log('saving (updating) the workflow...');
     var xpdlJson = workflow.data.updateXPDL();
+    console.log( xpdlJson );
 
     // This assume a workflow has already been created and assigned an id.
     $.ajax({
@@ -161,7 +162,7 @@ $(function(){
         workflow: {
           id: workflow.id,
           name: workflow.name,
-          json: xpdlJson
+          json: JSON.stringify(xpdlJson)
         }
       },
       success: function(response) {

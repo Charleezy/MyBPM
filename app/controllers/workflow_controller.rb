@@ -1,8 +1,7 @@
-require 'crack'
-require 'active_support/core_ext/hash/conversions'
+require 'xmlsimple'
 
 class WorkflowController < ApplicationController
-  #around_filter :exception_handler
+  around_filter :exception_handler
 
   def index
     @workflows = 
@@ -11,9 +10,7 @@ class WorkflowController < ApplicationController
 
   def show
     @workflow = Workflow.find(params[:id])
-    logger.fatal "BLAHHH" + @workflow.inspect()
 
-    @workflow.json = Crack::XML.parse(@workflow.xpdl)
   end
 
   def new
@@ -21,8 +18,6 @@ class WorkflowController < ApplicationController
   end
 
   def create
-    {}.to_xml
-    params[:workflow][:xpdl] = params[:workflow][:json].to_xml if !params[:workflow][:json].blank?
     workflow = current_user.workflows.create( workflow_params)
     if( workflow )
       render :text => workflow.id, :status => :created
@@ -37,15 +32,10 @@ class WorkflowController < ApplicationController
   end
 
   def update
-    {}.to_xml
-    params[:workflow][:xpdl] = (params[:workflow][:json]).to_xml if !params[:workflow][:json].blank?
     @workflow = Workflow.find( params[:workflow][:id].to_i)
-    
-    @workflow.xpdl = params[:workflow][:xpdl]
-    # logger.fatal "BLAHHH" + @workflow.xpdl
     render :text => "Failed to find workflow", :status => :bad_request if @workflow.nil?
+    @workflow.json = params[:workflow][:json]
 
-    logger.fatal "BLAHHH" + workflow_params.inspect()
     @workflow.update_attributes(workflow_params)
     render :text => "Successfully updated workflow", :status => :created
   end
@@ -57,16 +47,16 @@ class WorkflowController < ApplicationController
     redirect_to :controller => 'workflow', :action => 'index'
   end
 
-  def import
-    if( current_user.workflows.create( workflow_params) )
-      render :json =>  Crack::XML.parse(params[:workflow][:xpdl]), :status => :created
-    else
-      render :nothing => true, :status => :bad_request
-    end 
-  end
+  # def import
+  #   if( current_user.workflows.create( workflow_params) )
+  #     render :json =>  Crack::XML.parse(params[:workflow][:xpdl]), :status => :created
+  #   else
+  #     render :nothing => true, :status => :bad_request
+  #   end 
+  # end
 
   def xpdltojson 
-    myXML = Crack::XML.parse(File.read("data/XML.txt"));
+    myXML = XmlSimple.xml_in( "data/XML.txt", { 'AttrPrefix' => false, 'KeepRoot' => false, 'ForceArray' => true }) 
     myJSON = myXML.to_json;
     
     respond_to do |format| 

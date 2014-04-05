@@ -58,6 +58,8 @@ gem 'libxml-ruby', '2.7.0'
 
 gem 'crack'
 
+gem 'xml-simple'
+
 gem 'active_link_to'
 
 # Using Phusion Passenger to power the server application.
