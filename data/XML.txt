@@ -104,38 +104,7 @@
     <xpdl:Pools>
         <xpdl:Pool BoundaryVisible="true" Id="workflow_patterns_pool1" MainPool="true" Name="WfBCP1 Sequence" Orientation="HORIZONTAL" Process="WfBCP1_Sequence">
             <xpdl:Lanes>
-                <xpdl:Lane Id="workflow_patterns_pool1_lan1" Name="Test">
-                    <xpdl:NodeGraphicsInfos>
-                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" IsVisible="true" ToolId="JaWE"/>
-                    </xpdl:NodeGraphicsInfos>
-                    <xpdl:Performers>
-                        <xpdl:Performer>test</xpdl:Performer>
-                    </xpdl:Performers>
-                </xpdl:Lane>
-                <xpdl:Lane Id="workflow_patterns_pool1_lan1" Name="Test">
-                    <xpdl:NodeGraphicsInfos>
-                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" IsVisible="true" ToolId="JaWE"/>
-                    </xpdl:NodeGraphicsInfos>
-                    <xpdl:Performers>
-                        <xpdl:Performer>test</xpdl:Performer>
-                    </xpdl:Performers>
-                </xpdl:Lane>
-            </xpdl:Lanes>
-            <xpdl:NodeGraphicsInfos>
-                <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" IsVisible="true" ToolId="JaWE"/>
-            </xpdl:NodeGraphicsInfos>
-        </xpdl:Pool>
-        <xpdl:Pool BoundaryVisible="true" Id="workflow_patterns_pool1" MainPool="true" Name="WfBCP1 Sequence" Orientation="HORIZONTAL" Process="WfBCP1_Sequence">
-            <xpdl:Lanes>
-                <xpdl:Lane Id="workflow_patterns_pool1_lan1" Name="Test">
-                    <xpdl:NodeGraphicsInfos>
-                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" IsVisible="true" ToolId="JaWE"/>
-                    </xpdl:NodeGraphicsInfos>
-                    <xpdl:Performers>
-                        <xpdl:Performer>test</xpdl:Performer>
-                    </xpdl:Performers>
-                </xpdl:Lane>
-                <xpdl:Lane Id="workflow_patterns_pool1_lan1" Name="Test">
+                <xpdl:Lane Id="workflow_patterns_pool1_lan1" Name="TestLane">
                     <xpdl:NodeGraphicsInfos>
                         <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" IsVisible="true" ToolId="JaWE"/>
                     </xpdl:NodeGraphicsInfos>

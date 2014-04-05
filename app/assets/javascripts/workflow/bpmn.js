@@ -33,6 +33,9 @@ function assert(condition, message) {
 // Constructor
 net.BpmnJS = function(xpdlJson, canvas, isStatic){
 
+  // ALL ID'S GENERATED FROM THE BEGINNING
+  this.idList = [];
+  
   // IF THE JSON OBJECT IS NOT CREATED AT THE BEGINNING
   if(xpdlJson === null)
     this.xpdlJson = XpdlJsonGenerator.getNewWorkflowJson(this.generateNewID());
@@ -63,9 +66,6 @@ net.BpmnJS = function(xpdlJson, canvas, isStatic){
   this.newPools = [];
   this.oldPools = [];
   this.deletedPoolsIds = [];
-
-  // ALL ID'S GENERATED FROM THE BEGINNING
-  this.idList = [];
 };
 
 // Shared functions
@@ -114,42 +114,42 @@ net.BpmnJS.prototype = {
     // WE HAVE A PROBLEM: POOLS MAY NOT HAVE COORDINATES (ACCORDING TO ZARTAB'S EXAMPLE AND XPDL SCHEMA)
     // Parse through processes' pools
     if (this.xpdlJson.hasOwnProperty('Pools')) {
-      console.log('Pool:');
-      this.pools = this.xpdlJson["Pools"][0];
-      // FIXIT
-      // WE ARE ASSUMING WE ONLY HAVE ONE POOL TO IMPORT
-      var pool = this.pools["Pool"][0];
-      console.log(pool);
-      var temporaryId = pool.Id;
-      // console.log('newId: ' + pool.Id);
-      // The coordinates of the pools
-      
-      // FIXIT
-      // borderColor and fillColor shouldn't be hardcoded here
-      var borderColor = pool["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
-      var fillColor = pool["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor;
-      var name = pool.Name;
-      var poolShape = me.paintPool(pool, 10, 10, name, 'lightblue', 'black');
+      this.pools = this.xpdlJson["Pools"][0]["Pool"];
 
-      // TODO
-      // FINISH IMPORT FOR LANES
-      // WE HAVE THE SAME PROBLEM WITH THE LANES (NO COORDINATES)
-      var lanes = pool['Lanes'][0]['Lane'];
-      console.log(lanes);
-      lanes.forEach(function(lane){
-        var name = lane.Name;
-        // FIXIT
-        // I HARDCODED THE COORDINATES OF THE LANE TO x=0 y=0 BUT WE SHOULD FIX IT
-        // THERE'S A BUG WITH THE LANE NAME 
-        me.paintLane(lane, 0, 0, '', poolShape, 'white', 'black');
+        // PAINTING EACH POOL
+        this.pools.forEach(function(pool){
+          console.log(pool);
+          var temporaryId = pool.Id;
+          // console.log('newId: ' + pool.Id);
+          // The coordinates of the pools
+          
+          // FIXIT
+          // borderColor and fillColor shouldn't be hardcoded here
+          var borderColor = pool["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
+          var fillColor = pool["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor;
+          var name = pool.Name;
+          var poolShape = me.paintPool(pool, 10, 10, name, 'lightblue', 'black');
 
-      });
-      
+          // TODO
+          // FINISH IMPORT FOR LANES
+          // WE HAVE THE SAME PROBLEM WITH THE LANES (NO COORDINATES)
+          var lanes = pool['Lanes'][0]['Lane'];
+          console.log(lanes);
+
+          // PAINTING EACH LANE
+          lanes.forEach(function(lane){
+            var name = lane.Name;
+            // FIXIT
+            // I HARDCODED THE COORDINATES OF THE LANE TO x=0 y=0 BUT WE SHOULD FIX IT
+            me.paintLane(lane, 0, 0, name, poolShape, 'white', 'black');
+          });
+
+        });
     }
 
     // Parse through processes' activities
     if (this.process.hasOwnProperty('Activities')) {
-      var activities = this.process["Activities"][0]["Activity"][0];
+      var activities = this.process["Activities"][0]["Activity"];
       activities.forEach(function(activity) {
         var temporaryId = activity.Id;
         // console.log('newId: ' + activity.Id);
@@ -168,7 +168,7 @@ net.BpmnJS.prototype = {
 
     // Parse through processes' transitions
     if (this.process.hasOwnProperty('Transitions')) {
-      this.transitions = this.process["Transitions"][0]["Transition"][0];
+      this.transitions = this.process["Transitions"][0]["Transition"];
       this.transitions.forEach(function(transition) {
         // Reference the activities we're transitioning to/from.
         var element1 = me.getById(transition.From);
@@ -728,7 +728,9 @@ net.BpmnJS.prototype = {
 
     var offset = 10,
         x1 = x+offset*2,
-        y1 = y+40+((this.totalLanes-1)*350),
+        // FIXIT
+        // Y OFFSET OF THE LANE IS HARDCODED HERE AS 50
+        y1 = y+50+((this.totalLanes-1)*350),
         width = this.paper.canvas.offsetWidth - x1,
         height = 350;
 
@@ -902,7 +904,7 @@ net.BpmnJS.prototype = {
   },
 
   // CALLED WHEN THE USER CLICKS THE SAVE BUTTON
-  update: function(){
+  updateXPDL: function(){
 
     // UPDATES ASSOCIATED XPDL OF THE SHAPES
     this.paper.forEach(function(shape){
@@ -951,12 +953,12 @@ net.BpmnJS.prototype = {
 
     // UPDATE THE TRANSITIONS
     this.newConnections.forEach(function(connection){
-      me.xpdlJson['Package'][0]['WorkflowProcesses'][0]['WorkflowProcess'][0]['Transitions'][0]['Transition'][0].push(connection.associatedXPDL);
+      me.xpdlJson['WorkflowProcesses'][0]['WorkflowProcess'][0]['Transitions'][0]['Transition'].push(connection.associatedXPDL);
     });
     this.oldConnections.concat(this.newConnections);
     this.newConnections = [];
 
-    var xpdlTransitionsArray = me.xpdlJson['Package'][0]['WorkflowProcesses'][0]['WorkflowProcess'][0]['Transitions'][0]['Transition'][0];
+    var xpdlTransitionsArray = me.xpdlJson['WorkflowProcesses'][0]['WorkflowProcess'][0]['Transitions'][0]['Transition'];
     xpdlTransitionsArray.forEach(function(transition, index){
       me.removedConnectionsIds.forEach(function(id){
         if(id === transition.Id){
@@ -969,14 +971,14 @@ net.BpmnJS.prototype = {
 
     // UPDATE THE ACTIVITIES
     this.newActivities.forEach(function(activity){
-      me.xpdlJson['Package'][0]['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity'][0].push(activity.associatedXPDL);
+      me.xpdlJson['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity'].push(activity.associatedXPDL);
     });
     this.oldActivities.concat(this.newActivities);
     this.newActivities = [];
 
     console.log('removed activities:');
     console.log(me.removedActivitiesIds);
-    var xpdlActivitiesArray = me.xpdlJson['Package'][0]['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity'][0];
+    var xpdlActivitiesArray = me.xpdlJson['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity'];
     xpdlActivitiesArray.forEach(function(activity, index){
       me.removedActivitiesIds.forEach(function(id){
         if(id === activity.Id){
@@ -988,7 +990,7 @@ net.BpmnJS.prototype = {
     me.removedActivitiesIds = [];
 
     console.log('updated activities: ');
-    console.log(this.xpdlJson['Package'][0]['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity'][0]);
+    console.log(this.xpdlJson['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity']);
     return this.xpdlJson;
   },
 
