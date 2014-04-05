@@ -347,6 +347,9 @@ class XpdlObject
         end
       else # the mockDataFile does not have the required variable
         @simulationLog = @simulationLog + "FATAL ERROR: Mock Data File does not have the required variable: " + dataVar + " ...\n"
+        # Update @mockDataHash and @resultJSON
+        update_resultJSON(@currActID)
+        update_mockDataHash(@currActID)
         self.terminate()
         return false
       end

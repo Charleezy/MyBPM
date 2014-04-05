@@ -51,12 +51,26 @@ class SimulationController < ApplicationController
   end
   
   def run
-	@data = MockData.find(params[:id])
-	Worker.run(@data)
-	@results = SimulationResult.where(mock_data_id: @data.id)
-	respond_to do |format| 
-      format.json { render :json => @data.id }
+    @data = MockData.find(params[:id])
+    sr = Worker.run(@data)
+    simulation_result = SimulationResult.find(sr)
+
+    @results = eval(simulation_result.step_trace)
+
+    last_activity_log = ""
+    @results.each do |val|
+      #puts "INSIDE SIMULATION CONTROLLER, @results: " + val.to_s + "\n"
+      last_activity_log = val.to_s
     end
+
+    puts "INSIDE SIMULATION CONTROLLER, last_activity_log: " + last_activity_log + "\n\n"
+    last_activity_log = last_activity_log.gsub('\n', '<br/>')
+
+    simulation_result.step_trace = last_activity_log
+    simulation_result.save()
+
+    render :text => last_activity_log
+
   end
 
   def simulation_params

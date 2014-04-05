@@ -13,6 +13,9 @@ class Worker
     wf = Workflow.find(mock_data.workflow_id)
     mock_data_json = mock_data.mockdata
 
+    if mock_data_json == nil
+      mock_data_json = '{ "stages":[] }'
+    end
     
 
     sim = XpdlObject.new(wf.xpdl, File.read(self.schema_file) , mock_data_json)
@@ -23,10 +26,14 @@ class Worker
       puts "Next Step Called, New Current Step is: " + sim.nextStep()
     end
 
+    #jlogger.
+
     # Save the simulation results
-    sr.step_trace = sim.resultJSON
+    sr.step_trace = sim.resultJSON.to_s
     sr.status = 'FINISHED'
     sr.save()
+  
+    return sr.id
 
   end
 

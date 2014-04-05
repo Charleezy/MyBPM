@@ -28,9 +28,9 @@ $(document).ready(function() {
 				beforeSend: function(req) {
 					req.setRequestHeader("Accept", "application/json");
 				},
-				url: "simulation", 
+				url: "/simulation", 
 				type: "POST",
-				data: {mockdata : { "name" : sim_name, "workflow_id" : workflow_id}},
+				data: {mockdata : { "name" : sim_name, "workflow_id" : workflow_id }},
 				success: function(sim_id) {
 					location.reload();
 				}

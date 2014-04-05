@@ -6,7 +6,7 @@ require './xpdl_object'
 #file = File.open("/Users/abdulhaseeb/Google Drive/Projects/RailsWorkSpace/MyBPM/app/models/workflow_pattern_simple.xml", "rb")
 
 ## DEMO: This XPDL Model, has one Exclusive Gateway (ID=2)
-file = File.open("/Users/abdulhaseeb/Google Drive/Projects/RailsWorkSpace/MyBPM/app/models/Exclusive_choice_transition.xml", "rb")
+file = File.open("/Users/abdulhaseeb/demo/MyBPM/app/models/workflow_patterns.xpdl", "rb")
 
 contents = file.read
 
@@ -17,7 +17,7 @@ contentsSchema = schema.read
 mockFile = File.open("/Users/abdulhaseeb/Google Drive/Projects/RailsWorkSpace/MyBPM/app/models/mock1.json", "rb")
 mockDataContents = mockFile.read
 
-sim = XpdlObject.new(contents, contentsSchema, mockDataContents)
+sim = XpdlObject.new(contents, contentsSchema, nil)
 #sim = XpdlObject.new(contents, contentsSchema, nil) # If no mock data file is passed in
 
 sim.validate()
