@@ -35,7 +35,7 @@ net.BpmnJS = function(xpdlJson, canvas, isStatic){
 
   // IF THE JSON OBJECT IS NOT CREATED AT THE BEGINNING
   if(xpdlJson === null)
-    this.xpdlJson = XpdlJsonGenerator.getNewWorkflowJson();
+    this.xpdlJson = XpdlJsonGenerator.getNewWorkflowJson(this.generateNewID());
   else
     this.xpdlJson = xpdlJson;
 
@@ -100,21 +100,25 @@ net.BpmnJS.prototype = {
 
   plot: function(){
     // Assume we are only handling a single workflow process (there's only one WorkflowProcess inside WorkflowProcesses)
+
+    console.log("Root:");
+    console.log(this.xpdlJson);
+    $('#asdf').val(JSON.stringify(this.xpdlJson));
     
     // Last process
-    this.process = this.xpdlJson["xpdl:Package"]["xpdl:WorkflowProcesses"]["xpdl:WorkflowProcess"],
+    this.process = this.xpdlJson["WorkflowProcesses"][0]["WorkflowProcess"][0],
         me = this;
     
     // TODO
     // FINISH IMPORT FOR POOLS
     // WE HAVE A PROBLEM: POOLS MAY NOT HAVE COORDINATES (ACCORDING TO ZARTAB'S EXAMPLE AND XPDL SCHEMA)
     // Parse through processes' pools
-    if (this.xpdlJson["xpdl:Package"].hasOwnProperty('xpdl:Pools')) {
-      console.log('pool');
-      this.pools = this.xpdlJson["xpdl:Package"]["xpdl:Pools"];
+    if (this.xpdlJson.hasOwnProperty('Pools')) {
+      console.log('Pool:');
+      this.pools = this.xpdlJson["Pools"][0];
       // FIXIT
       // WE ARE ASSUMING WE ONLY HAVE ONE POOL TO IMPORT
-      var pool = this.pools["xpdl:Pool"];
+      var pool = this.pools["Pool"][0];
       console.log(pool);
       var temporaryId = pool.Id;
       // console.log('newId: ' + pool.Id);
@@ -122,15 +126,15 @@ net.BpmnJS.prototype = {
       
       // FIXIT
       // borderColor and fillColor shouldn't be hardcoded here
-      var borderColor = pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
-      var fillColor = pool["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor;
+      var borderColor = pool["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
+      var fillColor = pool["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor;
       var name = pool.Name;
       var poolShape = me.paintPool(pool, 10, 10, name, 'lightblue', 'black');
 
       // TODO
       // FINISH IMPORT FOR LANES
       // WE HAVE THE SAME PROBLEM WITH THE LANES (NO COORDINATES)
-      var lanes = pool['xpdl:Lanes']['xpdl:Lane'];
+      var lanes = pool['Lanes'][0]['Lane'];
       console.log(lanes);
       lanes.forEach(function(lane){
         var name = lane.Name;
@@ -144,17 +148,17 @@ net.BpmnJS.prototype = {
     }
 
     // Parse through processes' activities
-    if (this.process.hasOwnProperty('xpdl:Activities')) {
-      var activities = this.process["xpdl:Activities"]["xpdl:Activity"];
+    if (this.process.hasOwnProperty('Activities')) {
+      var activities = this.process["Activities"][0]["Activity"][0];
       activities.forEach(function(activity) {
         var temporaryId = activity.Id;
         // console.log('newId: ' + activity.Id);
-        var xCoordinate = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].XCoordinate);
-        var yCoordinate = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].YCoordinate);
-        var height = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height);
-        var width = parseInt(activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width);
-        var borderColor = activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
-        var fillColor = activity["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor;
+        var xCoordinate = parseInt(activity["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0]["Coordinates"][0].XCoordinate);
+        var yCoordinate = parseInt(activity["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0]["Coordinates"][0].YCoordinate);
+        var height = parseInt(activity["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].Height);
+        var width = parseInt(activity["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].Width);
+        var borderColor = activity["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
+        var fillColor = activity["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor;
         var name = activity.Name;
         var activityShape = me.paintActivity(activity, xCoordinate, yCoordinate, height, width, borderColor, fillColor, name);
         me.allActivities.push(activityShape);
@@ -163,14 +167,14 @@ net.BpmnJS.prototype = {
     }
 
     // Parse through processes' transitions
-    if (this.process.hasOwnProperty('xpdl:Transitions')) {
-      this.transitions = this.process["xpdl:Transitions"]["xpdl:Transition"];
+    if (this.process.hasOwnProperty('Transitions')) {
+      this.transitions = this.process["Transitions"][0]["Transition"][0];
       this.transitions.forEach(function(transition) {
         // Reference the activities we're transitioning to/from.
         var element1 = me.getById(transition.From);
         var element2 = me.getById(transition.To);
-        if (transition.hasOwnProperty('xpdl:Condition')){
-          var condition = transition["xpdl:Condition"];
+        if (transition.hasOwnProperty('Condition')){
+          var condition = transition["Condition"][0];
         }
         else {
           var condition = "";
@@ -195,7 +199,7 @@ net.BpmnJS.prototype = {
     }
   },
   
-funSaveAsImage: function() {
+  funSaveAsImage: function() {
     var svg = this.paper.toSVG();
     canvg(document.getElementById('myCanvas'), svg);
     $("#myCanvas").hide();
@@ -210,7 +214,7 @@ funSaveAsImage: function() {
         a[0].click();
         a.remove();
       }
-    },
+  },
 
   clear: function() {
     this.paper.clear();
@@ -536,11 +540,11 @@ funSaveAsImage: function() {
       
       switch(activityProperty){
         
-        case 'xpdl:Event':
-          if(xpdlActivity['xpdl:Event'].hasOwnProperty('xpdl:StartEvent')){
+        case 'Event':
+          if(xpdlActivity['Event'][0].hasOwnProperty('StartEvent')){
             shape = this.paintStartEvent(xpdlActivity,x,y,width, height, name, fillColor, borderColor);
           }
-          else if(xpdlActivity['xpdl:Event'].hasOwnProperty('xpdl:IntermediateEvent')){
+          else if(xpdlActivity['Event'][0].hasOwnProperty('IntermediateEvent')){
             shape = this.paintIntermediateEvent(xpdlActivity,x,y,width, height, name, fillColor, borderColor);
           }
           else{
@@ -548,14 +552,14 @@ funSaveAsImage: function() {
           }
           break;
 
-        case 'xpdl:Implementation':
+        case 'Implementation':
 
-          // if(xpdlActivity["xpdl:Implementation"].hasOwnProperty('Task'))
+          // if(xpdlActivity["Implementation"][0].hasOwnProperty('Task'))
             shape = this.paintImplementation(xpdlActivity,x,y,width,height, name, fillColor, borderColor);
           
           break;
 
-        case 'xpdl:Route':
+        case 'Route':
             shape = this.paintRoute(xpdlActivity,x,y,width,height, name, fillColor, borderColor);
           break;
       }
@@ -799,10 +803,10 @@ funSaveAsImage: function() {
   initStartEvent: function(x, y) {
     var xpdlJson = XpdlJsonGenerator.getNewStartEventJson(this.generateNewID(), x, y),
         name = xpdlJson.Name,
-        width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
-        height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
-        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
-        borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+        width = parseInt(xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].Width),
+        height = parseInt(xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].Height),
+        //fillColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor,
+        borderColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
 
     var shape = this.initActivity(this.paintStartEvent(
       xpdlJson, x, y, width, height, name, 'white', borderColor));
@@ -815,10 +819,10 @@ funSaveAsImage: function() {
   initIntermediateEvent: function(x, y) {
     var xpdlJson = XpdlJsonGenerator.getNewIntermediateEventJson(this.generateNewID(), x, y),
         name = xpdlJson.Name,
-        width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
-        height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
-        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
-        borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+        width = parseInt(xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].Width),
+        height = parseInt(xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].Height),
+        //fillColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor,
+        borderColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
 
     var shape = this.initActivity(this.paintIntermediateEvent(
       xpdlJson, x, y, width, height, name, 'lightyellow', borderColor));
@@ -831,10 +835,10 @@ funSaveAsImage: function() {
   initEndEvent: function(x, y) {
     var xpdlJson = XpdlJsonGenerator.getNewEndEventJson(this.generateNewID(), x, y),
         name = xpdlJson.Name,
-        width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
-        height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
-        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
-        borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+        width = parseInt(xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].Width),
+        height = parseInt(xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].Height),
+        //fillColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor,
+        borderColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
 
     var shape = this.initActivity(this.paintEndEvent(
       xpdlJson, x, y, width, height, name, 'lightblue', borderColor));
@@ -847,10 +851,10 @@ funSaveAsImage: function() {
   initGateway: function(x, y) {
     var xpdlJson = XpdlJsonGenerator.getNewGatewayJson(this.generateNewID(), x, y),
         name = xpdlJson.Name,
-        width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
-        height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
-        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
-        borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+        width = parseInt(xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].Width),
+        height = parseInt(xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].Height),
+        //fillColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor,
+        borderColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
 
 
     var shape = this.initActivity(this.paintRoute(
@@ -864,10 +868,10 @@ funSaveAsImage: function() {
   initTask: function(x, y) {
     var xpdlJson = XpdlJsonGenerator.getNewTaskJson(this.generateNewID(), x, y),
         name = xpdlJson.Name,
-        width = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Width),
-        height = parseInt(xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].Height),
-        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
-        borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+        width = parseInt(xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].Width),
+        height = parseInt(xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].Height),
+        //fillColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor,
+        borderColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
 
     var shape = this.initActivity(this.paintImplementation(
       xpdlJson, x, y, width, height, name, 'lightyellow', borderColor));
@@ -879,9 +883,9 @@ funSaveAsImage: function() {
   
   initPool: function(x,y, poolTitle){
     var xpdlJson = XpdlJsonGenerator.getNewPoolJson(this.generateNewID(), poolTitle, x, y),
-        name = xpdlJson.Name,
-        //fillColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].FillColor,
-        borderColor = xpdlJson["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"].BorderColor;
+        name = xpdlJson["Name"],
+        //fillColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor,
+        borderColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
 
     var shape = this.initActivity(this.paintPool(xpdlJson, x, y, name, 'lightblue', borderColor));
 
@@ -898,7 +902,7 @@ funSaveAsImage: function() {
   },
 
   // CALLED WHEN THE USER CLICKS THE SAVE BUTTON
-  updateXPDL: function(){
+  update: function(){
 
     // UPDATES ASSOCIATED XPDL OF THE SHAPES
     this.paper.forEach(function(shape){
@@ -908,8 +912,8 @@ funSaveAsImage: function() {
           // UPDATE COORDINATES
           if (shape.shapeType != 'Text' && shape.shapeType != 'Transition' && shape.shapeType != 'Pool' && shape.shapeType != 'Lane' && shape.shapeType != 'RotatedText' && shape.shapeType != 'Condition') {
             console.log(shape);
-            shape.associatedXPDL["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].XCoordinate = shape.getBBox().x;
-            shape.associatedXPDL["xpdl:NodeGraphicsInfos"]["xpdl:NodeGraphicsInfo"]["xpdl:Coordinates"].YCoordinate= shape.getBBox().y;
+            shape.associatedXPDL["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0]["Coordinates"][0].XCoordinate = shape.getBBox().x;
+            shape.associatedXPDL["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0]["Coordinates"][0].YCoordinate= shape.getBBox().y;
           }
 
           // UPDATE SPECIFIC PROPERTIES
@@ -947,12 +951,12 @@ funSaveAsImage: function() {
 
     // UPDATE THE TRANSITIONS
     this.newConnections.forEach(function(connection){
-      me.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Transitions']['xpdl:Transition'].push(connection.associatedXPDL);
+      me.xpdlJson['Package'][0]['WorkflowProcesses'][0]['WorkflowProcess'][0]['Transitions'][0]['Transition'][0].push(connection.associatedXPDL);
     });
     this.oldConnections.concat(this.newConnections);
     this.newConnections = [];
 
-    var xpdlTransitionsArray = me.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Transitions']['xpdl:Transition'];
+    var xpdlTransitionsArray = me.xpdlJson['Package'][0]['WorkflowProcesses'][0]['WorkflowProcess'][0]['Transitions'][0]['Transition'][0];
     xpdlTransitionsArray.forEach(function(transition, index){
       me.removedConnectionsIds.forEach(function(id){
         if(id === transition.Id){
@@ -965,14 +969,14 @@ funSaveAsImage: function() {
 
     // UPDATE THE ACTIVITIES
     this.newActivities.forEach(function(activity){
-      me.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Activities']['xpdl:Activity'].push(activity.associatedXPDL);
+      me.xpdlJson['Package'][0]['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity'][0].push(activity.associatedXPDL);
     });
     this.oldActivities.concat(this.newActivities);
     this.newActivities = [];
 
     console.log('removed activities:');
     console.log(me.removedActivitiesIds);
-    var xpdlActivitiesArray = me.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Activities']['xpdl:Activity'];
+    var xpdlActivitiesArray = me.xpdlJson['Package'][0]['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity'][0];
     xpdlActivitiesArray.forEach(function(activity, index){
       me.removedActivitiesIds.forEach(function(id){
         if(id === activity.Id){
@@ -984,7 +988,7 @@ funSaveAsImage: function() {
     me.removedActivitiesIds = [];
 
     console.log('updated activities: ');
-    console.log(this.xpdlJson['xpdl:Package']['xpdl:WorkflowProcesses']['xpdl:WorkflowProcess']['xpdl:Activities']['xpdl:Activity']);
+    console.log(this.xpdlJson['Package'][0]['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity'][0]);
     return this.xpdlJson;
   },
 
