@@ -112,6 +112,14 @@
                         <xpdl:Performer>test</xpdl:Performer>
                     </xpdl:Performers>
                 </xpdl:Lane>
+                <xpdl:Lane Id="workflow_patterns_pool1_lan1" Name="TestLane">
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:NodeGraphicsInfos>
+                    <xpdl:Performers>
+                        <xpdl:Performer>test</xpdl:Performer>
+                    </xpdl:Performers>
+                </xpdl:Lane>
             </xpdl:Lanes>
             <xpdl:NodeGraphicsInfos>
                 <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" IsVisible="true" ToolId="JaWE"/>

@@ -35,7 +35,7 @@ net.BpmnJS = function(xpdlJson, canvas, isStatic){
 
   // ALL ID'S GENERATED FROM THE BEGINNING
   this.idList = [];
-  
+
   // IF THE JSON OBJECT IS NOT CREATED AT THE BEGINNING
   if(xpdlJson === null)
     this.xpdlJson = XpdlJsonGenerator.getNewWorkflowJson(this.generateNewID());
@@ -799,6 +799,7 @@ net.BpmnJS.prototype = {
     this.moveElement(activity);
     this.enableContextMenu(activity, this);
     activity.associatedXPDL.Id = this.generateNewID();
+    this.newActivities.push(activity);
     return activity;
   },
 
@@ -970,6 +971,8 @@ net.BpmnJS.prototype = {
     me.removedConnectionsIds = [];
 
     // UPDATE THE ACTIVITIES
+    console.log('Activities to be added:');
+    console.log(this.newActivities);
     this.newActivities.forEach(function(activity){
       me.xpdlJson['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity'].push(activity.associatedXPDL);
     });
