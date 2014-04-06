@@ -128,7 +128,7 @@ net.BpmnJS.prototype = {
           var borderColor = pool["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
           var fillColor = pool["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor;
           var name = pool.Name;
-          var poolShape = me.paintPool(pool, 10, 10, name, 'lightblue', 'black');
+          var poolShape = me.paintPool(pool, 10, 10, null,name, 'lightblue', 'black');
 
           // TODO
           // FINISH IMPORT FOR LANES
@@ -140,8 +140,8 @@ net.BpmnJS.prototype = {
           lanes.forEach(function(lane){
             var name = lane.Name;
             // FIXIT
-            // I HARDCODED THE COORDINATES OF THE LANE TO x=0 y=0 BUT WE SHOULD FIX IT
-            me.paintLane(lane, 0, 0, name, poolShape, 'white', 'black');
+            // I HARDCODED THE COORDINATES OF THE LANE TO x=10 y=10 BUT WE SHOULD FIX IT
+            me.paintLane(lane, 10, 10, name, poolShape, 'white', 'black');
           });
 
         });
@@ -191,7 +191,7 @@ net.BpmnJS.prototype = {
       this.paper.forEach(function(el) {
         // Don't bind move listener on Transitions (connections).
         if(el.shapeType !== undefined && el.shapeType !== 'Transition'){ 
-          this.moveElement(el);
+          this.moveElement(this, el);
         }
         // Bind contextmenu to all elements, to enable options such as removing.
         this.enableContextMenu(el, this);
@@ -402,6 +402,7 @@ net.BpmnJS.prototype = {
           // Both elements now selected; proceed to connect them.
           var connection = me.connectElements(firstSelected, secondSelected, null);
           connection.associatedXPDL = XpdlJsonGenerator.getNewTransitionJson(me.generateNewID(), 'Transition', firstSelected.associatedXPDL.Id, secondSelected.associatedXPDL.Id);
+          console.log(connection.line.associatedXPDL.ConnectorGraphicsInfos);
           // Unbind click listener for all elements.
           me.paper.forEach(function (el) {
             $(el[0]).unbind('click');
@@ -410,6 +411,19 @@ net.BpmnJS.prototype = {
         }
       });
     });
+  },
+
+  findMidpoint: function(element1, element2, coordinate){
+    console.log(eval("element1.getBBox()."+coordinate));
+    var el1 = eval("element1.getBBox()."+coordinate),
+        el2 = eval("element2.getBBox()."+coordinate);
+
+     pt = Math.abs((el1-el2)/2);
+     if (el1 > el2){
+        pt= pt+ el2;
+      }
+      else {pt= pt+ el1}
+      return pt;
   },
 
   connectElements: function(element1, element2, condition, newOrImported) {
@@ -436,8 +450,11 @@ net.BpmnJS.prototype = {
         if (condition === null || condition.trim() === '') return;
       }
       
-      //Need to determine correct x & y 
-      var x = 0, y = 0;
+      //Finds midpoint between the two elements
+      var x = this.findMidpoint(element1, element2, "x"),
+      y = this.findMidpoint(element1, element2, "y");
+      x = -1000, y = -1000;
+     
       var text = this.paper.text(x, y, condition);
       text.shapeType = 'Condition';
 
@@ -481,7 +498,7 @@ net.BpmnJS.prototype = {
     connectionToRemove.line.remove();
   },
 
-  moveElement : function(element) {
+  moveElement : function(me, element) {
     var connections = this.allConnections,
         dragger = function() {
           this.odx = 0;
@@ -692,7 +709,7 @@ net.BpmnJS.prototype = {
     
   },
 
-  paintPool: function(xpdlRoute, x, y, poolTitleText, fillColor, borderColor){
+  paintPool: function(xpdlRoute, x, y, pool, poolTitleText, fillColor, borderColor){
     var lanes = this.totalLanes;
     if (lanes === 0) {lanes = 1;}
     x = 0;
@@ -701,11 +718,17 @@ net.BpmnJS.prototype = {
         height = 350*lanes,
         y1 = y+offset*4;
 
-    var pool = this.paper.rect(x,y1,width,height).attr({fill: fillColor, border: borderColor});
-    pool.associatedXPDL = xpdlRoute;
-    pool.shapeType = 'Pool';
-    $(pool.node).attr("id",xpdlRoute.Id);
-    $(pool.node).attr("data-type","Pool");
+    if (pool != null){
+      //pool exists, resize
+      pool.attr({height: height});
+    }
+    else {
+      pool = this.paper.rect(x,y1,width,height).attr({fill: fillColor, border: borderColor});
+      pool.associatedXPDL = xpdlRoute;
+      pool.shapeType = 'Pool';
+      $(pool.node).attr("id",xpdlRoute.Id);
+      $(pool.node).attr("data-type","Pool");
+    }
     var poolTitle = this.paper.text(x+offset, y1+height/2, poolTitleText).attr({transform: "r" + 270});
     
     //Pair pool title with pool 
@@ -753,10 +776,10 @@ net.BpmnJS.prototype = {
 
       //Remove old pool & title elements
       pool.pair.remove();
-      $(pool[0]).remove();
-      pool.remove();
+      //$(pool[0]).remove();
+      //pool.remove();
 
-      this.initPool(x,y, poolTitle);
+      this.initPool(x,y, pool, poolTitle);
     }
 
       //Ordering of elements - put pool behind everything
@@ -780,6 +803,7 @@ net.BpmnJS.prototype = {
     return poolLane;
   },
 
+
   getCss: function(bpmnElement, cssClass){
     for(i in this.highlighted){
       if(this.highlighted[i] === bpmnElement){
@@ -796,7 +820,7 @@ net.BpmnJS.prototype = {
 
   // Common to all activities: allows drag/move, contextmenu and gives a new ID
   initActivity: function(activity) {
-    this.moveElement(activity);
+    this.moveElement(this, activity);
     this.enableContextMenu(activity, this);
     activity.associatedXPDL.Id = this.generateNewID();
     this.newActivities.push(activity);
@@ -884,13 +908,13 @@ net.BpmnJS.prototype = {
     return shape;
   },
   
-  initPool: function(x,y, poolTitle){
+  initPool: function(x,y, pool, poolTitle){
     var xpdlJson = XpdlJsonGenerator.getNewPoolJson(this.generateNewID(), poolTitle, x, y),
         name = xpdlJson["Name"],
         //fillColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor,
         borderColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
 
-    var shape = this.initActivity(this.paintPool(xpdlJson, x, y, name, 'lightblue', borderColor));
+    var shape = this.initActivity(this.paintPool(xpdlJson, x, y, pool, name, 'lightblue', borderColor));
 
     shape.shapeType = 'Pool';
 
