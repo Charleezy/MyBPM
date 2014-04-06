@@ -65,7 +65,13 @@ net.BpmnJS = function(xpdlJson, canvas, isStatic){
   this.allPools = [];
   this.newPools = [];
   this.oldPools = [];
-  this.deletedPoolsIds = [];
+  this.removedPoolsIds = [];
+
+  this.lanes = [];
+  this.allLanes = [];
+  this.newLanes = [];
+  this.oldLanes = [];
+  this.removedLanesIds = [];
 };
 
 // Shared functions
@@ -118,6 +124,7 @@ net.BpmnJS.prototype = {
 
         // PAINTING EACH POOL
         this.pools.forEach(function(pool){
+          console.log('Pool:');
           console.log(pool);
           var temporaryId = pool.Id;
           // console.log('newId: ' + pool.Id);
@@ -130,20 +137,25 @@ net.BpmnJS.prototype = {
           var name = pool.Name;
           var poolShape = me.paintPool(pool, 10, 10, name, 'lightblue', 'black');
 
-          // TODO
-          // FINISH IMPORT FOR LANES
-          // WE HAVE THE SAME PROBLEM WITH THE LANES (NO COORDINATES)
-          var lanes = pool['Lanes'][0]['Lane'];
-          console.log(lanes);
+          console.log('Array of lanes:');
+          console.log(pool['Lanes'][0]['Lane']);
 
-          // PAINTING EACH LANE
-          lanes.forEach(function(lane){
-            var name = lane.Name;
-            // FIXIT
-            // I HARDCODED THE COORDINATES OF THE LANE TO x=0 y=0 BUT WE SHOULD FIX IT
-            me.paintLane(lane, 0, 0, name, poolShape, 'white', 'black');
-          });
+          if(pool['Lanes'][0]['Lane'].length>0)
+          {
+            // TODO
+            // FINISH IMPORT FOR LANES
+            // WE HAVE THE SAME PROBLEM WITH THE LANES (NO COORDINATES)
+            var lanes = pool['Lanes'][0]['Lane'];
+            console.log(lanes);
 
+            // PAINTING EACH LANE
+            lanes.forEach(function(lane){
+              var name = lane.Name;
+              // FIXIT
+              // I HARDCODED THE COORDINATES OF THE LANE TO x=0 y=0 BUT WE SHOULD FIX IT
+              me.paintLane(lane, 0, 0, name, poolShape, 'white', 'black');
+            });
+          }
         });
     }
 
@@ -794,13 +806,27 @@ net.BpmnJS.prototype = {
   //  Driver/helper functions called by toolbox items in workflow editor.
   //===========================================================================
 
-  // Common to all activities: allows drag/move, contextmenu and gives a new ID
-  initActivity: function(activity) {
-    this.moveElement(activity);
-    this.enableContextMenu(activity, this);
-    activity.associatedXPDL.Id = this.generateNewID();
-    this.newActivities.push(activity);
-    return activity;
+  // Common to all elements: allows drag/move, contextmenu and gives a new ID
+  initElement: function(element) {
+    this.moveElement(element);
+    this.enableContextMenu(element, this);
+    element.associatedXPDL.Id = this.generateNewID();
+    switch(element.shapeType){
+      case 'StartEvent':
+      case 'IntermediateEvent':
+      case 'EndEvent':
+      case 'Gateway':
+      case 'Task':
+        this.newActivities.push(element);
+        break;
+      case 'Pool':
+        this.newPools.push(element);
+        break;
+      case 'Lane':
+        this.newLanes.push(element);
+        break;
+    }
+    return element;
   },
 
   initStartEvent: function(x, y) {
@@ -811,10 +837,9 @@ net.BpmnJS.prototype = {
         //fillColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor,
         borderColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
 
-    var shape = this.initActivity(this.paintStartEvent(
-      xpdlJson, x, y, width, height, name, 'white', borderColor));
-
+    var shape = this.paintStartEvent(xpdlJson, x, y, width, height, name, 'white', borderColor);
     shape.shapeType = 'StartEvent';
+    this.initElement(shape);
 
     return shape;
   },
@@ -827,10 +852,10 @@ net.BpmnJS.prototype = {
         //fillColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor,
         borderColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
 
-    var shape = this.initActivity(this.paintIntermediateEvent(
-      xpdlJson, x, y, width, height, name, 'lightyellow', borderColor));
-
+    var shape = this.paintIntermediateEvent(xpdlJson, x, y, width, height, name, 'lightyellow', borderColor);
     shape.shapeType = 'IntermediateEvent';
+    this.initElement(shape);
+
 
     return shape;
   },
@@ -843,10 +868,10 @@ net.BpmnJS.prototype = {
         //fillColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor,
         borderColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
 
-    var shape = this.initActivity(this.paintEndEvent(
-      xpdlJson, x, y, width, height, name, 'lightblue', borderColor));
-
+    var shape = this.paintEndEvent(xpdlJson, x, y, width, height, name, 'lightblue', borderColor);
     shape.shapeType = 'EndEvent';
+    this.initElement(shape);
+
 
     return shape;
   },
@@ -860,10 +885,10 @@ net.BpmnJS.prototype = {
         borderColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
 
 
-    var shape = this.initActivity(this.paintRoute(
-      xpdlJson, x, y, width, height, name, 'white', borderColor));
-
+    var shape = this.paintRoute(xpdlJson, x, y, width, height, name, 'white', borderColor);
     shape.shapeType = 'Gateway';
+    this.initElement(shape);
+
 
     return shape;
   },
@@ -876,10 +901,10 @@ net.BpmnJS.prototype = {
         //fillColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor,
         borderColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
 
-    var shape = this.initActivity(this.paintImplementation(
-      xpdlJson, x, y, width, height, name, 'lightyellow', borderColor));
-
+    var shape = this.paintImplementation(xpdlJson, x, y, width, height, name, 'lightyellow', borderColor);
     shape.shapeType = 'Task';
+    this.initElement(shape);
+
 
     return shape;
   },
@@ -890,18 +915,39 @@ net.BpmnJS.prototype = {
         //fillColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].FillColor,
         borderColor = xpdlJson["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].BorderColor;
 
-    var shape = this.initActivity(this.paintPool(xpdlJson, x, y, name, 'lightblue', borderColor));
-
+    var shape = this.paintPool(xpdlJson, x, y, name, 'lightblue', borderColor);
     shape.shapeType = 'Pool';
+    this.initElement(shape);
+
 
     return shape;
   },
 
   initLane: function(x,y, laneTitle, pool){
-    var xpdl = 'xpdlLane';
-    var shape = this.initActivity(this.paintLane(xpdl, x, y, laneTitle, pool, 'whitesmoke', 'black'));
+    var xpdlJson = XpdlJsonGenerator.getNewLaneJson(this.generateNewID(), laneTitle, x, y);
+    var shape = this.paintLane(xpdlJson, x, y, laneTitle, pool, 'whitesmoke', 'black');
     shape.shapeType = 'Lane';
+    this.initElement(shape);
     return shape;
+  },
+
+  updateArray: function(array, newElementsArray, oldElementsArray, removedIdsArray){
+    // UPDATE THE ACTIVITIES
+    newElementsArray.forEach(function(element){
+      array.push(element.associatedXPDL);
+    });
+    oldElementsArray.concat(newElementsArray);
+    newElementsArray.length = 0;
+
+    array.forEach(function(element, index){
+      removedIdsArray.forEach(function(id){
+        if(id === element.Id){
+          array.splice(index, 1);
+        }
+
+      });
+    });
+    removedIdsArray.length = 0;
   },
 
   // CALLED WHEN THE USER CLICKS THE SAVE BUTTON
@@ -950,50 +996,17 @@ net.BpmnJS.prototype = {
     });
 
     // UPDATES THE XPDL TREE WITH THE NEW ELEMENTS CREATED
-    var me = this;
 
     // UPDATE THE TRANSITIONS
-    this.newConnections.forEach(function(connection){
-      me.xpdlJson['WorkflowProcesses'][0]['WorkflowProcess'][0]['Transitions'][0]['Transition'].push(connection.associatedXPDL);
-    });
-    this.oldConnections.concat(this.newConnections);
-    this.newConnections = [];
-
-    var xpdlTransitionsArray = me.xpdlJson['WorkflowProcesses'][0]['WorkflowProcess'][0]['Transitions'][0]['Transition'];
-    xpdlTransitionsArray.forEach(function(transition, index){
-      me.removedConnectionsIds.forEach(function(id){
-        if(id === transition.Id){
-          xpdlTransitionsArray.splice(index, 1);
-        }
-
-      });
-    });
-    me.removedConnectionsIds = [];
+    this.updateArray(me.xpdlJson['WorkflowProcesses'][0]['WorkflowProcess'][0]['Transitions'][0]['Transition'], this.newConnections, this.oldConnections, this.removedConnectionsIds);
 
     // UPDATE THE ACTIVITIES
-    console.log('Activities to be added:');
-    console.log(this.newActivities);
-    this.newActivities.forEach(function(activity){
-      me.xpdlJson['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity'].push(activity.associatedXPDL);
-    });
-    this.oldActivities.concat(this.newActivities);
-    this.newActivities = [];
+    this.updateArray(me.xpdlJson['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity'], this.newActivities, this.oldActivities, this.removedActivitiesIds);
 
-    console.log('removed activities:');
-    console.log(me.removedActivitiesIds);
-    var xpdlActivitiesArray = me.xpdlJson['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity'];
-    xpdlActivitiesArray.forEach(function(activity, index){
-      me.removedActivitiesIds.forEach(function(id){
-        if(id === activity.Id){
-          xpdlActivitiesArray.splice(index, 1);
-        }
+    // UPDATE THE POOLS
+    this.updateArray(me.xpdlJson['Pools'][0]['Pool'], this.newPools, this.oldPools, this.removedPoolsIds);
 
-      });
-    });
-    me.removedActivitiesIds = [];
-
-    console.log('updated activities: ');
-    console.log(this.xpdlJson['WorkflowProcesses'][0]['WorkflowProcess'][0]['Activities'][0]['Activity']);
+    // UPDATE THE LANES
     return this.xpdlJson;
   },
 

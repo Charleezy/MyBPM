@@ -257,7 +257,11 @@ XpdlJsonGenerator.getNewWorkflowJson = function(id, workflowName) {
                   ]
                 }
               ],
-              "Pools": [],
+              "Pools": [
+                {
+                  "Pool": []
+                }
+              ],
               "WorkflowProcesses": [
                 {
                   "WorkflowProcess": [
