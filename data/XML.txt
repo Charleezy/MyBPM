@@ -146,7 +146,7 @@
                     </xpdl:Performers>
                     <xpdl:NodeGraphicsInfos>
                         <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="60" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="90">
-                            <xpdl:Coordinates XCoordinate="206" YCoordinate="48"/>
+                            <xpdl:Coordinates XCoordinate="206" YCoordinate="150"/>
                         </xpdl:NodeGraphicsInfo>
                     </xpdl:NodeGraphicsInfos>
                 </xpdl:Activity>
@@ -160,7 +160,7 @@
                     </xpdl:Performers>
                     <xpdl:NodeGraphicsInfos>
                         <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="60" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="90">
-                            <xpdl:Coordinates XCoordinate="356" YCoordinate="48"/>
+                            <xpdl:Coordinates XCoordinate="356" YCoordinate="150"/>
                         </xpdl:NodeGraphicsInfo>
                     </xpdl:NodeGraphicsInfos>
                 </xpdl:Activity>
@@ -174,7 +174,7 @@
                     </xpdl:Performers>
                     <xpdl:NodeGraphicsInfos>
                         <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="60" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="90">
-                            <xpdl:Coordinates XCoordinate="509" YCoordinate="48"/>
+                            <xpdl:Coordinates XCoordinate="509" YCoordinate="150"/>
                         </xpdl:NodeGraphicsInfo>
                     </xpdl:NodeGraphicsInfos>
                 </xpdl:Activity>
@@ -184,7 +184,7 @@
                     </xpdl:Event>
                     <xpdl:NodeGraphicsInfos>
                         <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="31" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="31">
-                            <xpdl:Coordinates XCoordinate="92" YCoordinate="88"/>
+                            <xpdl:Coordinates XCoordinate="92" YCoordinate="150"/>
                         </xpdl:NodeGraphicsInfo>
                     </xpdl:NodeGraphicsInfos>
                 </xpdl:Activity>
@@ -194,7 +194,7 @@
                     </xpdl:Event>
                     <xpdl:NodeGraphicsInfos>
                         <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="31" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="31">
-                            <xpdl:Coordinates XCoordinate="661" YCoordinate="101"/>
+                            <xpdl:Coordinates XCoordinate="661" YCoordinate="150"/>
                         </xpdl:NodeGraphicsInfo>
                     </xpdl:NodeGraphicsInfos>
                 </xpdl:Activity>
