@@ -212,6 +212,7 @@ $(function(){
           break;
         case 'tb-participant':
           var poolTitle = prompt('Please enter title of pool:');
+          if (poolTitle === null) return;
           workflow.data.initPool(x,y, poolTitle); 
           break;
         case 'tb-lane': 
