@@ -106,10 +106,6 @@ net.BpmnJS.prototype = {
 
   plot: function(){
     // Assume we are only handling a single workflow process (there's only one WorkflowProcess inside WorkflowProcesses)
-
-    console.log("Root:");
-    console.log(this.xpdlJson);
-    $('#asdf').val(JSON.stringify(this.xpdlJson));
     
     // Last process
     this.process = this.xpdlJson["WorkflowProcesses"][0]["WorkflowProcess"][0],
@@ -124,10 +120,7 @@ net.BpmnJS.prototype = {
 
         // PAINTING EACH POOL
         this.pools.forEach(function(pool){
-          console.log('Pool:');
-          console.log(pool);
           var temporaryId = pool.Id;
-          // console.log('newId: ' + pool.Id);
           // The coordinates of the pools
           
           // FIXIT
@@ -141,8 +134,7 @@ net.BpmnJS.prototype = {
           // FINISH IMPORT FOR LANES
           // WE HAVE THE SAME PROBLEM WITH THE LANES (NO COORDINATES)
           var lanes = pool['Lanes'][0]['Lane'];
-          console.log(lanes);
-
+          
           // PAINTING EACH LANE
           lanes.forEach(function(lane){
             var name = lane.Name;
@@ -159,7 +151,6 @@ net.BpmnJS.prototype = {
       var activities = this.process["Activities"][0]["Activity"];
       activities.forEach(function(activity) {
         var temporaryId = activity.Id;
-        // console.log('newId: ' + activity.Id);
         var xCoordinate = parseInt(activity["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0]["Coordinates"][0].XCoordinate);
         var yCoordinate = parseInt(activity["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0]["Coordinates"][0].YCoordinate);
         var height = parseInt(activity["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0].Height);
@@ -250,7 +241,7 @@ net.BpmnJS.prototype = {
         canvasY = "out of range";
       };
       // DEBUG
-      $( "#log" ).text("X: " + event.pageX + ", Y: " + event.pageY + ". Canvas X:"+ canvasX +", canvas Y:" + canvasY);
+      //$( "#log" ).text("X: " + event.pageX + ", Y: " + event.pageY + ". Canvas X:"+ canvasX +", canvas Y:" + canvasY);
     });
 
     $(element[0]).on('contextmenu', function(e) {
@@ -263,7 +254,6 @@ net.BpmnJS.prototype = {
       // FIXME why is this called twice per element?
       contextMenu.on('click', 'a#remove-element', function() {
         if(element.hasOwnProperty('shapeType')){
-          console.log('removing ' + element.shapeType);
           switch(element.shapeType){
             case 'StartEvent':
             case 'IntermediateEvent':
@@ -271,8 +261,6 @@ net.BpmnJS.prototype = {
             case 'Gateway':
             case 'Task':
               me.removedActivitiesIds.push(element.associatedXPDL.Id);
-              console.log('me.removedActivitiesIds:');
-              console.log(me.removedActivitiesIds);
               break;
           }
         }
@@ -409,7 +397,6 @@ net.BpmnJS.prototype = {
           // Both elements now selected; proceed to connect them.
           var connection = me.connectElements(firstSelected, secondSelected, null);
           connection.associatedXPDL = XpdlJsonGenerator.getNewTransitionJson(me.generateNewID(), 'Transition', firstSelected.associatedXPDL.Id, secondSelected.associatedXPDL.Id);
-          console.log(connection.line.associatedXPDL.ConnectorGraphicsInfos);
           // Unbind click listener for all elements.
           me.paper.forEach(function (el) {
             $(el[0]).unbind('click');
@@ -421,7 +408,6 @@ net.BpmnJS.prototype = {
   },
 
   findMidpoint: function(element1, element2, coordinate){
-    console.log(eval("element1.getBBox()."+coordinate));
     var el1 = eval("element1.getBBox()."+coordinate),
         el2 = eval("element2.getBBox()."+coordinate);
 
@@ -980,7 +966,6 @@ net.BpmnJS.prototype = {
 
           // UPDATE COORDINATES
           if (shape.shapeType != 'Text' && shape.shapeType != 'Transition' && shape.shapeType != 'Pool' && shape.shapeType != 'Lane' && shape.shapeType != 'RotatedText' && shape.shapeType != 'Condition') {
-            console.log(shape);
             shape.associatedXPDL["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0]["Coordinates"][0].XCoordinate = shape.getBBox().x;
             shape.associatedXPDL["NodeGraphicsInfos"][0]["NodeGraphicsInfo"][0]["Coordinates"][0].YCoordinate= shape.getBBox().y;
           }
@@ -1027,6 +1012,10 @@ net.BpmnJS.prototype = {
     this.updateArray(me.xpdlJson['Pools'][0]['Pool'], this.newPools, this.oldPools, this.removedPoolsIds);
 
     // UPDATE THE LANES
+
+    // DEBUG
+    // SHOWS THE CURRENT JSON
+    // $('#json').val(JSON.stringify(this.xpdlJson));
     return this.xpdlJson;
   },
 
@@ -1043,8 +1032,6 @@ net.BpmnJS.prototype = {
     } while(alreadyTaken);
 
     this.idList.push(newId);
-    // DEBUG    
-    // console.log('ID: ' + newId);
     return newId;
   },
 };      

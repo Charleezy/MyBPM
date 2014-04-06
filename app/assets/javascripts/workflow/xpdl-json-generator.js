@@ -440,7 +440,7 @@ XpdlJsonGenerator.getNewGatewayJson = function(id, x, y) {
   // WE ARE ASSUMING THAT EVERY GATEWAY IS EXCLUSIVE
   return  {
             "Id": id,
-            "Name": "ExclusiveGateway",
+            "Name": "X",
             "Route":[
               {
                 "GatewayType":"Exclusive" 
@@ -551,6 +551,18 @@ XpdlJsonGenerator.getNewPoolJson = function(id, name, x, y) {
               }
             ]
           
+          };
+}
+
+//===========================================================================
+//  Lanes
+//===========================================================================
+
+XpdlJsonGenerator.getNewLaneJson = function(id, name, x, y) {
+  // TODO 
+  // FINISH THAT
+  return  {
+
           };
 }
 

@@ -84,10 +84,10 @@ $(function(){
     $('#instructions').toggleClass('hide');
   });
 
-  $(document).keypress(function(e) {
-    var checkUndo = (e.which == 117);
-    $("#log").text("Todo: undo action!");
-    });
+  // $(document).keypress(function(e) {
+  //   var checkUndo = (e.which == 117);
+  //   $("#log").text("Todo: undo action!");
+  //   });
 
   function createNewWorkflow() {
     // Make a call to the server to create a new (blank) workflow.
@@ -106,9 +106,9 @@ $(function(){
       },
       success: function(workflowId) {
         // Grab the workfow id of our newly-created workflow.
-        console.log('Created new blank workflow...');
+        // console.log('Created new blank workflow...');
         workflow.id = workflowId;
-        console.log(workflowId);
+        // console.log(workflowId);
         $('#workflow-name').text(workflow.name);
         $('#create_workflow').modal('hide');
       }
@@ -117,7 +117,7 @@ $(function(){
 
   function importWorkflow(file) {
     // TODO
-    console.log(file);
+    // console.log(file);
   }
 
   function loadBlankWorkflow() {
@@ -147,9 +147,9 @@ $(function(){
   });
   
   $("#save").click(function() {
-    console.log('saving (updating) the workflow...');
+    // console.log('saving (updating) the workflow...');
     var xpdlJson = workflow.data.updateXPDL();
-    console.log( xpdlJson );
+    // console.log( xpdlJson );
 
     // This assume a workflow has already been created and assigned an id.
     $.ajax({
@@ -166,8 +166,8 @@ $(function(){
         }
       },
       success: function(response) {
-        console.log('Saved workflow...');
-        console.log(response);
+        // console.log('Saved workflow...');
+        // console.log(response);
       }
     });
   });
@@ -353,4 +353,4 @@ $(function(){
     </div>
 </div>
 
-<textarea id='asdf'></textarea>
+<!-- <textarea rows="100" cols="100" id="json"></textarea> -->

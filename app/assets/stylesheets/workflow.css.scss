@@ -171,13 +171,14 @@ div#canvas{
 }
 
 .startEvent-high, .boundaryEvent-high{
-   fill:white;
+   fill:AliceBlue;
    stroke:red;
    stroke-width:2px; 
 }
 
 .endEvent{
-   stroke-width:3; 
+  fill:lightblue;
+  stroke-width:3;
 }
     
 .endEvent-high{
