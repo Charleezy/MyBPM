@@ -26,15 +26,9 @@ class WorkflowController < ApplicationController
     end
   end
 
-  def edit
-    @workflow.find(params[:id])
-    @workflow.json = Crack::XML.parse(@workflow.xpdl)
-  end
-
   def update
     @workflow = Workflow.find( params[:workflow][:id].to_i)
     render :text => "Failed to find workflow", :status => :bad_request if @workflow.nil?
-    @workflow.json = params[:workflow][:json]
 
     @workflow.update_attributes(workflow_params)
     render :text => "Successfully updated workflow", :status => :created

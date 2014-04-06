@@ -47,7 +47,6 @@ class SimulationController < ApplicationController
   def edit
     @simulation = MockData.find(params[:id])
     @workflow = Workflow.find(@simulation.workflow_id)
-	@workflow.json = Crack::XML.parse(@workflow.xpdl)
   end
   
   def run
