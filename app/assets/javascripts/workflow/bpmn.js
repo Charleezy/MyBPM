@@ -730,7 +730,7 @@ net.BpmnJS.prototype = {
         x1 = x+offset*2,
         // FIXIT
         // Y OFFSET OF THE LANE IS HARDCODED HERE AS 50
-        y1 = y+50+((this.totalLanes-1)*350),
+        y1 = y+40+((this.totalLanes-1)*350),
         width = this.paper.canvas.offsetWidth - x1,
         height = 350;
 
