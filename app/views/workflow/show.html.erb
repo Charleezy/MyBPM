@@ -54,7 +54,7 @@ $(function(){
         workflow: {
           id: workflow.id,
           name: workflow.name,
-          xpdl: xpdlJson
+          json: JSON.stringify(xpdlJson)
         }
       },
       processRequest: false,

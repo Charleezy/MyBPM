@@ -172,7 +172,8 @@ net.BpmnJS.prototype = {
         var element1 = me.getById(transition.From);
         var element2 = me.getById(transition.To);
         if (transition.hasOwnProperty('Condition')){
-          var condition = transition["Condition"][0];
+          var condition = transition["Condition"];
+          console.log(condition);
         }
         else {
           var condition = "";
@@ -784,7 +785,8 @@ net.BpmnJS.prototype = {
       //$(pool[0]).remove();
       //pool.remove();
 
-      this.initPool(x,y, pool, poolTitle);
+      //this.initPool(x,y, pool, poolTitle);
+      this.paintPool(pool.associatedXPDL, x, y, pool, name, 'lightblue', borderColor);
     }
 
       //Ordering of elements - put pool behind everything

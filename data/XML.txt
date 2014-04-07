@@ -1,231 +1,288 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!--
-    Together Workflow Editor
-    Copyright (C) 2011 Together Teamsolutions Co., Ltd.
+<Package xmlns:xpdl="http://www.wfmc.org/2008/XPDL2.1" xmlns="http://www.wfmc.org/2008/XPDL2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Id="workflow_patterns" Name="Workflow patterns" xsi:schemaLocation="http://www.wfmc.org/2008/XPDL2.1 http://www.wfmc.org/standards/docs/bpmnxpdl_31.xsd">
+  <PackageHeader>
+    <XPDLVersion>2.1</XPDLVersion>
+    <Vendor>(c) Together Teamsolutions Co., Ltd.</Vendor>
+    <Created>2004-08-31 22:22:17</Created>
+    <Description>Contains workflow processes that show workflow patterns defined by Wil van der Aalst that are more or less directly supported by XPDL and Shark engine</Description>
+  </PackageHeader>
+  <RedefinableHeader PublicationStatus="UNDER_TEST">
+    <Author>Sasa Bojanic</Author>
+  </RedefinableHeader>
+  <ConformanceClass GraphConformance="NON_BLOCKED" />
+  <Script Type="text/javascript" />
+  <Participants>
+    <Participant Id="test" Name="Test">
+      <ParticipantType Type="ROLE" />
+    </Participant>
+  </Participants>
+  <Applications>
+    <Application Id="ResetCounter">
+      <FormalParameters>
+        <FormalParameter Id="counter" IsArray="false" Mode="OUT">
+          <DataType>
+            <BasicType Type="INTEGER" />
+          </DataType>
+        </FormalParameter>
+      </FormalParameters>
+      <ExtendedAttributes>
+        <ExtendedAttribute Name="ToolAgentClass" Value="org.enhydra.shark.toolagent.JavaScriptToolAgent" />
+        <ExtendedAttribute Name="Script" Value="counter = 0;" />
+      </ExtendedAttributes>
+    </Application>
+    <Application Id="IncrementCounter">
+      <FormalParameters>
+        <FormalParameter Id="counter" IsArray="false" Mode="INOUT">
+          <DataType>
+            <BasicType Type="INTEGER" />
+          </DataType>
+        </FormalParameter>
+      </FormalParameters>
+      <ExtendedAttributes>
+        <ExtendedAttribute Name="ToolAgentClass" Value="org.enhydra.shark.toolagent.JavaScriptToolAgent" />
+        <ExtendedAttribute Name="Script" Value="counter = counter + 1;" />
+      </ExtendedAttributes>
+    </Application>
+    <Application Id="DecrementCounter">
+      <FormalParameters>
+        <FormalParameter Id="counter" IsArray="false" Mode="INOUT">
+          <DataType>
+            <BasicType Type="INTEGER" />
+          </DataType>
+        </FormalParameter>
+      </FormalParameters>
+      <ExtendedAttributes>
+        <ExtendedAttribute Name="ToolAgentClass" Value="org.enhydra.shark.toolagent.JavaScriptToolAgent" />
+        <ExtendedAttribute Name="Script" Value="counter = counter - 1;" />
+      </ExtendedAttributes>
+    </Application>
+    <Application Id="SetCounter">
+      <FormalParameters>
+        <FormalParameter Id="value" IsArray="false" Mode="IN">
+          <DataType>
+            <BasicType Type="INTEGER" />
+          </DataType>
+        </FormalParameter>
+        <FormalParameter Id="counter" IsArray="false" Mode="OUT">
+          <DataType>
+            <BasicType Type="INTEGER" />
+          </DataType>
+        </FormalParameter>
+      </FormalParameters>
+      <ExtendedAttributes>
+        <ExtendedAttribute Name="ToolAgentClass" Value="org.enhydra.shark.toolagent.JavaScriptToolAgent" />
+        <ExtendedAttribute Name="Script" Value="counter = value;" />
+      </ExtendedAttributes>
+    </Application>
+  </Applications>
+  <DataFields>
+    <DataField Id="whereToGo" IsArray="false" Name="Where to go">
+      <DataType>
+        <BasicType Type="STRING" />
+      </DataType>
+      <InitialValue>B</InitialValue>
+      <Description>The value of this variable determines the process flow.</Description>
+    </DataField>
+  </DataFields>
+  <Pools>
+    <Pool BoundaryVisible="true" Id="workflow_patterns_pool4" MainPool="true" Name="WfBCP4 Exclusive Choice" Orientation="HORIZONTAL" Process="WfBCP4_Exclusive_Choice">
+      <Lanes>
+        <Lane Id="workflow_patterns_pool4_lan1" Name="Test">
+          <NodeGraphicsInfos>
+            <NodeGraphicsInfo BorderColor="0,0,0" FillColor="220,220,220" IsVisible="true" ToolId="JaWE" />
+          </NodeGraphicsInfos>
+          <Performers>
+            <Performer>test</Performer>
+          </Performers>
+        </Lane>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or 
-    (at your option) any later version.
- 
-    This program is distributed in the hope that it will be useful, 
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-    GNU General Public License for more details.
- 
-    You should have received a copy of the GNU General Public License
-    along with this program. If not, see http://www.gnu.org/licenses
--->
-<xpdl:Package xmlns:xpdl="http://www.wfmc.org/2008/XPDL2.1" xmlns="http://www.wfmc.org/2008/XPDL2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Id="workflow_patterns" Name="Workflow patterns" xsi:schemaLocation="http://www.wfmc.org/2008/XPDL2.1 http://www.wfmc.org/standards/docs/bpmnxpdl_31.xsd">
-    <xpdl:PackageHeader>
-        <xpdl:XPDLVersion>2.1</xpdl:XPDLVersion>
-        <xpdl:Vendor>(c) Together Teamsolutions Co., Ltd.</xpdl:Vendor>
-        <xpdl:Created>2004-08-31 22:22:17</xpdl:Created>
-        <xpdl:Description>Contains workflow processes that show workflow patterns defined by Wil van der Aalst that are more or less directly supported by XPDL and Shark engine</xpdl:Description>
-    </xpdl:PackageHeader>
-    <xpdl:RedefinableHeader PublicationStatus="UNDER_TEST">
-        <xpdl:Author>Sasa Bojanic</xpdl:Author>
-    </xpdl:RedefinableHeader>
-    <xpdl:ConformanceClass GraphConformance="NON_BLOCKED"/>
-    <xpdl:Script Type="text/javascript"/>
-    <xpdl:Participants>
-        <xpdl:Participant Id="test" Name="Test">
-            <xpdl:ParticipantType Type="ROLE"/>
-        </xpdl:Participant>
-    </xpdl:Participants>
-    <xpdl:Applications>
-        <xpdl:Application Id="ResetCounter">
-            <xpdl:FormalParameters>
-                <xpdl:FormalParameter Id="counter" IsArray="false" Mode="OUT">
-                    <xpdl:DataType>
-                        <xpdl:BasicType Type="INTEGER"/>
-                    </xpdl:DataType>
-                </xpdl:FormalParameter>
-            </xpdl:FormalParameters>
-            <xpdl:ExtendedAttributes>
-                <xpdl:ExtendedAttribute Name="ToolAgentClass" Value="org.enhydra.shark.toolagent.JavaScriptToolAgent"/>
-                <xpdl:ExtendedAttribute Name="Script" Value="counter = 0;"/>
-            </xpdl:ExtendedAttributes>
-        </xpdl:Application>
-        <xpdl:Application Id="IncrementCounter">
-            <xpdl:FormalParameters>
-                <xpdl:FormalParameter Id="counter" IsArray="false" Mode="INOUT">
-                    <xpdl:DataType>
-                        <xpdl:BasicType Type="INTEGER"/>
-                    </xpdl:DataType>
-                </xpdl:FormalParameter>
-            </xpdl:FormalParameters>
-            <xpdl:ExtendedAttributes>
-                <xpdl:ExtendedAttribute Name="ToolAgentClass" Value="org.enhydra.shark.toolagent.JavaScriptToolAgent"/>
-                <xpdl:ExtendedAttribute Name="Script" Value="counter = counter + 1;"/>
-            </xpdl:ExtendedAttributes>
-        </xpdl:Application>
-        <xpdl:Application Id="DecrementCounter">
-            <xpdl:FormalParameters>
-                <xpdl:FormalParameter Id="counter" IsArray="false" Mode="INOUT">
-                    <xpdl:DataType>
-                        <xpdl:BasicType Type="INTEGER"/>
-                    </xpdl:DataType>
-                </xpdl:FormalParameter>
-            </xpdl:FormalParameters>
-            <xpdl:ExtendedAttributes>
-                <xpdl:ExtendedAttribute Name="ToolAgentClass" Value="org.enhydra.shark.toolagent.JavaScriptToolAgent"/>
-                <xpdl:ExtendedAttribute Name="Script" Value="counter = counter - 1;"/>
-            </xpdl:ExtendedAttributes>
-        </xpdl:Application>
-        <xpdl:Application Id="SetCounter">
-            <xpdl:FormalParameters>
-                <xpdl:FormalParameter Id="value" IsArray="false" Mode="IN">
-                    <xpdl:DataType>
-                        <xpdl:BasicType Type="INTEGER"/>
-                    </xpdl:DataType>
-                </xpdl:FormalParameter>
-                <xpdl:FormalParameter Id="counter" IsArray="false" Mode="OUT">
-                    <xpdl:DataType>
-                        <xpdl:BasicType Type="INTEGER"/>
-                    </xpdl:DataType>
-                </xpdl:FormalParameter>
-            </xpdl:FormalParameters>
-            <xpdl:ExtendedAttributes>
-                <xpdl:ExtendedAttribute Name="ToolAgentClass" Value="org.enhydra.shark.toolagent.JavaScriptToolAgent"/>
-                <xpdl:ExtendedAttribute Name="Script" Value="counter = value;"/>
-            </xpdl:ExtendedAttributes>
-        </xpdl:Application>
-    </xpdl:Applications>
-    <xpdl:DataFields>
-        <xpdl:DataField Id="whereToGo" IsArray="false" Name="Where to go">
-            <xpdl:DataType>
-                <xpdl:BasicType Type="STRING"/>
-            </xpdl:DataType>
-            <xpdl:InitialValue>B</xpdl:InitialValue>
-            <xpdl:Description>The value of this variable determines the process flow.</xpdl:Description>
-        </xpdl:DataField>
-    </xpdl:DataFields>
-    <xpdl:Pools>
-        <xpdl:Pool BoundaryVisible="true" Id="workflow_patterns_pool1" MainPool="true" Name="WfBCP1 Sequence" Orientation="HORIZONTAL" Process="WfBCP1_Sequence">
-            <xpdl:Lanes>
-                <xpdl:Lane Id="workflow_patterns_pool1_lan1" Name="TestLane">
-                    <xpdl:NodeGraphicsInfos>
-                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" IsVisible="true" ToolId="JaWE"/>
-                    </xpdl:NodeGraphicsInfos>
-                    <xpdl:Performers>
-                        <xpdl:Performer>test</xpdl:Performer>
-                    </xpdl:Performers>
-                </xpdl:Lane>
-                <xpdl:Lane Id="workflow_patterns_pool1_lan1" Name="TestLane">
-                    <xpdl:NodeGraphicsInfos>
-                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" IsVisible="true" ToolId="JaWE"/>
-                    </xpdl:NodeGraphicsInfos>
-                    <xpdl:Performers>
-                        <xpdl:Performer>test</xpdl:Performer>
-                    </xpdl:Performers>
-                </xpdl:Lane>
-            </xpdl:Lanes>
-            <xpdl:NodeGraphicsInfos>
-                <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" IsVisible="true" ToolId="JaWE"/>
-            </xpdl:NodeGraphicsInfos>
-        </xpdl:Pool>
-    </xpdl:Pools>
-    <xpdl:WorkflowProcesses>
-        <xpdl:WorkflowProcess AccessLevel="PUBLIC" Id="WfBCP1_Sequence" Name="WfBCP1 Sequence">
-            <xpdl:ProcessHeader DurationUnit="D">
-                <xpdl:Created>2004-08-31 22:28:17</xpdl:Created>
-                <xpdl:Description>execute activities A, B and C in sequence</xpdl:Description>
-            </xpdl:ProcessHeader>
-            <xpdl:RedefinableHeader PublicationStatus="UNDER_TEST">
-                <xpdl:Author>Sasa Bojanic</xpdl:Author>
-            </xpdl:RedefinableHeader>
-            <xpdl:Activities>
-                <xpdl:Activity Id="A3" Name="A">
-                    <xpdl:Description>Just press 'Complete' button</xpdl:Description>
-                    <xpdl:Implementation>
-                        <xpdl:No/>
-                    </xpdl:Implementation>
-                    <xpdl:Performers>
-                        <xpdl:Performer>test</xpdl:Performer>
-                    </xpdl:Performers>
-                    <xpdl:NodeGraphicsInfos>
-                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="60" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="90">
-                            <xpdl:Coordinates XCoordinate="206" YCoordinate="150"/>
-                        </xpdl:NodeGraphicsInfo>
-                    </xpdl:NodeGraphicsInfos>
-                </xpdl:Activity>
-                <xpdl:Activity Id="B5" Name="B">
-                    <xpdl:Description>Just press 'Complete' button</xpdl:Description>
-                    <xpdl:Implementation>
-                        <xpdl:No/>
-                    </xpdl:Implementation>
-                    <xpdl:Performers>
-                        <xpdl:Performer>test</xpdl:Performer>
-                    </xpdl:Performers>
-                    <xpdl:NodeGraphicsInfos>
-                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="60" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="90">
-                            <xpdl:Coordinates XCoordinate="356" YCoordinate="150"/>
-                        </xpdl:NodeGraphicsInfo>
-                    </xpdl:NodeGraphicsInfos>
-                </xpdl:Activity>
-                <xpdl:Activity Id="C4" Name="C">
-                    <xpdl:Description>Just press 'Complete' button</xpdl:Description>
-                    <xpdl:Implementation>
-                        <xpdl:No/>
-                    </xpdl:Implementation>
-                    <xpdl:Performers>
-                        <xpdl:Performer>test</xpdl:Performer>
-                    </xpdl:Performers>
-                    <xpdl:NodeGraphicsInfos>
-                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="60" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="90">
-                            <xpdl:Coordinates XCoordinate="509" YCoordinate="150"/>
-                        </xpdl:NodeGraphicsInfo>
-                    </xpdl:NodeGraphicsInfos>
-                </xpdl:Activity>
-                <xpdl:Activity Id="WfBCP1_Sequence_act1">
-                    <xpdl:Event>
-                        <xpdl:StartEvent Trigger="None"/>
-                    </xpdl:Event>
-                    <xpdl:NodeGraphicsInfos>
-                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="31" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="31">
-                            <xpdl:Coordinates XCoordinate="92" YCoordinate="150"/>
-                        </xpdl:NodeGraphicsInfo>
-                    </xpdl:NodeGraphicsInfos>
-                </xpdl:Activity>
-                <xpdl:Activity Id="WfBCP1_Sequence_act2">
-                    <xpdl:Event>
-                        <xpdl:EndEvent Result="None"/>
-                    </xpdl:Event>
-                    <xpdl:NodeGraphicsInfos>
-                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="white" Height="31" IsVisible="true" LaneId="workflow_patterns_pool1_lan1" ToolId="JaWE" Width="31">
-                            <xpdl:Coordinates XCoordinate="661" YCoordinate="150"/>
-                        </xpdl:NodeGraphicsInfo>
-                    </xpdl:NodeGraphicsInfos>
-                </xpdl:Activity>
-            </xpdl:Activities>
-            <xpdl:Transitions>
-                <xpdl:Transition From="A3" Id="WfBCP1_Sequence_Tra1" Name="Transition" To="B5">
-                    <xpdl:ConnectorGraphicsInfos>
-                        <xpdl:ConnectorGraphicsInfo FillColor="white" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE"/>
-                    </xpdl:ConnectorGraphicsInfos>
-                </xpdl:Transition>
-                <xpdl:Transition From="B5" Id="WfBCP1_Sequence_Tra2" Name="Transition" To="C4">
-                    <xpdl:ConnectorGraphicsInfos>
-                        <xpdl:ConnectorGraphicsInfo FillColor="white" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE"/>
-                    </xpdl:ConnectorGraphicsInfos>
-                </xpdl:Transition>
-                <xpdl:Transition From="WfBCP1_Sequence_act1" Id="WfBCP1_Sequence_tra1" To="A3">
-                    <xpdl:ConnectorGraphicsInfos>
-                        <xpdl:ConnectorGraphicsInfo FillColor="white" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE"/>
-                    </xpdl:ConnectorGraphicsInfos>
-                </xpdl:Transition>
-                <xpdl:Transition From="C4" Id="WfBCP1_Sequence_tra2" To="WfBCP1_Sequence_act2">
-                    <xpdl:ConnectorGraphicsInfos>
-                        <xpdl:ConnectorGraphicsInfo FillColor="white" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE"/>
-                    </xpdl:ConnectorGraphicsInfos>
-                </xpdl:Transition>
-            </xpdl:Transitions>
-        </xpdl:WorkflowProcess>
-    </xpdl:WorkflowProcesses>
-    <xpdl:ExtendedAttributes>
-        <xpdl:ExtendedAttribute Name="EDITING_TOOL" Value="Together Workflow Editor"/>
-        <xpdl:ExtendedAttribute Name="EDITING_TOOL_VERSION" Value="4.0-1-20110124-0813"/>
-        <xpdl:ExtendedAttribute Name="JaWE_CONFIGURATION" Value="default"/>
-    </xpdl:ExtendedAttributes>
-</xpdl:Package>
+      </Lanes>
+      <NodeGraphicsInfos>
+        <NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,255,215" IsVisible="true" ToolId="JaWE" />
+      </NodeGraphicsInfos>
+    </Pool>
+  </Pools>
+  <WorkflowProcesses>
+    <WorkflowProcess AccessLevel="PUBLIC" Id="WfBCP4_Exclusive_Choice" Name="WfBCP4 Exclusive Choice">
+      <ProcessHeader DurationUnit="D">
+        <Created>2004-08-31 22:38:47</Created>
+        <Description>choose one execution path from many alternatives</Description>
+      </ProcessHeader>
+      <RedefinableHeader PublicationStatus="UNDER_TEST">
+        <Author>Sasa Bojanic</Author>
+      </RedefinableHeader>
+      <Activities>
+        <Activity Id="A6" Name="A">
+          <Description>you have option to change the value of variable whereToGo. If you set it to B process will follow to activity B, if you set it to C it will proceed to activity C, otherwise activity D will be executed</Description>
+          <Implementation>
+            <No></No>
+          </Implementation>
+          <Performers>
+            <Performer>test</Performer>
+          </Performers>
+          <ExtendedAttributes>
+            <ExtendedAttribute Name="VariableToProcess_UPDATE" Value="whereToGo" />
+          </ExtendedAttributes>
+          <NodeGraphicsInfos>
+            <NodeGraphicsInfo BorderColor="0,0,0" FillColor="187,247,190" Height="60" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="90">
+              <Coordinates XCoordinate="150" YCoordinate="110" />
+            </NodeGraphicsInfo>
+          </NodeGraphicsInfos>
+        </Activity>
+        <Activity Id="B8" Name="B">
+          <Description>Just press &apos;Complete&apos; button</Description>
+          <Implementation>
+            <No></No>
+          </Implementation>
+          <Performers>
+            <Performer>test</Performer>
+          </Performers>
+          <NodeGraphicsInfos>
+            <NodeGraphicsInfo BorderColor="0,0,0" FillColor="187,247,190" Height="60" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="90">
+              <Coordinates XCoordinate="370" YCoordinate="10" />
+            </NodeGraphicsInfo>
+          </NodeGraphicsInfos>
+        </Activity>
+        <Activity Id="C7" Name="C">
+          <Description>Just press &apos;Complete&apos; button</Description>
+          <Implementation>
+            <No></No>
+          </Implementation>
+          <Performers>
+            <Performer>test</Performer>
+          </Performers>
+          <NodeGraphicsInfos>
+            <NodeGraphicsInfo BorderColor="0,0,0" FillColor="187,247,190" Height="60" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="90">
+              <Coordinates XCoordinate="370" YCoordinate="110" />
+            </NodeGraphicsInfo>
+          </NodeGraphicsInfos>
+        </Activity>
+        <Activity Id="D7" Name="D">
+          <Description>Just press &apos;Complete&apos; button</Description>
+          <Implementation>
+            <No></No>
+          </Implementation>
+          <Performers>
+            <Performer>test</Performer>
+          </Performers>
+          <NodeGraphicsInfos>
+            <NodeGraphicsInfo BorderColor="0,0,0" FillColor="187,247,190" Height="60" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="90">
+              <Coordinates XCoordinate="370" YCoordinate="210" />
+            </NodeGraphicsInfo>
+          </NodeGraphicsInfos>
+        </Activity>
+        <Activity Id="A1">
+          <Route GatewayType="Exclusive" />
+          <TransitionRestrictions>
+            <TransitionRestriction>
+              <Split Type="Exclusive">
+                <TransitionRefs>
+                  <TransitionRef Id="WfBCP4_Exclusive_Choice_Tra1" />
+                  <TransitionRef Id="WfBCP4_Exclusive_Choice_Tra2" />
+                  <TransitionRef Id="WfBCP4_Exclusive_Choice_Tra3" />
+                </TransitionRefs>
+              </Split>
+            </TransitionRestriction>
+          </TransitionRestrictions>
+          <ExtendedAttributes>
+            <ExtendedAttribute Name="VariableToProcess_UPDATE" Value="whereToGo" />
+          </ExtendedAttributes>
+          <NodeGraphicsInfos>
+            <NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,229,124" Height="43" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="43">
+              <Coordinates XCoordinate="273" YCoordinate="120" />
+            </NodeGraphicsInfo>
+          </NodeGraphicsInfos>
+        </Activity>
+        <Activity Id="WfBCP4_Exclusive_Choice_act1">
+          <Event>
+            <StartEvent Trigger="None" />
+          </Event>
+          <NodeGraphicsInfos>
+            <NodeGraphicsInfo BorderColor="0,0,0" FillColor="102,204,51" Height="31" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="31">
+              <Coordinates XCoordinate="79.97687566930131" YCoordinate="27" />
+            </NodeGraphicsInfo>
+          </NodeGraphicsInfos>
+        </Activity>
+        <Activity Id="WfBCP4_Exclusive_Choice_act2">
+          <Event>
+            <EndEvent Result="None" />
+          </Event>
+          <NodeGraphicsInfos>
+            <NodeGraphicsInfo BorderColor="0,0,0" FillColor="236,120,98" Height="31" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="31">
+              <Coordinates XCoordinate="499.9768756693013" YCoordinate="250" />
+            </NodeGraphicsInfo>
+          </NodeGraphicsInfos>
+        </Activity>
+        <Activity Id="WfBCP4_Exclusive_Choice_act3">
+          <Event>
+            <EndEvent Result="None" />
+          </Event>
+          <NodeGraphicsInfos>
+            <NodeGraphicsInfo BorderColor="0,0,0" FillColor="236,120,98" Height="31" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="31">
+              <Coordinates XCoordinate="499.9768756693013" YCoordinate="50" />
+            </NodeGraphicsInfo>
+          </NodeGraphicsInfos>
+        </Activity>
+        <Activity Id="WfBCP4_Exclusive_Choice_act4">
+          <Event>
+            <EndEvent Result="None" />
+          </Event>
+          <NodeGraphicsInfos>
+            <NodeGraphicsInfo BorderColor="0,0,0" FillColor="236,120,98" Height="31" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="31">
+              <Coordinates XCoordinate="500.9768756693013" YCoordinate="151" />
+            </NodeGraphicsInfo>
+          </NodeGraphicsInfos>
+        </Activity>
+      </Activities>
+      <Transitions>
+        <Transition From="A1" Id="WfBCP4_Exclusive_Choice_Tra1" Name="Transition" To="B8">
+          <Condition Type="CONDITION">whereToGo==&quot;B&quot;</Condition>
+          <ConnectorGraphicsInfos>
+            <ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE" />
+          </ConnectorGraphicsInfos>
+        </Transition>
+        <Transition From="A1" Id="WfBCP4_Exclusive_Choice_Tra2" Name="Transition" To="C7">
+          <Condition Type="CONDITION">whereToGo==&quot;C&quot;</Condition>
+          <ConnectorGraphicsInfos>
+            <ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE" />
+          </ConnectorGraphicsInfos>
+        </Transition>
+        <Transition From="A1" Id="WfBCP4_Exclusive_Choice_Tra3" Name="Transition" To="D7">
+          <Condition Type="OTHERWISE" />
+          <ConnectorGraphicsInfos>
+            <ConnectorGraphicsInfo FillColor="255,128,0" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE" />
+          </ConnectorGraphicsInfos>
+        </Transition>
+        <Transition From="A6" Id="WfBCP4_Exclusive_Choice_tra1" To="A1">
+          <ConnectorGraphicsInfos>
+            <ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" ToolId="JaWE" />
+          </ConnectorGraphicsInfos>
+        </Transition>
+        <Transition From="WfBCP4_Exclusive_Choice_act1" Id="WfBCP4_Exclusive_Choice_tra2" To="A6">
+          <ConnectorGraphicsInfos>
+            <ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE" />
+          </ConnectorGraphicsInfos>
+        </Transition>
+        <Transition From="D7" Id="WfBCP4_Exclusive_Choice_tra3" To="WfBCP4_Exclusive_Choice_act2">
+          <ConnectorGraphicsInfos>
+            <ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE" />
+          </ConnectorGraphicsInfos>
+        </Transition>
+        <Transition From="B8" Id="WfBCP4_Exclusive_Choice_tra4" To="WfBCP4_Exclusive_Choice_act3">
+          <ConnectorGraphicsInfos>
+            <ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE" />
+          </ConnectorGraphicsInfos>
+        </Transition>
+        <Transition From="C7" Id="WfBCP4_Exclusive_Choice_tra5" To="WfBCP4_Exclusive_Choice_act4">
+          <ConnectorGraphicsInfos>
+            <ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE" />
+          </ConnectorGraphicsInfos>
+        </Transition>
+      </Transitions>
+    </WorkflowProcess>
+  </WorkflowProcesses>
+  <ExtendedAttributes>
+    <ExtendedAttribute Name="EDITING_TOOL" Value="Together Workflow Editor" />
+    <ExtendedAttribute Name="EDITING_TOOL_VERSION" Value="4.0-1-20110124-0813" />
+    <ExtendedAttribute Name="JaWE_CONFIGURATION" Value="default" />
+  </ExtendedAttributes>
+</Package>
