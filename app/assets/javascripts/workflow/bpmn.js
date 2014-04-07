@@ -418,7 +418,6 @@ net.BpmnJS.prototype = {
       else {pt= pt+ el1}
       return pt;
   },
-
   connectElements: function(element1, element2, condition, newOrImported) {
     var connection = this.paper.connection(element1, element2, "#000");
     connection.line.shapeType = 'Transition';
@@ -427,6 +426,9 @@ net.BpmnJS.prototype = {
     element1.connections.push(connection);
     element2.connections.push(connection);
 
+    //For easier access to use in moveElement
+    connection.line.data("From", element1.associatedXPDL.Id);
+    connection.line.data("To", element2.associatedXPDL.Id);
     if(typeof newOrImported === 'undefined' || newOrImported === 'new'){
       this.newConnections.push(connection);
     }
@@ -446,8 +448,7 @@ net.BpmnJS.prototype = {
       //Finds midpoint between the two elements
       var x = this.findMidpoint(element1, element2, "x"),
       y = this.findMidpoint(element1, element2, "y");
-      x = -1000, y = -1000;
-     
+           
       var text = this.paper.text(x, y, condition);
       text.shapeType = 'Condition';
 
@@ -515,6 +516,15 @@ net.BpmnJS.prototype = {
 
           //Move connections as well
           for (var i = connections.length; i--;) {
+            if (connections[i].pair && connections[i].pair.shapeType == 'Condition'){
+              console.log("has a condition");
+              var el1 = me.getById(connections[i].line.data("From")),
+                  el2 = me.getById(connections[i].line.data("To"));
+              //move the condition text as well
+              var x = me.findMidpoint(el1, el2, "x"),
+                  y = me.findMidpoint(el1, el2, "y");
+              connections[i].pair.attr({x: x, y:y});
+            }
             this.paper.connection(connections[i]);
           }
 
