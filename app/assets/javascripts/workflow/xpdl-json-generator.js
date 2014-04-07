@@ -570,11 +570,11 @@ XpdlJsonGenerator.getNewLaneJson = function(id, name, x, y) {
 //  Transitions
 //===========================================================================
 
-XpdlJsonGenerator.getNewTransitionJson = function(id, name, from, to) {
+XpdlJsonGenerator.getNewTransitionJson = function(id, from, to) {
   return  {
             "From": from,
             "Id": id,
-            "Name": name,
+            "Name": "Transition",
             "To": to,
             "ConnectorGraphicsInfos": [
               {

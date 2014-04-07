@@ -435,7 +435,7 @@ net.BpmnJS.prototype = {
     this.allConnections.push(connection);
     element1.connections.push(connection);
     element2.connections.push(connection);
-
+    console.log(connection.line.associatedXPDL);
     //For easier access to use in moveElement
     connection.line.data("From", element1.associatedXPDL.Id);
     connection.line.data("To", element2.associatedXPDL.Id);
@@ -520,7 +520,6 @@ net.BpmnJS.prototype = {
           //Move connections as well
           for (var i = connections.length; i--;) {
             if (connections[i].pair && connections[i].pair.shapeType == 'Condition'){
-              console.log("has a condition");
               var el1 = me.getById(connections[i].line.data("From")),
                   el2 = me.getById(connections[i].line.data("To"));
               //move the condition text as well
