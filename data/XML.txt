@@ -124,7 +124,7 @@
           </ExtendedAttributes>
           <NodeGraphicsInfos>
             <NodeGraphicsInfo BorderColor="0,0,0" FillColor="187,247,190" Height="60" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="90">
-              <Coordinates XCoordinate="150" YCoordinate="110" />
+              <Coordinates XCoordinate="150" YCoordinate="155" />
             </NodeGraphicsInfo>
           </NodeGraphicsInfos>
         </Activity>
@@ -138,7 +138,7 @@
           </Performers>
           <NodeGraphicsInfos>
             <NodeGraphicsInfo BorderColor="0,0,0" FillColor="187,247,190" Height="60" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="90">
-              <Coordinates XCoordinate="370" YCoordinate="10" />
+              <Coordinates XCoordinate="370" YCoordinate="60" />
             </NodeGraphicsInfo>
           </NodeGraphicsInfos>
         </Activity>
@@ -152,7 +152,7 @@
           </Performers>
           <NodeGraphicsInfos>
             <NodeGraphicsInfo BorderColor="0,0,0" FillColor="187,247,190" Height="60" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="90">
-              <Coordinates XCoordinate="370" YCoordinate="110" />
+              <Coordinates XCoordinate="370" YCoordinate="160" />
             </NodeGraphicsInfo>
           </NodeGraphicsInfos>
         </Activity>
@@ -166,7 +166,7 @@
           </Performers>
           <NodeGraphicsInfos>
             <NodeGraphicsInfo BorderColor="0,0,0" FillColor="187,247,190" Height="60" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="90">
-              <Coordinates XCoordinate="370" YCoordinate="210" />
+              <Coordinates XCoordinate="370" YCoordinate="260" />
             </NodeGraphicsInfo>
           </NodeGraphicsInfos>
         </Activity>
@@ -188,7 +188,7 @@
           </ExtendedAttributes>
           <NodeGraphicsInfos>
             <NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,229,124" Height="43" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="43">
-              <Coordinates XCoordinate="273" YCoordinate="120" />
+              <Coordinates XCoordinate="273" YCoordinate="170" />
             </NodeGraphicsInfo>
           </NodeGraphicsInfos>
         </Activity>
@@ -198,7 +198,7 @@
           </Event>
           <NodeGraphicsInfos>
             <NodeGraphicsInfo BorderColor="0,0,0" FillColor="102,204,51" Height="31" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="31">
-              <Coordinates XCoordinate="79.97687566930131" YCoordinate="27" />
+              <Coordinates XCoordinate="79.97687566930131" YCoordinate="77" />
             </NodeGraphicsInfo>
           </NodeGraphicsInfos>
         </Activity>
@@ -208,7 +208,7 @@
           </Event>
           <NodeGraphicsInfos>
             <NodeGraphicsInfo BorderColor="0,0,0" FillColor="236,120,98" Height="31" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="31">
-              <Coordinates XCoordinate="499.9768756693013" YCoordinate="250" />
+              <Coordinates XCoordinate="499.9768756693013" YCoordinate="300" />
             </NodeGraphicsInfo>
           </NodeGraphicsInfos>
         </Activity>
@@ -218,7 +218,7 @@
           </Event>
           <NodeGraphicsInfos>
             <NodeGraphicsInfo BorderColor="0,0,0" FillColor="236,120,98" Height="31" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="31">
-              <Coordinates XCoordinate="499.9768756693013" YCoordinate="50" />
+              <Coordinates XCoordinate="499.9768756693013" YCoordinate="100" />
             </NodeGraphicsInfo>
           </NodeGraphicsInfos>
         </Activity>
@@ -228,7 +228,7 @@
           </Event>
           <NodeGraphicsInfos>
             <NodeGraphicsInfo BorderColor="0,0,0" FillColor="236,120,98" Height="31" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="31">
-              <Coordinates XCoordinate="500.9768756693013" YCoordinate="151" />
+              <Coordinates XCoordinate="500.9768756693013" YCoordinate="200" />
             </NodeGraphicsInfo>
           </NodeGraphicsInfos>
         </Activity>
