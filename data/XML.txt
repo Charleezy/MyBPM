@@ -84,9 +84,9 @@
     </DataField>
   </DataFields>
   <Pools>
-    <Pool BoundaryVisible="true" Id="workflow_patterns_pool4" MainPool="true" Name="WfBCP4 Exclusive Choice" Orientation="HORIZONTAL" Process="WfBCP4_Exclusive_Choice">
+    <Pool BoundaryVisible="true" Id="workflow_patterns_pool4" MainPool="true" Name="Pool" Orientation="HORIZONTAL" Process="WfBCP4_Exclusive_Choice">
       <Lanes>
-        <Lane Id="workflow_patterns_pool4_lan1" Name="Test">
+        <Lane Id="workflow_patterns_pool4_lan1" Name="Lane">
           <NodeGraphicsInfos>
             <NodeGraphicsInfo BorderColor="0,0,0" FillColor="220,220,220" IsVisible="true" ToolId="JaWE" />
           </NodeGraphicsInfos>
@@ -170,7 +170,7 @@
             </NodeGraphicsInfo>
           </NodeGraphicsInfos>
         </Activity>
-        <Activity Id="A1">
+        <Activity Id="A1" Name="Gateway">
           <Route GatewayType="Exclusive" />
           <TransitionRestrictions>
             <TransitionRestriction>
@@ -187,7 +187,7 @@
             <ExtendedAttribute Name="VariableToProcess_UPDATE" Value="whereToGo" />
           </ExtendedAttributes>
           <NodeGraphicsInfos>
-            <NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,229,124" Height="43" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="43">
+            <NodeGraphicsInfo BorderColor="black" FillColor="white" Height="43" IsVisible="true" LaneId="workflow_patterns_pool4_lan1" ToolId="JaWE" Width="43">
               <Coordinates XCoordinate="273" YCoordinate="170" />
             </NodeGraphicsInfo>
           </NodeGraphicsInfos>

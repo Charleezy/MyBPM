@@ -178,7 +178,7 @@ net.BpmnJS.prototype = {
         else {
           var condition = "";
         }
-
+        condition = "";
         // Create link association between the two activities.
         var connection = me.connectElements(element1, element2, condition, 'imported');
         connection.associatedXPDL = transition;
@@ -505,7 +505,7 @@ net.BpmnJS.prototype = {
         },
         move = function(dx, dy) {
           //Don't allow movement for pools & pool lanes
-          if (this.shapeType === 'Pool' || this.shapeType === 'Lane'){
+          if (this.shapeType === 'Pool' || this.shapeType === 'Lane' || this.shapeType === 'RotatedText'){
             return;
           }
           
