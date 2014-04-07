@@ -396,7 +396,9 @@ net.BpmnJS.prototype = {
             'Both required elements not selected for a connection.');
           // Both elements now selected; proceed to connect them.
           var connection = me.connectElements(firstSelected, secondSelected, null);
-          connection.associatedXPDL = XpdlJsonGenerator.getNewTransitionJson(me.generateNewID(), 'Transition', firstSelected.associatedXPDL.Id, secondSelected.associatedXPDL.Id);
+          if (connection != null){
+            connection.associatedXPDL = XpdlJsonGenerator.getNewTransitionJson(me.generateNewID(), 'Transition', firstSelected.associatedXPDL.Id, secondSelected.associatedXPDL.Id);
+          }
           // Unbind click listener for all elements.
           me.paper.forEach(function (el) {
             $(el[0]).unbind('click');
@@ -419,6 +421,14 @@ net.BpmnJS.prototype = {
       return pt;
   },
   connectElements: function(element1, element2, condition, newOrImported) {
+    if (element1.shapeType === 'Gateway'){
+      //If new element, ask for condition
+      if (condition === null){
+        condition = prompt('Condition:');
+        //If null, cancelled -> no connection
+        if (condition === null) return null;
+      }
+    }
     var connection = this.paper.connection(element1, element2, "#000");
     connection.line.shapeType = 'Transition';
     connection.line.associatedXPDL = XpdlJsonGenerator.getNewTransitionJson(this.generateNewID(), element1.associatedXPDL.Id, element2.associatedXPDL.Id);
@@ -437,18 +447,11 @@ net.BpmnJS.prototype = {
     }
 
     //If gateway element, ask for condition(s)
-    if (element1.shapeType === 'Gateway'){
-      //If new element, ask for condition
-      if (condition === null){
-        condition = prompt('Condition:');
-        //If null, path is always travelled -> parallel
-        if (condition === null || condition.trim() === '') return;
-      }
-      
+    if (element1.shapeType === 'Gateway'){      
       //Finds midpoint between the two elements
       var x = this.findMidpoint(element1, element2, "x"),
       y = this.findMidpoint(element1, element2, "y");
-           
+
       var text = this.paper.text(x, y, condition);
       text.shapeType = 'Condition';
 
